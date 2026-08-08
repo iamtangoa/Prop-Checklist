@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Gate — Prop Account Pre-Flight</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="description" content="Daily pre-trade compliance checklist and risk sizing for prop firm challenge accounts.">
 <!-- 
   STANDALONE VERSION — uses localStorage instead of Claude's window.storage,
@@ -827,6 +830,13 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   await loadRealBalanceMeta();
   await renderWeekly();
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => console.error('SW registration failed:', err));
+    });
+  }
 </script>
 </body>
 </html>

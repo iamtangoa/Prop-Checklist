@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0B0F14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Gate — Prop Account Pre-Flight</title>
+<meta name="description" content="Daily pre-trade compliance checklist and risk sizing for prop firm challenge accounts.">
+<!-- 
+  STANDALONE VERSION — uses localStorage instead of Claude's window.storage,
+  so it runs independently of claude.ai. Ready to feed into PWABuilder.com
+  to generate an installable Android .apk.
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+  :root{
+    --bg:#0B0F14;
+    --panel:#121820;
+    --panel2:#171F29;
+    --line:#232C38;
+    --text:#E8ECEF;
+    --muted:#7A8894;
+    --dim:#4E5A66;
+    --green:#3ECF8E;
+    --amber:#E8A33D;
+    --red:#E8544D;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Space Grotesk', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--mono); font-size:14px;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 40px;}
+
+  /* HERO */
+  .hero{
+    border:1px solid var(--line); border-radius:14px;
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+    padding:22px 20px; margin-bottom:18px; position:relative; overflow:hidden;
+  }
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .eyebrow{font-size:11px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;}
+  .datepick{font-family:var(--display);font-weight:600;font-size:19px;margin-top:4px;}
+  .gate-badge{
+    font-family:var(--display); font-weight:700; font-size:13px;
+    padding:8px 14px; border-radius:999px; white-space:nowrap;
+    display:flex; align-items:center; gap:7px;
+  }
+  .dot{width:8px;height:8px;border-radius:50%;}
+  .gate-blocked{background:rgba(232,84,77,.12);color:var(--red);border:1px solid rgba(232,84,77,.35);}
+  .gate-blocked .dot{background:var(--red);}
+  .gate-clear{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.35);}
+  .gate-clear .dot{background:var(--green);}
+  .gate-progress{background:rgba(232,163,61,.12);color:var(--amber);border:1px solid rgba(232,163,61,.35);}
+  .gate-progress .dot{background:var(--amber);}
+
+  .hero-meter{margin-top:16px;height:6px;background:var(--line);border-radius:99px;overflow:hidden;}
+  .hero-meter-fill{height:100%;background:var(--green);transition:width .25s ease;}
+  .hero-sub{margin-top:8px;font-size:12px;color:var(--muted);}
+
+  /* SECTION */
+  .section{margin-bottom:18px;}
+  .section-head{
+    display:flex;align-items:baseline;gap:8px;margin:0 0 10px 2px;
+  }
+  .section-num{font-family:var(--display);font-weight:700;color:var(--dim);font-size:12px;}
+  .section-title{font-family:var(--display);font-weight:600;font-size:15px;}
+
+  .card{
+    border:1px solid var(--line); border-radius:12px; background:var(--panel);
+    padding:14px 16px; margin-bottom:10px;
+  }
+
+  /* daily start balance inputs */
+  .inputs-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .field{flex:1; min-width:140px;}
+  .field label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .field input{
+    width:100%; background:var(--bg); border:1px solid var(--line); border-radius:8px;
+    color:var(--text); padding:8px 10px; font-family:var(--mono); font-size:13px;
+  }
+  .field input:focus{outline:none;border-color:var(--green);}
+  .calc-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+  .calc-pill{
+    flex:1; min-width:150px; background:var(--bg); border:1px solid var(--line);
+    border-radius:10px; padding:10px 12px;
+  }
+  .calc-pill .k{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;}
+  .calc-pill .v{font-family:var(--display);font-weight:700;font-size:17px;margin-top:2px;color:var(--amber);}
+
+  /* checklist items */
+  .item{
+    display:flex; align-items:flex-start; gap:10px; padding:10px 4px;
+    border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .item:last-child{border-bottom:none;}
+  .box{
+    width:19px;height:19px;border-radius:5px;border:1.5px solid var(--dim);
+    flex:none; margin-top:1px; display:flex;align-items:center;justify-content:center;
+    transition:.15s;
+  }
+  .box.checked{background:var(--green);border-color:var(--green);}
+  .box.checked:after{content:"✓";color:#08130D;font-size:12px;font-weight:700;}
+  .item-text{font-size:13.5px;line-height:1.4;}
+  .item-text b{color:var(--text);}
+  .item.checked .item-text{color:var(--muted);}
+  .item.urgent{background:rgba(232,84,77,.09);border-radius:8px;padding:10px 8px;margin:2px 0;border-bottom:none;}
+  .item.urgent .box{border-color:var(--red);}
+  .urgent-tag{display:inline-block;font-size:9.5px;font-weight:700;color:var(--red);background:rgba(232,84,77,.15);border:1px solid rgba(232,84,77,.35);padding:2px 7px;border-radius:99px;margin-left:6px;vertical-align:middle;}
+
+  /* calendar */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .cal-dow{font-size:10px;color:var(--dim);text-align:center;padding-bottom:4px;}
+  .cal-cell{
+    aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; font-size:11px; cursor:pointer;
+    border:1px solid var(--line); background:var(--bg); gap:2px;
+  }
+  .cal-cell.today{border-color:var(--text);}
+  .cal-cell.selected{border-color:var(--green);}
+  .cal-cell .n{font-family:var(--display);font-weight:600;}
+  .cal-cell.full{background:rgba(62,207,142,.10);}
+  .cal-cell.full .n{color:var(--green);}
+  .cal-cell.partial{background:rgba(232,163,61,.10);}
+  .cal-cell.partial .n{color:var(--amber);}
+  .cal-cell.empty .n{color:var(--dim);}
+  .cal-cell.future{opacity:.3;pointer-events:none;}
+  .cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .cal-nav button{
+    background:var(--panel2);border:1px solid var(--line);color:var(--text);
+    border-radius:8px;padding:5px 10px;font-family:var(--mono);cursor:pointer;
+  }
+  .cal-month{font-family:var(--display);font-weight:600;}
+
+  /* trackers */
+  .tracker{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 4px;border-bottom:1px solid var(--line);
+  }
+  .tracker:last-child{border-bottom:none;}
+  .tracker .label{font-size:12.5px;color:var(--muted);max-width:60%;}
+  .tracker .val{font-family:var(--display);font-weight:700;font-size:14px;text-align:right;}
+  .val.ok{color:var(--green);}
+  .val.warn{color:var(--amber);}
+  .val.bad{color:var(--red);}
+
+  .milestone-item{padding:11px 4px;border-bottom:1px solid var(--line);}
+  .milestone-item:last-child{border-bottom:none;}
+  .milestone-top{display:flex;gap:10px;align-items:flex-start;}
+  .milestone-note{font-size:11.5px;color:var(--muted);margin-top:5px;margin-left:29px;line-height:1.4;}
+
+  .stage-select{display:flex;gap:6px;margin-bottom:12px;}
+  .stage-btn{
+    flex:1; background:var(--bg); border:1px solid var(--line); color:var(--muted);
+    padding:8px 6px; border-radius:8px; font-family:var(--mono); font-size:11px; cursor:pointer;
+    text-align:center;
+  }
+  .stage-btn.active{border-color:var(--green);color:var(--green);background:rgba(62,207,142,.08);}
+
+  .hint{font-size:11px;color:var(--dim);margin-top:8px;line-height:1.5;}
+  .save-toast{
+    position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--panel2);border:1px solid var(--green);color:var(--green);
+    padding:8px 16px;border-radius:99px;font-size:12px;opacity:0;transition:.25s;pointer-events:none;
+  }
+  .save-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ALARM BANNER */
+  .alarm{
+    border:2px solid var(--red); border-radius:14px; background:rgba(232,84,77,.14);
+    padding:16px 18px; margin-bottom:18px; animation:pulse 1.6s ease-in-out infinite;
+  }
+  .alarm-title{font-family:var(--display);font-weight:700;font-size:16px;color:var(--red);display:flex;align-items:center;gap:8px;}
+  .alarm-body{font-size:12.5px;color:var(--text);margin-top:8px;line-height:1.5;}
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(232,84,77,.35);}
+    50%{box-shadow:0 0 0 8px rgba(232,84,77,0);}
+  }
+  .tracker.urgent{background:rgba(232,84,77,.10);border-radius:8px;padding:10px 8px;margin:2px 0;animation:pulse 1.6s ease-in-out infinite;}
+
+  /* RISK LADDER */
+  .risk-tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+  .risk-tier{
+    background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;
+  }
+  .risk-tier.active{border-color:var(--green);background:rgba(62,207,142,.08);}
+  .risk-tier .pct{font-size:10px;color:var(--dim);}
+  .risk-tier.active .pct{color:var(--green);}
+  .risk-tier .amt{font-family:var(--display);font-weight:700;font-size:13px;margin-top:3px;}
+  .risk-actions{display:flex;gap:10px;margin-top:14px;}
+  .risk-btn{
+    flex:1;padding:10px;border-radius:10px;font-family:var(--display);font-weight:600;font-size:13px;
+    border:1px solid var(--line);cursor:pointer;text-align:center;
+  }
+  .risk-btn.win{background:rgba(62,207,142,.10);color:var(--green);border-color:rgba(62,207,142,.35);}
+  .risk-btn.loss{background:rgba(232,84,77,.10);color:var(--red);border-color:rgba(232,84,77,.35);}
+  .risk-current{
+    margin-top:12px;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:12px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .risk-current .k{font-size:11px;color:var(--muted);}
+  .risk-current .v{font-family:var(--display);font-weight:700;font-size:20px;color:var(--amber);}
+
+  /* WEEKLY BLOCK */
+  .weekly-badge{
+    display:inline-block;font-size:10px;padding:3px 9px;border-radius:99px;
+    background:rgba(232,163,61,.14);color:var(--amber);border:1px solid rgba(232,163,61,.35);
+    margin-left:6px;vertical-align:middle;
+  }
+
+  /* TABS */
+  .tabbar{
+    display:flex; gap:6px; overflow-x:auto; margin-bottom:16px; padding-bottom:2px;
+    -ms-overflow-style:none; scrollbar-width:none;
+  }
+  .tabbar::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    flex:none; font-family:var(--display); font-weight:600; font-size:12.5px;
+    color:var(--muted); background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:9px 14px; cursor:pointer; white-space:nowrap;
+  }
+  .tab-btn.active{color:var(--bg); background:var(--text); border-color:var(--text);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="alarmSlot"></div>
+
+  <div class="tabbar" id="tabbar">
+    <div class="tab-btn active" data-tab="today">Today</div>
+    <div class="tab-btn" data-tab="realbalance">Real Balance</div>
+    <div class="tab-btn" data-tab="weekly">Mon / Fri</div>
+    <div class="tab-btn" data-tab="milestones">One-Time</div>
+    <div class="tab-btn" data-tab="calendar">Calendar</div>
+  </div>
+
+  <div class="tab-panel active" data-panel="today">
+
+  <div class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Pre-flight — <span id="dowLabel"></span></div>
+        <div class="datepick" id="heroDate"></div>
+      </div>
+      <div class="gate-badge" id="gateBadge"><span class="dot"></span><span id="gateText">—</span></div>
+    </div>
+    <div class="hero-meter"><div class="hero-meter-fill" id="heroFill" style="width:0%"></div></div>
+    <div class="hero-sub" id="heroSub">0 of 9 checked</div>
+  </div>
+
+  <!-- ACCOUNT SETUP -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">00</span><span class="section-title">Account</span></div>
+    <div class="card">
+      <div class="stage-select" id="stageSelect">
+        <div class="stage-btn" data-stage="challenge1">Challenge 1<br>Target $5,500</div>
+        <div class="stage-btn" data-stage="challenge2">Challenge 2<br>Target $5,250</div>
+        <div class="stage-btn" data-stage="real">Real Account</div>
+      </div>
+      <div class="inputs-row">
+        <div class="field">
+          <label>Account start date</label>
+          <input type="date" id="accountStart">
+        </div>
+        <div class="field">
+          <label>Last trade date</label>
+          <input type="date" id="lastTradeDate">
+        </div>
+      </div>
+      <div class="inputs-row" style="margin-top:10px;">
+        <div class="field" id="withdrawTargetWrap" style="display:none;">
+          <label>My withdrawal target ($)</label>
+          <input type="number" id="withdrawTarget" placeholder="5500">
+        </div>
+        <div class="field" id="realAccountDateWrap" style="display:none;">
+          <label>Date real account received</label>
+          <input type="date" id="realAccountDate">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S DRAWDOWN CALC -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">01</span><span class="section-title">Daily drawdown (resets at broker 00:00)</span></div>
+    <div class="card">
+      <div class="field">
+        <label>Today's starting balance/equity ($)</label>
+        <input type="number" id="todayBalance" placeholder="e.g. 5120">
+      </div>
+      <div class="calc-row">
+        <div class="calc-pill">
+          <div class="k">Daily drawdown limit (5%)</div>
+          <div class="v" id="dailyDDVal">—</div>
+        </div>
+      </div>
+      <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's.</div>
+    </div>
+  </div>
+
+  <!-- OPEN-POSITION DRAWDOWN CALC -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">01b</span><span class="section-title">Open-position drawdown (recalculate every time, live)</span></div>
+    <div class="card">
+      <div class="field">
+        <label>Balance right now, at this exact moment (before opening) ($)</label>
+        <input type="number" id="liveBalance" placeholder="e.g. 5087.40">
+      </div>
+      <div class="calc-row">
+        <div class="calc-pill">
+          <div class="k">Max open-position DD (3%)</div>
+          <div class="v" id="openDDVal">—</div>
+        </div>
+      </div>
+      <div class="hint">This one is <b>not</b> tied to the day's opening balance — it floats with your live balance at the exact moment you put a trade on. Re-check it every single time, even if it's your 3rd trade of the day.</div>
+    </div>
+  </div>
+
+  <!-- DAILY CHECKLIST -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">02</span><span class="section-title">Before you place a single trade</span></div>
+    <div class="card" id="checklistCard"></div>
+  </div>
+
+  </div><!-- /panel: today -->
+
+  <div class="tab-panel" data-panel="realbalance">
+  <!-- REAL BALANCE / RISK LADDER -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">02b</span><span class="section-title">Real Balance — per-trade risk sizing</span></div>
+    <div class="card">
+      <div class="inputs-row">
+        <div class="field">
+          <label>Account size ($)</label>
+          <input type="number" id="rbAccountSize" placeholder="5000">
+        </div>
+        <div class="field">
+          <label>Overall drawdown limit (%)</label>
+          <input type="number" id="rbDDPercent" placeholder="12">
+        </div>
+      </div>
+      <div class="calc-row">
+        <div class="calc-pill">
+          <div class="k">Real Balance (your risk budget)</div>
+          <div class="v" id="rbRealBalance" style="color:var(--green);">—</div>
+        </div>
+      </div>
+      <div class="risk-tiers" id="riskTiers"></div>
+      <div class="risk-current">
+        <div>
+          <div class="k">Next trade risk</div>
+          <div class="v" id="riskCurrentAmt">—</div>
+        </div>
+        <div style="font-family:var(--display);font-weight:700;color:var(--amber);font-size:14px;" id="riskCurrentPct">1%</div>
+      </div>
+      <div class="risk-actions">
+        <div class="risk-btn win" id="riskWinBtn">Won last trade — step up</div>
+        <div class="risk-btn loss" id="riskLossBtn">Lost last trade — reset to 0.5%</div>
+      </div>
+      <div class="hint">First trade risks 1% of Real Balance. Win → step up (1%→2%→3%, capped at 3%). Lose → reset straight to 0.5% and build back up.</div>
+    </div>
+  </div>
+  </div><!-- /panel: realbalance -->
+
+  <div class="tab-panel active" data-panel="today">
+  <!-- LIVE TRACKERS -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">03</span><span class="section-title">Live trackers</span></div>
+    <div class="card" id="trackerCard"></div>
+  </div>
+  </div><!-- /panel: today -->
+
+  <div class="tab-panel" data-panel="weekly">
+  <!-- WEEKLY REMINDERS -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">03b</span><span class="section-title">Monday & Friday check<span class="weekly-badge" id="weeklyBadge"></span></span></div>
+    <div class="card" id="weeklyCard"></div>
+  </div>
+  </div><!-- /panel: weekly -->
+
+  <div class="tab-panel" data-panel="milestones">
+  <!-- MILESTONES -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">04</span><span class="section-title">Milestones & one-time actions</span></div>
+    <div class="card" id="milestoneCard"></div>
+  </div>
+  </div><!-- /panel: milestones -->
+
+  <div class="tab-panel" data-panel="calendar">
+  <!-- CALENDAR -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">05</span><span class="section-title">Calendar</span></div>
+    <div class="card">
+      <div class="cal-nav">
+        <button id="prevMonth">‹</button>
+        <div class="cal-month" id="calMonthLabel"></div>
+        <button id="nextMonth">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="hint">Green = every checklist item was checked that day. Amber = partially checked. Tap a day to review or edit it.</div>
+    </div>
+  </div>
+  </div><!-- /panel: calendar -->
+
+</div>
+
+<div class="save-toast" id="toast">Saved</div>
+
+<script>
+const DAILY_ITEMS = [
+  {id:'dd_daily', text:"Recalculated <b>today's daily drawdown limit</b> (5% of today's starting balance) — checked in the actual dashboard, not assumed."},
+  {id:'dd_open', text:"Recalculated the <b>open-position drawdown limit</b> (3% of live balance right now) — not yesterday's number, not this morning's, the one from this exact moment."},
+  {id:'one_trade', text:"<b>Only one trade open</b> at any time — no second position at all, regardless of direction."},
+  {id:'ip_stable', text:"<b>Same IP</b> as always — no VPN, no DNS change, no VPS, no new location."},
+  {id:'weekend_orders', text:"No SL / TP / pending / sell order sitting anywhere that could touch <b>Saturday or Sunday</b>, even unactivated."},
+  {id:'mt5_closed', text:"<b>MetaTrader 5 fully closed</b> — from late Friday through early Monday, no app open, no chance of a weekend order."},
+  {id:'no_devices', text:"Account not linked to <b>any other device</b> or anyone else's account — zero copy-trading risk."},
+  {id:'target_check', text:"Checked current equity against <b>this stage's target</b> — if hit, I stop now, not after one more trade."},
+  {id:'scalp_check', text:"Running total of trades held <b>under 30 seconds</b> is still below <b>20%</b> of this stage's target / withdrawal amount."},
+];
+
+const WEEKLY_ITEMS = [
+  {id:'w_password', text:"<b>Investor password</b> unchanged since account start."},
+  {id:'w_no_show', text:"Have <b>not shown the account, app, or this tool to relatives</b> or anyone else — reduces copy-trading flag risk."},
+  {id:'w_exposure', text:"Combined open accounts ≤ 2 and ≤ <b>$250,000</b> total size."},
+];
+
+const MILESTONES = [
+  {id:'m_pass2', text:"After passing <b>both challenges</b> — email the firm a personal ID + selfie for verification.", note:"One-time, do it as soon as challenge 2 is passed."},
+  {id:'m_refund', text:"Real account received → request the <b>20% refund</b>.", note:"Hard deadline: 45 days from receiving the real account. After that it's denied — no exceptions."},
+  {id:'m_fundraise', text:"3 months after real account, if total profit ≥ <b>8%</b> → request the <b>40% fund-raise</b>.", note:"Check the calendar tracker below for the exact date this opens."},
+  {id:'m_withdraw', text:"The instant I hit my withdrawal target: <b>stop trading, close every open trade, submit the withdrawal request</b> — then place zero new trades until payment lands.", note:"One trade after the target, even by accident, fails the account. Keep the target modest ($5,500 → $500 profit) — smaller numbers draw less scrutiny on withdrawal review."},
+];
+
+const RISK_TIERS = [0.5, 1, 2, 3];
+
+// ---------- Storage helpers ----------
+async function sGet(key){ try{ const v = localStorage.getItem('propchk:'+key); return v ? JSON.parse(v) : null; }catch(e){ return null; } }
+async function sSet(key, val){ try{ localStorage.setItem('propchk:'+key, JSON.stringify(val)); showToast(); }catch(e){ console.error(e); } }
+function showToast(){ const t=document.getElementById('toast'); t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'), 900); }
+
+// Debounced writer — avoids hammering storage on every keystroke (rate limit protection)
+const _debounceTimers = {};
+function sSetDebounced(key, val, delay=700){
+  clearTimeout(_debounceTimers[key]);
+  _debounceTimers[key] = setTimeout(()=>{ sSet(key, val); }, delay);
+}
+
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function fmtDate(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+}
+function daysBetween(a,b){
+  const da = new Date(a+'T00:00:00'), db = new Date(b+'T00:00:00');
+  return Math.round((db-da)/86400000);
+}
+function addDays(iso, n){
+  const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10);
+}
+
+let selectedDate = todayISO();
+let accountMeta = { stage:'challenge1', accountStart: todayISO(), lastTradeDate: todayISO(), withdrawTarget: '', realAccountDate: '' };
+let calViewDate = new Date();
+
+// ---------- Render: hero ----------
+function renderHero(dayItems){
+  document.getElementById('heroDate').textContent = fmtDate(selectedDate);
+  document.getElementById('dowLabel').textContent = selectedDate === todayISO() ? 'Today' : (selectedDate > todayISO() ? 'Upcoming' : 'Past day');
+  const total = DAILY_ITEMS.length;
+  const checked = DAILY_ITEMS.filter(i => dayItems[i.id]).length;
+  document.getElementById('heroFill').style.width = (checked/total*100)+'%';
+  document.getElementById('heroSub').textContent = `${checked} of ${total} checked`;
+  const badge = document.getElementById('gateBadge');
+  const text = document.getElementById('gateText');
+  badge.className = 'gate-badge ' + (checked===total ? 'gate-clear' : checked===0 ? 'gate-blocked' : 'gate-progress');
+  text.textContent = checked===total ? 'CLEARED TO TRADE' : checked===0 ? 'DO NOT TRADE YET' : 'INCOMPLETE';
+}
+
+// ---------- Render: checklist ----------
+function renderChecklist(dayData){
+  const card = document.getElementById('checklistCard');
+  card.innerHTML = '';
+  const dow = new Date(selectedDate+'T12:00:00').getDay(); // 0 Sun,1 Mon,5 Fri,6 Sat
+  const isWeekendWindow = dow===5 || dow===6 || dow===0 || dow===1; // Fri, Sat, Sun, Mon
+  DAILY_ITEMS.forEach(item => {
+    const checked = !!dayData.items[item.id];
+    const isUrgent = item.id==='mt5_closed' && isWeekendWindow && !checked;
+    const row = document.createElement('div');
+    row.className = 'item' + (checked?' checked':'') + (isUrgent?' urgent':'');
+    const tag = isUrgent ? '<span class="urgent-tag">DO NOW</span>' : '';
+    row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text">${item.text}${tag}</div>`;
+    row.onclick = async () => {
+      dayData.items[item.id] = !dayData.items[item.id];
+      setDayCache(selectedDate, dayData);
+      await sSet('day:'+selectedDate, dayData);
+      renderChecklist(dayData);
+      renderHero(dayData.items);
+      renderCalendar();
+    };
+    card.appendChild(row);
+  });
+}
+
+// ---------- Render: today's DD numbers ----------
+function renderCalc(dayData){
+  const bal = parseFloat(dayData.balance || 0);
+  const dd5 = document.getElementById('dailyDDVal');
+  dd5.textContent = bal ? '$' + (bal*0.05).toFixed(2) : '—';
+}
+function renderLiveCalc(dayData){
+  const live = parseFloat(dayData.liveBalance || 0);
+  const dd3 = document.getElementById('openDDVal');
+  dd3.textContent = live ? '$' + (live*0.03).toFixed(2) : '—';
+}
+
+// ---------- Load a given day ----------
+// Local cache for per-day data — cuts repeated storage.get calls (rate limit protection)
+const dayCache = {};
+async function getDayCached(iso){
+  if(dayCache[iso] !== undefined) return dayCache[iso];
+  const d = await sGet('day:'+iso);
+  dayCache[iso] = d;
+  return d;
+}
+function setDayCache(iso, data){ dayCache[iso] = data; }
+
+async function loadDay(dateISO){
+  selectedDate = dateISO;
+  let dayData = await getDayCached(dateISO);
+  if(!dayData){ dayData = { items:{}, balance:'', liveBalance:'' }; setDayCache(dateISO, dayData); }
+  document.getElementById('todayBalance').value = dayData.balance || '';
+  document.getElementById('liveBalance').value = dayData.liveBalance || '';
+  renderHero(dayData.items);
+  renderChecklist(dayData);
+  renderCalc(dayData);
+  renderLiveCalc(dayData);
+  renderAlarmBanner(dayData);
+  renderCalendar();
+}
+
+document.getElementById('todayBalance').addEventListener('input', async (e)=>{
+  let dayData = (await getDayCached(selectedDate)) || {items:{}, balance:'', liveBalance:''};
+  dayData.balance = e.target.value;
+  setDayCache(selectedDate, dayData);
+  sSetDebounced('day:'+selectedDate, dayData);
+  renderCalc(dayData);
+  renderAlarmBanner(dayData);
+});
+
+document.getElementById('liveBalance').addEventListener('input', async (e)=>{
+  let dayData = (await getDayCached(selectedDate)) || {items:{}, balance:'', liveBalance:''};
+  dayData.liveBalance = e.target.value;
+  setDayCache(selectedDate, dayData);
+  sSetDebounced('day:'+selectedDate, dayData);
+  renderLiveCalc(dayData);
+  renderAlarmBanner(dayData);
+});
+
+// ---------- Account meta ----------
+async function loadAccountMeta(){
+  const saved = await sGet('account-meta');
+  if(saved) accountMeta = saved;
+  document.getElementById('accountStart').value = accountMeta.accountStart;
+  document.getElementById('lastTradeDate').value = accountMeta.lastTradeDate;
+  document.getElementById('withdrawTarget').value = accountMeta.withdrawTarget || '';
+  document.getElementById('realAccountDate').value = accountMeta.realAccountDate || '';
+  setStageUI(accountMeta.stage);
+}
+function setStageUI(stage){
+  accountMeta.stage = stage;
+  document.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active', b.dataset.stage===stage));
+  document.getElementById('withdrawTargetWrap').style.display = stage==='real' ? '' : 'none';
+  document.getElementById('realAccountDateWrap').style.display = stage==='real' ? '' : 'none';
+  renderTrackers();
+  renderMilestones();
+  sGet('day:'+selectedDate).then(d => renderAlarmBanner(d || {items:{},balance:'',liveBalance:''}));
+}
+document.querySelectorAll('.stage-btn').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    setStageUI(btn.dataset.stage);
+    await sSet('account-meta', accountMeta);
+  });
+});
+['accountStart','lastTradeDate','withdrawTarget','realAccountDate'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', async (e)=>{
+    const map = {accountStart:'accountStart', lastTradeDate:'lastTradeDate', withdrawTarget:'withdrawTarget', realAccountDate:'realAccountDate'};
+    accountMeta[map[id]] = e.target.value;
+    await sSet('account-meta', accountMeta);
+    renderTrackers();
+    renderMilestones();
+  });
+});
+
+// ---------- Trackers ----------
+function renderTrackers(){
+  const card = document.getElementById('trackerCard');
+  const today = todayISO();
+  const rows = [];
+
+  // 30-day inactivity (urgent styling kicks in at day 25 / 5 days left)
+  const lastTrade = accountMeta.lastTradeDate || accountMeta.accountStart;
+  const deadline = addDays(lastTrade, 30);
+  const daysLeft = daysBetween(today, deadline);
+  rows.push({
+    label:'30-day no-trade deadline (0.01 lot open+close counts)',
+    val: daysLeft<0 ? 'MISSED' : daysLeft+' day'+(daysLeft===1?'':'s')+' left',
+    cls: daysLeft<0 ? 'bad' : daysLeft<=5 ? 'warn' : 'ok',
+    urgent: daysLeft>=0 && daysLeft<=5
+  });
+
+  // stage target
+  const stageTarget = accountMeta.stage==='challenge1' ? 5500 : accountMeta.stage==='challenge2' ? 5250 : (accountMeta.withdrawTarget || null);
+  rows.push({
+    label: accountMeta.stage==='real' ? 'My next withdrawal target' : 'Current stage target',
+    val: stageTarget ? '$'+Number(stageTarget).toLocaleString() : 'set a target above',
+    cls: 'ok'
+  });
+
+  // refund window (real account only)
+  if(accountMeta.stage==='real' && accountMeta.realAccountDate){
+    const refundDeadline = addDays(accountMeta.realAccountDate, 45);
+    const rLeft = daysBetween(today, refundDeadline);
+    rows.push({
+      label:'20% refund request window',
+      val: rLeft<0 ? 'CLOSED' : rLeft+' day'+(rLeft===1?'':'s')+' left',
+      cls: rLeft<0 ? 'bad' : rLeft<=7 ? 'warn' : 'ok',
+      urgent: rLeft>=0 && rLeft<=7
+    });
+    const fundraiseDate = addDays(accountMeta.realAccountDate, 90);
+    const fLeft = daysBetween(today, fundraiseDate);
+    rows.push({
+      label:'40% fund-raise eligible (needs 8% total profit)',
+      val: fLeft<=0 ? 'ELIGIBLE NOW — check profit ≥ 8%' : 'opens in '+fLeft+' day'+(fLeft===1?'':'s'),
+      cls: fLeft<=0 ? 'ok' : 'warn'
+    });
+  }
+
+  card.innerHTML = rows.map(r=>`
+    <div class="tracker ${r.urgent?'urgent':''}">
+      <div class="label">${r.label}</div>
+      <div class="val ${r.cls}">${r.val}</div>
+    </div>`).join('');
+}
+
+// ---------- Real Balance / Risk Ladder ----------
+async function loadRealBalanceMeta(){
+  const saved = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
+  document.getElementById('rbAccountSize').value = saved.accountSize;
+  document.getElementById('rbDDPercent').value = saved.ddPercent;
+  renderRealBalance(saved);
+}
+function renderRealBalance(meta){
+  const size = parseFloat(meta.accountSize||0);
+  const pct = parseFloat(meta.ddPercent||0);
+  const real = size * pct/100;
+  document.getElementById('rbRealBalance').textContent = real ? '$'+real.toFixed(2) : '—';
+  renderRiskTiers(real);
+}
+['rbAccountSize','rbDDPercent'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', async ()=>{
+    const meta = { accountSize: document.getElementById('rbAccountSize').value, ddPercent: document.getElementById('rbDDPercent').value };
+    sSetDebounced('real-balance-meta', meta);
+    renderRealBalance(meta);
+  });
+});
+
+async function renderRiskTiers(realBalance){
+  const ladder = await sGet('risk-ladder') || { stepIndex: 1 };
+  const wrap = document.getElementById('riskTiers');
+  wrap.innerHTML = RISK_TIERS.map((t,i)=>`
+    <div class="risk-tier ${i===ladder.stepIndex?'active':''}">
+      <div class="pct">${t}%</div>
+      <div class="amt">${realBalance ? '$'+(realBalance*t/100).toFixed(2) : '—'}</div>
+    </div>`).join('');
+  document.getElementById('riskCurrentPct').textContent = RISK_TIERS[ladder.stepIndex]+'%';
+  document.getElementById('riskCurrentAmt').textContent = realBalance ? '$'+(realBalance*RISK_TIERS[ladder.stepIndex]/100).toFixed(2) : '—';
+}
+document.getElementById('riskWinBtn').onclick = async ()=>{
+  const ladder = await sGet('risk-ladder') || { stepIndex: 1 };
+  ladder.stepIndex = Math.min(ladder.stepIndex+1, RISK_TIERS.length-1);
+  await sSet('risk-ladder', ladder);
+  const meta = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
+  renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100);
+};
+document.getElementById('riskLossBtn').onclick = async ()=>{
+  const ladder = { stepIndex: 0 };
+  await sSet('risk-ladder', ladder);
+  const meta = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
+  renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100);
+};
+
+// ---------- Weekly (Mon/Fri) reminders ----------
+async function renderWeekly(){
+  const saved = await sGet('weekly-checks') || {};
+  const card = document.getElementById('weeklyCard');
+  const dow = new Date().getDay(); // 0 Sun ... 1 Mon ... 5 Fri
+  const isCheckDay = dow===1 || dow===5;
+  document.getElementById('weeklyBadge').textContent = isCheckDay ? 'DO THIS TODAY' : 'next: Mon/Fri';
+  card.innerHTML = '';
+  WEEKLY_ITEMS.forEach(item=>{
+    const checked = !!saved[item.id];
+    const row = document.createElement('div');
+    row.className = 'item' + (checked?' checked':'');
+    row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text">${item.text}</div>`;
+    row.onclick = async ()=>{
+      saved[item.id] = !saved[item.id];
+      await sSet('weekly-checks', saved);
+      renderWeekly();
+    };
+    card.appendChild(row);
+  });
+}
+
+// ---------- Target-hit alarm banner ----------
+function renderAlarmBanner(dayData){
+  const slot = document.getElementById('alarmSlot');
+  const stageTarget = accountMeta.stage==='challenge1' ? 5500 : accountMeta.stage==='challenge2' ? 5250 : parseFloat(accountMeta.withdrawTarget||0);
+  const bal = Math.max(parseFloat(dayData.balance||0), parseFloat(dayData.liveBalance||0));
+  if(stageTarget && bal >= stageTarget){
+    const label = accountMeta.stage==='real' ? 'WITHDRAWAL TARGET HIT' : 'CHALLENGE TARGET HIT';
+    slot.innerHTML = `
+      <div class="alarm">
+        <div class="alarm-title">🚨 ${label} — STOP TRADING NOW</div>
+        <div class="alarm-body">
+          Close every open position immediately.
+          ${accountMeta.stage==='real' ? 'Submit your withdrawal request now.' : 'Do not place another trade on this stage.'}
+          Zero new trades — pending, SL/TP, anything — until ${accountMeta.stage==='real' ? 'payment is received.' : 'the next stage officially begins.'}
+          One trade past this point fails the account.
+        </div>
+      </div>`;
+  } else {
+    slot.innerHTML = '';
+  }
+}
+
+// ---------- Milestones (persistent, not date-scoped) ----------
+async function renderMilestones(){
+  const saved = await sGet('milestones') || {};
+  const card = document.getElementById('milestoneCard');
+  card.innerHTML = '';
+  MILESTONES.forEach(m=>{
+    const checked = !!saved[m.id];
+    const wrap = document.createElement('div');
+    wrap.className = 'milestone-item';
+    wrap.innerHTML = `
+      <div class="milestone-top" style="cursor:pointer;">
+        <div class="box ${checked?'checked':''}"></div>
+        <div class="item-text" style="${checked?'color:var(--muted);':''}">${m.text}</div>
+      </div>
+      <div class="milestone-note">${m.note}</div>`;
+    wrap.querySelector('.milestone-top').onclick = async ()=>{
+      saved[m.id] = !saved[m.id];
+      await sSet('milestones', saved);
+      renderMilestones();
+    };
+    card.appendChild(wrap);
+  });
+}
+
+// ---------- Calendar ----------
+async function renderCalendar(){
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  ['S','M','T','W','T','F','S'].forEach(d=>{
+    const el = document.createElement('div'); el.className='cal-dow'; el.textContent=d; grid.appendChild(el);
+  });
+  const year = calViewDate.getFullYear(), month = calViewDate.getMonth();
+  document.getElementById('calMonthLabel').textContent = calViewDate.toLocaleDateString('en-US',{month:'long', year:'numeric'});
+  const firstDay = new Date(year, month, 1);
+  const startOffset = firstDay.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = todayISO();
+
+  for(let i=0;i<startOffset;i++){ grid.appendChild(document.createElement('div')); }
+
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayData = iso > today ? null : await getDayCached(iso);
+    const cell = document.createElement('div');
+    let cls = 'cal-cell empty';
+    if(dayData && dayData.items){
+      const c = DAILY_ITEMS.filter(it=>dayData.items[it.id]).length;
+      if(c === DAILY_ITEMS.length) cls = 'cal-cell full';
+      else if(c > 0) cls = 'cal-cell partial';
+    }
+    if(iso === today) cls += ' today';
+    if(iso === selectedDate) cls += ' selected';
+    if(iso > today) cls += ' future';
+    cell.className = cls;
+    cell.innerHTML = `<div class="n">${d}</div>`;
+    cell.onclick = () => { loadDay(iso); };
+    grid.appendChild(cell);
+  }
+}
+document.getElementById('prevMonth').onclick = ()=>{ calViewDate.setMonth(calViewDate.getMonth()-1); renderCalendar(); };
+document.getElementById('nextMonth').onclick = ()=>{ calViewDate.setMonth(calViewDate.getMonth()+1); renderCalendar(); };
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b===btn));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.dataset.panel===tab));
+    window.scrollTo({top:0, behavior:'instant'});
+  });
+});
+
+// ---------- Init ----------
+(async function init(){
+  await loadAccountMeta();
+  await loadDay(todayISO());
+  renderTrackers();
+  await renderMilestones();
+  await loadRealBalanceMeta();
+  await renderWeekly();
+})();
+</script>
+</body>
+</html>

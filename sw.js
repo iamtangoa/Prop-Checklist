@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gate-preflight-v3';
+const CACHE_NAME = 'gate-preflight-v4';
 const ASSETS = [
   './',
   './index.html',

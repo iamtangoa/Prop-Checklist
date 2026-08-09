@@ -945,7 +945,7 @@ window.initApp = initApp;
   import {
     getAuth, onAuthStateChanged, signInWithEmailAndPassword,
     createUserWithEmailAndPassword, signOut,
-    GoogleAuthProvider, signInWithRedirect, getRedirectResult
+    GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence
@@ -986,6 +986,9 @@ window.initApp = initApp;
       'auth/weak-password': 'Password needs to be at least 6 characters.',
       'auth/unauthorized-domain': 'This site isn\'t authorized yet — add it under Authentication → Settings → Authorized domains in Firebase.',
       'auth/popup-blocked': 'Popup was blocked — trying a different sign-in method.',
+      'auth/popup-closed-by-user': 'The Google sign-in window was closed before finishing — try again.',
+      'auth/account-exists-with-different-credential': 'That email is already used with a different sign-in method (likely email/password) — use that instead.',
+      'auth/network-request-failed': 'Network error — check your connection and try again.',
     };
     return map[code] || ('Something went wrong (' + (code || 'unknown') + ') — try again.');
   }
@@ -995,15 +998,29 @@ window.initApp = initApp;
     errorEl.textContent = '';
     setLoading(true);
     try{
-      await signInWithRedirect(auth, googleProvider);
+      // Popup avoids the cross-domain redirect round-trip that some mobile
+      // browser privacy settings silently break.
+      await signInWithPopup(auth, googleProvider);
     }catch(e){
-      errorEl.textContent = friendlyError(e.code);
-      setLoading(false);
+      console.error('Google popup sign-in failed:', e.code, e.message);
+      if(e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment' || e.code === 'auth/cancelled-popup-request'){
+        try{
+          await signInWithRedirect(auth, googleProvider);
+          return; // page will navigate away
+        }catch(e2){
+          console.error('Google redirect sign-in failed:', e2.code, e2.message);
+          errorEl.textContent = friendlyError(e2.code);
+        }
+      } else {
+        errorEl.textContent = friendlyError(e.code);
+      }
     }
+    setLoading(false);
   });
 
-  // Finish the Google sign-in after the redirect comes back.
+  // In case a redirect-based attempt is in flight from a previous load.
   getRedirectResult(auth).catch((e) => {
+    console.error('Redirect result error:', e.code, e.message);
     if(e && e.code) errorEl.textContent = friendlyError(e.code);
   });
 

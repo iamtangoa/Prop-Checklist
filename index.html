@@ -197,6 +197,8 @@
   .risk-tier .pct{font-size:10px;color:var(--dim);}
   .risk-tier.active .pct{color:var(--green);}
   .risk-tier .amt{font-family:var(--display);font-weight:700;font-size:13px;margin-top:3px;}
+  .risk-tier .mt5pct{font-size:9.5px;color:var(--dim);margin-top:3px;}
+  .risk-tier.active .mt5pct{color:var(--muted);}
   .risk-actions{display:flex;gap:10px;margin-top:14px;}
   .risk-btn{
     flex:1;padding:10px;border-radius:10px;font-family:var(--display);font-weight:600;font-size:13px;
@@ -509,6 +511,7 @@ const DAILY_ITEMS = [
   {id:'dd_open', text:"Recalculated the <b>open-position drawdown limit</b> (3% of live balance right now) — not yesterday's number, not this morning's, the one from this exact moment."},
   {id:'one_trade', text:"<b>Only one trade open</b> at any time — no second position at all, regardless of direction."},
   {id:'ip_stable', text:"<b>Same IP</b> as always — no VPN, no DNS change, no VPS, no new location."},
+  {id:'taskbar_vpn', text:"Checked the <b>taskbar / app switcher</b> — no VPN app open or running in the background, even minimized."},
   {id:'weekend_orders', text:"No SL / TP / pending / sell order sitting anywhere that could touch <b>Saturday or Sunday</b>, even unactivated."},
   {id:'mt5_closed', text:"<b>MetaTrader 5 fully closed</b> — from late Friday through early Monday, no app open, no chance of a weekend order."},
   {id:'no_devices', text:"Account not linked to <b>any other device</b> or anyone else's account — zero copy-trading risk."},
@@ -613,13 +616,13 @@ function renderChecklist(dayData){
   card.innerHTML = '';
   const dow = new Date(selectedDate+'T12:00:00').getDay(); // 0 Sun,1 Mon,5 Fri,6 Sat
   const isWeekendWindow = dow===5 || dow===6 || dow===0 || dow===1; // Fri, Sat, Sun, Mon
-  DAILY_ITEMS.forEach(item => {
+  DAILY_ITEMS.forEach((item, idx) => {
     const checked = !!dayData.items[item.id];
     const isUrgent = item.id==='mt5_closed' && isWeekendWindow && !checked;
     const row = document.createElement('div');
     row.className = 'item' + (checked?' checked':'') + (isUrgent?' urgent':'');
     const tag = isUrgent ? '<span class="urgent-tag">DO NOW</span>' : '';
-    row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text">${item.text}${tag}</div>`;
+    row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text"><b>${idx+1}.</b> ${item.text}${tag}</div>`;
     row.onclick = async () => {
       dayData.items[item.id] = !dayData.items[item.id];
       setDayCache(selectedDate, dayData);
@@ -811,7 +814,7 @@ function renderRealBalance(meta){
   const pct = parseFloat(meta.ddPercent||0);
   const real = size * pct/100;
   document.getElementById('rbRealBalance').textContent = real ? '$'+real.toFixed(2) : '—';
-  renderRiskTiers(real);
+  renderRiskTiers(real, size);
 }
 ['rbAccountSize','rbDDPercent'].forEach(id=>{
   document.getElementById(id).addEventListener('input', async ()=>{
@@ -821,14 +824,19 @@ function renderRealBalance(meta){
   });
 });
 
-async function renderRiskTiers(realBalance){
+async function renderRiskTiers(realBalance, accountSize){
   const ladder = await sGet('risk-ladder') || { stepIndex: 1 };
   const wrap = document.getElementById('riskTiers');
-  wrap.innerHTML = RISK_TIERS.map((t,i)=>`
+  wrap.innerHTML = RISK_TIERS.map((t,i)=>{
+    const dollarAmt = realBalance ? realBalance*t/100 : 0;
+    const equivPct = (realBalance && accountSize) ? (dollarAmt/accountSize*100) : 0;
+    return `
     <div class="risk-tier ${i===ladder.stepIndex?'active':''}">
       <div class="pct">${t}%</div>
-      <div class="amt">${realBalance ? '$'+(realBalance*t/100).toFixed(2) : '—'}</div>
-    </div>`).join('');
+      <div class="amt">${realBalance ? '$'+dollarAmt.toFixed(2) : '—'}</div>
+      <div class="mt5pct">${(realBalance && accountSize) ? equivPct.toFixed(3)+'% in MT5' : ''}</div>
+    </div>`;
+  }).join('');
   document.getElementById('riskCurrentPct').textContent = RISK_TIERS[ladder.stepIndex]+'%';
   document.getElementById('riskCurrentAmt').textContent = realBalance ? '$'+(realBalance*RISK_TIERS[ladder.stepIndex]/100).toFixed(2) : '—';
 }
@@ -837,13 +845,13 @@ document.getElementById('riskWinBtn').onclick = async ()=>{
   ladder.stepIndex = Math.min(ladder.stepIndex+1, RISK_TIERS.length-1);
   await sSet('risk-ladder', ladder);
   const meta = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
-  renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100);
+  renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100, parseFloat(meta.accountSize||0));
 };
 document.getElementById('riskLossBtn').onclick = async ()=>{
   const ladder = { stepIndex: 0 };
   await sSet('risk-ladder', ladder);
   const meta = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
-  renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100);
+  renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100, parseFloat(meta.accountSize||0));
 };
 
 // ---------- Weekly (Mon/Fri) reminders ----------
@@ -854,11 +862,11 @@ async function renderWeekly(){
   const isCheckDay = dow===1 || dow===5;
   document.getElementById('weeklyBadge').textContent = isCheckDay ? 'DO THIS TODAY' : 'next: Mon/Fri';
   card.innerHTML = '';
-  WEEKLY_ITEMS.forEach(item=>{
+  WEEKLY_ITEMS.forEach((item, idx)=>{
     const checked = !!saved[item.id];
     const row = document.createElement('div');
     row.className = 'item' + (checked?' checked':'');
-    row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text">${item.text}</div>`;
+    row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text"><b>${idx+1}.</b> ${item.text}</div>`;
     row.onclick = async ()=>{
       saved[item.id] = !saved[item.id];
       await sSet('weekly-checks', saved);
@@ -895,14 +903,14 @@ async function renderMilestones(){
   const saved = await sGet('milestones') || {};
   const card = document.getElementById('milestoneCard');
   card.innerHTML = '';
-  MILESTONES.forEach(m=>{
+  MILESTONES.forEach((m, idx)=>{
     const checked = !!saved[m.id];
     const wrap = document.createElement('div');
     wrap.className = 'milestone-item';
     wrap.innerHTML = `
       <div class="milestone-top" style="cursor:pointer;">
         <div class="box ${checked?'checked':''}"></div>
-        <div class="item-text" style="${checked?'color:var(--muted);':''}">${m.text}</div>
+        <div class="item-text" style="${checked?'color:var(--muted);':''}"><b>${idx+1}.</b> ${m.text}</div>
       </div>
       <div class="milestone-note">${m.note}</div>`;
     wrap.querySelector('.milestone-top').onclick = async ()=>{

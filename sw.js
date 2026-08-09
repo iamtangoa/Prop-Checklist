@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gate-preflight-v1';
+const CACHE_NAME = 'gate-preflight-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -23,11 +23,12 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Cache-first for app shell, falling back to network, so the checklist still
-// opens even with no connection (your data itself lives in localStorage,
-// which already works offline).
+// Cache-first for the app shell only (same-origin), falling back to network.
+// Firebase Auth/Firestore calls go straight to the network, untouched — caching
+// those would break live sign-in and real-time sync.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  if (new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       return cached || fetch(event.request).then((response) => {

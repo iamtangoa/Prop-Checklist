@@ -9,10 +9,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Gate — Prop Account Pre-Flight</title>
 <meta name="description" content="Daily pre-trade compliance checklist and risk sizing for prop firm challenge accounts.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <!-- 
-  STANDALONE VERSION — uses localStorage instead of Claude's window.storage,
-  so it runs independently of claude.ai. Ready to feed into PWABuilder.com
-  to generate an installable Android .apk.
+  FIREBASE VERSION — private cloud sync via Firebase Auth + Firestore.
+  Paired with manifest.json, sw.js, icon-192.png, icon-512.png for PWA/APK packaging.
 -->
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
@@ -1017,6 +1019,13 @@ window.initApp = initApp;
       overlay.style.display = 'flex';
     }
   });
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => console.error('SW registration failed:', err));
+    });
+  }
 </script>
 </body>
 </html>

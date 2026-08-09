@@ -634,6 +634,31 @@ function renderLiveCalc(dayData){
 // ---------- Load a given day ----------
 // Local cache for per-day data — cuts repeated storage.get calls (rate limit protection)
 const dayCache = {};
+let historyPrefetched = false;
+
+// Pulls the user's ENTIRE checklist history in ONE request instead of one
+// request per calendar day. Firestore also caches this locally afterward
+// (via enableIndexedDbPersistence), so once this has run at least once while
+// online, the calendar keeps working fully offline indefinitely — it doesn't
+// re-fetch from the network on every visit.
+async function prefetchHistory(){
+  if(!window.currentUser || !window._fb.getDocs) return;
+  try{
+    const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
+    const snap = await window._fb.getDocs(colRef);
+    snap.forEach((docSnap) => {
+      const key = docSnap.id;
+      if(key.startsWith('day:')){
+        const iso = key.slice(4);
+        try{ dayCache[iso] = JSON.parse(docSnap.data().value); }catch(e){ dayCache[iso] = null; }
+      }
+    });
+    historyPrefetched = true;
+  }catch(e){
+    console.error('History prefetch failed (falling back to per-day reads):', e);
+  }
+}
+
 async function getDayCached(iso){
   if(dayCache[iso] !== undefined) return dayCache[iso];
   const d = await sGet('day:'+iso);
@@ -876,24 +901,37 @@ async function renderMilestones(){
 }
 
 // ---------- Calendar ----------
+let _calRenderToken = 0;
 async function renderCalendar(){
-  const grid = document.getElementById('calGrid');
-  grid.innerHTML = '';
-  ['S','M','T','W','T','F','S'].forEach(d=>{
-    const el = document.createElement('div'); el.className='cal-dow'; el.textContent=d; grid.appendChild(el);
-  });
+  const myToken = ++_calRenderToken; // if another render starts before this finishes, this one abandons its DOM write
   const year = calViewDate.getFullYear(), month = calViewDate.getMonth();
-  document.getElementById('calMonthLabel').textContent = calViewDate.toLocaleDateString('en-US',{month:'long', year:'numeric'});
   const firstDay = new Date(year, month, 1);
   const startOffset = firstDay.getDay();
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const today = todayISO();
 
+  // Build the list of ISO dates for this month, then fetch them all in
+  // parallel (they're already in dayCache after prefetchHistory ran, so this
+  // is normally instant with zero network calls).
+  const isoList = [];
+  for(let d=1; d<=daysInMonth; d++){
+    isoList.push(`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+  }
+  const dataList = await Promise.all(isoList.map(iso => iso > today ? Promise.resolve(null) : getDayCached(iso)));
+
+  if(myToken !== _calRenderToken) return; // a newer render superseded this one — don't touch the DOM
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  ['S','M','T','W','T','F','S'].forEach(d=>{
+    const el = document.createElement('div'); el.className='cal-dow'; el.textContent=d; grid.appendChild(el);
+  });
+  document.getElementById('calMonthLabel').textContent = calViewDate.toLocaleDateString('en-US',{month:'long', year:'numeric'});
   for(let i=0;i<startOffset;i++){ grid.appendChild(document.createElement('div')); }
 
-  for(let d=1; d<=daysInMonth; d++){
-    const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayData = iso > today ? null : await getDayCached(iso);
+  isoList.forEach((iso, idx) => {
+    const d = idx+1;
+    const dayData = dataList[idx];
     const cell = document.createElement('div');
     let cls = 'cal-cell empty';
     if(dayData && dayData.items){
@@ -908,7 +946,7 @@ async function renderCalendar(){
     cell.innerHTML = `<div class="n">${d}</div>`;
     cell.onclick = () => { loadDay(iso); };
     grid.appendChild(cell);
-  }
+  });
 }
 document.getElementById('prevMonth').onclick = ()=>{ calViewDate.setMonth(calViewDate.getMonth()-1); renderCalendar(); };
 document.getElementById('nextMonth').onclick = ()=>{ calViewDate.setMonth(calViewDate.getMonth()+1); renderCalendar(); };
@@ -925,6 +963,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 
 // ---------- Init (called by the Firebase auth listener once logged in) ----------
 async function initApp(){
+  await prefetchHistory();
   await loadAccountMeta();
   await loadDay(todayISO());
   renderTrackers();
@@ -957,7 +996,8 @@ window.initApp = initApp;
     sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence
+    getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence,
+    collection, getDocs
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
@@ -971,7 +1011,7 @@ window.initApp = initApp;
   });
 
   // Expose the pieces the main app script needs.
-  window._fb = { db, doc, getDoc, setDoc };
+  window._fb = { db, doc, getDoc, setDoc, collection, getDocs };
 
   const overlay = document.getElementById('authOverlay');
   const errorEl = document.getElementById('authError');

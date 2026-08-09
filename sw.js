@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gate-preflight-v7';
+const CACHE_NAME = 'gate-preflight-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -11,7 +11,16 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
+  // Deliberately NOT calling skipWaiting() here — the new worker stays
+  // "waiting" until the page explicitly asks it to take over (via the
+  // update banner), so the person controls when the app actually updates
+  // instead of it silently swapping code underneath an open session.
+});
+
+self.addEventListener('message', (event) => {
+  if(event.data && event.data.type === 'SKIP_WAITING'){
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (event) => {

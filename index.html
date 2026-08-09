@@ -8,9 +8,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Gate — Prop Account Pre-Flight</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="description" content="Daily pre-trade compliance checklist and risk sizing for prop firm challenge accounts.">
 <!-- 
   STANDALONE VERSION — uses localStorage instead of Claude's window.storage,
@@ -233,10 +230,72 @@
   .tab-btn.active{color:var(--bg); background:var(--text); border-color:var(--text);}
   .tab-panel{display:none;}
   .tab-panel.active{display:block;}
+
+  /* AUTH OVERLAY */
+  #authOverlay{
+    position:fixed; inset:0; background:var(--bg); z-index:1000;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .auth-card{
+    width:100%; max-width:340px; border:1px solid var(--line); border-radius:14px;
+    background:var(--panel2); padding:24px 22px;
+  }
+  .auth-title{font-family:var(--display);font-weight:700;font-size:19px;margin-bottom:4px;}
+  .auth-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+  .auth-field{margin-bottom:12px;}
+  .auth-field label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .auth-field input{
+    width:100%; background:var(--bg); border:1px solid var(--line); border-radius:8px;
+    color:var(--text); padding:10px 11px; font-family:var(--mono); font-size:13px;
+  }
+  .auth-field input:focus{outline:none;border-color:var(--green);}
+  .auth-btn{
+    width:100%; padding:11px; border-radius:9px; border:none; cursor:pointer;
+    font-family:var(--display); font-weight:600; font-size:13.5px; margin-top:6px;
+  }
+  .auth-btn.primary{background:var(--green);color:#08130D;}
+  .auth-btn.secondary{background:transparent;color:var(--muted);border:1px solid var(--line);margin-top:8px;}
+  .auth-error{color:var(--red);font-size:11.5px;margin-top:10px;min-height:14px;}
+  .auth-loading{color:var(--dim);font-size:11.5px;text-align:center;}
+
+  /* ACCOUNT BAR */
+  .account-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; color:var(--dim); margin-bottom:10px; padding:0 2px;
+  }
+  .account-bar button{
+    background:none;border:none;color:var(--muted);font-family:var(--mono);
+    font-size:11px;cursor:pointer;text-decoration:underline;
+  }
 </style>
 </head>
 <body>
+
+<div id="authOverlay">
+  <div class="auth-card">
+    <div class="auth-title">Gate</div>
+    <div class="auth-sub">Sign in to sync your track record privately across devices.</div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="authPassword" autocomplete="current-password" placeholder="At least 6 characters">
+    </div>
+    <button class="auth-btn primary" id="authSignInBtn">Sign In</button>
+    <button class="auth-btn secondary" id="authSignUpBtn">Create Account</button>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-loading" id="authLoading" style="display:none;">Connecting…</div>
+  </div>
+</div>
+
 <div class="wrap">
+
+  <div class="account-bar">
+    <span id="accountEmail"></span>
+    <button id="signOutBtn">Sign out</button>
+  </div>
 
   <div id="alarmSlot"></div>
 
@@ -449,9 +508,28 @@ const MILESTONES = [
 const RISK_TIERS = [0.5, 1, 2, 3];
 
 // ---------- Storage helpers ----------
-async function sGet(key){ try{ const v = localStorage.getItem('propchk:'+key); return v ? JSON.parse(v) : null; }catch(e){ return null; } }
-async function sSet(key, val){ try{ localStorage.setItem('propchk:'+key, JSON.stringify(val)); showToast(); }catch(e){ console.error(e); } }
-function showToast(){ const t=document.getElementById('toast'); t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'), 900); }
+// ---------- Firebase-backed storage ----------
+// Reads/writes go to Firestore under users/{uid}/appdata/{key}, so data is
+// private to the logged-in user and syncs across every device they log into.
+window.currentUser = null;
+
+async function sGet(key){
+  if(!window.currentUser) return null;
+  try{
+    const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
+    const snap = await window._fb.getDoc(ref);
+    return snap.exists() ? JSON.parse(snap.data().value) : null;
+  }catch(e){ console.error('Firestore read failed:', e); return null; }
+}
+async function sSet(key, val){
+  if(!window.currentUser) return;
+  try{
+    const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
+    await window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() });
+    showToast();
+  }catch(e){ console.error('Firestore write failed:', e); showToast('Sync failed — will retry'); }
+}
+function showToast(msg){ const t=document.getElementById('toast'); if(msg) t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>{ t.classList.remove('show'); t.textContent = 'Saved'; }, 1400); }
 
 // Debounced writer — avoids hammering storage on every keystroke (rate limit protection)
 const _debounceTimers = {};
@@ -821,22 +899,124 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ---------- Init ----------
-(async function init(){
+// ---------- Init (called by the Firebase auth listener once logged in) ----------
+async function initApp(){
   await loadAccountMeta();
   await loadDay(todayISO());
   renderTrackers();
   await renderMilestones();
   await loadRealBalanceMeta();
   await renderWeekly();
-})();
+}
+window.initApp = initApp;
 </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(err => console.error('SW registration failed:', err));
-    });
+
+<script type="module">
+  // ============================================================
+  // FIREBASE SETUP — paste your project's config here.
+  // Firebase Console → Project Settings → General → Your apps → SDK setup
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCm65FuaV80bZ6Z1YGCCMG4sFBNDkXGNBA",
+    authDomain: "prop-checklist.firebaseapp.com",
+    projectId: "prop-checklist",
+    storageBucket: "prop-checklist.firebasestorage.app",
+    messagingSenderId: "139046608918",
+    appId: "1:139046608918:web:ad3efb4c2ef6481c775537"
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+    createUserWithEmailAndPassword, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Offline caching so the app still opens (read-only for unsynced data)
+  // with no connection, and queues writes until back online.
+  enableIndexedDbPersistence(db).catch((err) => {
+    console.warn('Offline persistence unavailable:', err.code);
+  });
+
+  // Expose the pieces the main app script needs.
+  window._fb = { db, doc, getDoc, setDoc };
+
+  const overlay = document.getElementById('authOverlay');
+  const errorEl = document.getElementById('authError');
+  const loadingEl = document.getElementById('authLoading');
+  const emailInput = document.getElementById('authEmail');
+  const passInput = document.getElementById('authPassword');
+  const accountEmailEl = document.getElementById('accountEmail');
+
+  function setLoading(on){
+    loadingEl.style.display = on ? 'block' : 'none';
+    document.getElementById('authSignInBtn').disabled = on;
+    document.getElementById('authSignUpBtn').disabled = on;
   }
+  function friendlyError(code){
+    const map = {
+      'auth/invalid-email': 'That email address looks invalid.',
+      'auth/user-not-found': 'No account with that email — try Create Account.',
+      'auth/wrong-password': 'Wrong password.',
+      'auth/invalid-credential': 'Wrong email or password.',
+      'auth/email-already-in-use': 'An account already exists with that email — try Sign In instead.',
+      'auth/weak-password': 'Password needs to be at least 6 characters.',
+    };
+    return map[code] || 'Something went wrong — try again.';
+  }
+
+  document.getElementById('authSignInBtn').addEventListener('click', async () => {
+    errorEl.textContent = '';
+    setLoading(true);
+    try{
+      await signInWithEmailAndPassword(auth, emailInput.value.trim(), passInput.value);
+    }catch(e){
+      errorEl.textContent = friendlyError(e.code);
+    }
+    setLoading(false);
+  });
+
+  passInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') document.getElementById('authSignInBtn').click();
+  });
+
+  document.getElementById('authSignUpBtn').addEventListener('click', async () => {
+    errorEl.textContent = '';
+    setLoading(true);
+    try{
+      await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passInput.value);
+    }catch(e){
+      errorEl.textContent = friendlyError(e.code);
+    }
+    setLoading(false);
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', async () => {
+    await signOut(auth);
+    location.reload(); // simplest way to fully reset in-memory state/caches
+  });
+
+  let appStarted = false;
+  onAuthStateChanged(auth, (user) => {
+    if(user){
+      window.currentUser = user;
+      overlay.style.display = 'none';
+      accountEmailEl.textContent = user.email;
+      if(!appStarted && window.initApp){
+        appStarted = true;
+        window.initApp();
+      }
+    } else {
+      window.currentUser = null;
+      overlay.style.display = 'flex';
+    }
+  });
 </script>
 </body>
 </html>

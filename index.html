@@ -124,17 +124,27 @@
   .cal-cell{
     aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column;
     align-items:center; justify-content:center; font-size:11px; cursor:pointer;
-    border:1px solid var(--line); background:var(--bg); gap:2px;
+    border:1px solid var(--line); background:var(--bg); gap:1px; padding:2px;
+    overflow:hidden;
   }
   .cal-cell.today{border-color:var(--text);}
   .cal-cell.selected{border-color:var(--green);}
-  .cal-cell .n{font-family:var(--display);font-weight:600;}
-  .cal-cell.full{background:rgba(62,207,142,.10);}
-  .cal-cell.full .n{color:var(--green);}
-  .cal-cell.partial{background:rgba(232,163,61,.10);}
-  .cal-cell.partial .n{color:var(--amber);}
+  .cal-cell .n{font-family:var(--display);font-weight:600;font-size:11px;}
+  .cal-cell .pnl{font-family:var(--mono);font-weight:700;font-size:9.5px;line-height:1;}
+  .cal-cell .trades{font-family:var(--mono);font-size:7.5px;color:var(--dim);line-height:1;}
+  .cal-cell.profit{background:rgba(62,207,142,.14);border-color:rgba(62,207,142,.35);}
+  .cal-cell.profit .n{color:var(--muted);}
+  .cal-cell.profit .pnl{color:var(--green);}
+  .cal-cell.loss{background:rgba(232,84,77,.14);border-color:rgba(232,84,77,.35);}
+  .cal-cell.loss .n{color:var(--muted);}
+  .cal-cell.loss .pnl{color:var(--red);}
+  .cal-cell.breakeven{background:rgba(122,136,148,.12);}
+  .cal-cell.breakeven .pnl{color:var(--muted);}
   .cal-cell.empty .n{color:var(--dim);}
   .cal-cell.future{opacity:.3;pointer-events:none;}
+  .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:10.5px;color:var(--muted);}
+  .cal-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .cal-legend .dot{width:8px;height:8px;border-radius:3px;display:inline-block;}
   .cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
   .cal-nav button{
     background:var(--panel2);border:1px solid var(--line);color:var(--text);
@@ -421,6 +431,24 @@
     <div class="card" id="checklistCard"></div>
   </div>
 
+  <!-- DAY RESULT (feeds the P&L calendar) -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">02c</span><span class="section-title">Day result</span></div>
+    <div class="card">
+      <div class="inputs-row">
+        <div class="field">
+          <label>Trades taken today</label>
+          <input type="number" id="dayTradeCount" placeholder="0" min="0" step="1">
+        </div>
+        <div class="field">
+          <label>Today's P&L ($, use − for a loss)</label>
+          <input type="number" id="dayPnl" placeholder="e.g. 120 or -45">
+        </div>
+      </div>
+      <div class="hint">This is what colors the Calendar tab — green for a profit day, red for a loss, grey if nothing's logged yet.</div>
+    </div>
+  </div>
+
   </div><!-- /panel: today -->
 
   <div class="tab-panel" data-panel="realbalance">
@@ -496,7 +524,12 @@
         <button id="nextMonth">›</button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
-      <div class="hint">Green = every checklist item was checked that day. Amber = partially checked. Tap a day to review or edit it.</div>
+      <div class="cal-legend">
+        <span><span class="dot" style="background:var(--green);"></span>Profit day</span>
+        <span><span class="dot" style="background:var(--red);"></span>Loss day</span>
+        <span><span class="dot" style="background:var(--dim);"></span>No trades logged</span>
+      </div>
+      <div class="hint">Log trades and P&L for a day on the Today tab (under "Day result") — it colors in here automatically. Tap any day to open and edit it.</div>
     </div>
   </div>
   </div><!-- /panel: calendar -->
@@ -687,9 +720,11 @@ function setDayCache(iso, data){ dayCache[iso] = data; }
 async function loadDay(dateISO){
   selectedDate = dateISO;
   let dayData = await getDayCached(dateISO);
-  if(!dayData){ dayData = { items:{}, balance:'', liveBalance:'' }; setDayCache(dateISO, dayData); }
+  if(!dayData){ dayData = { items:{}, balance:'', liveBalance:'', tradeCount:'', pnl:'' }; setDayCache(dateISO, dayData); }
   document.getElementById('todayBalance').value = dayData.balance || '';
   document.getElementById('liveBalance').value = dayData.liveBalance || '';
+  document.getElementById('dayTradeCount').value = dayData.tradeCount || '';
+  document.getElementById('dayPnl').value = (dayData.pnl === 0) ? 0 : (dayData.pnl || '');
   renderHero(dayData.items);
   renderChecklist(dayData);
   renderCalc(dayData);
@@ -714,6 +749,20 @@ document.getElementById('liveBalance').addEventListener('input', async (e)=>{
   sSetDebounced('day:'+selectedDate, dayData);
   renderLiveCalc(dayData);
   renderAlarmBanner(dayData);
+});
+
+document.getElementById('dayTradeCount').addEventListener('input', async (e)=>{
+  let dayData = (await getDayCached(selectedDate)) || {items:{}, balance:'', liveBalance:'', tradeCount:'', pnl:''};
+  dayData.tradeCount = e.target.value;
+  setDayCache(selectedDate, dayData);
+  sSetDebounced('day:'+selectedDate, dayData);
+});
+
+document.getElementById('dayPnl').addEventListener('input', async (e)=>{
+  let dayData = (await getDayCached(selectedDate)) || {items:{}, balance:'', liveBalance:'', tradeCount:'', pnl:''};
+  dayData.pnl = e.target.value;
+  setDayCache(selectedDate, dayData);
+  sSetDebounced('day:'+selectedDate, dayData);
 });
 
 // ---------- Account meta ----------
@@ -956,16 +1005,28 @@ async function renderCalendar(){
     const dayData = dataList[idx];
     const cell = document.createElement('div');
     let cls = 'cal-cell empty';
-    if(dayData && dayData.items){
-      const c = DAILY_ITEMS.filter(it=>dayData.items[it.id]).length;
-      if(c === DAILY_ITEMS.length) cls = 'cal-cell full';
-      else if(c > 0) cls = 'cal-cell partial';
+    let innerHtml = `<div class="n">${d}</div>`;
+
+    const pnlRaw = dayData ? dayData.pnl : undefined;
+    const hasPnl = pnlRaw !== undefined && pnlRaw !== null && pnlRaw !== '';
+    if(hasPnl){
+      const pnl = parseFloat(pnlRaw);
+      const trades = (dayData.tradeCount !== undefined && dayData.tradeCount !== '') ? parseInt(dayData.tradeCount, 10) : null;
+      if(pnl > 0) cls = 'cal-cell profit';
+      else if(pnl < 0) cls = 'cal-cell loss';
+      else cls = 'cal-cell breakeven';
+      const sign = pnl > 0 ? '+' : '';
+      innerHtml += `<div class="pnl">${sign}${Math.round(pnl)}</div>`;
+      if(trades !== null && !isNaN(trades)){
+        innerHtml += `<div class="trades">${trades}t</div>`;
+      }
     }
+
     if(iso === today) cls += ' today';
     if(iso === selectedDate) cls += ' selected';
     if(iso > today) cls += ' future';
     cell.className = cls;
-    cell.innerHTML = `<div class="n">${d}</div>`;
+    cell.innerHTML = innerHtml;
     cell.onclick = () => { loadDay(iso); };
     grid.appendChild(cell);
   });

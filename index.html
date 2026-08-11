@@ -344,7 +344,7 @@
       <div class="gate-badge" id="gateBadge"><span class="dot"></span><span id="gateText">—</span></div>
     </div>
     <div class="hero-meter"><div class="hero-meter-fill" id="heroFill" style="width:0%"></div></div>
-    <div class="hero-sub" id="heroSub">0 of 9 checked</div>
+    <div class="hero-sub" id="heroSub">0 of 10 checked</div>
   </div>
 
   <!-- ACCOUNT SETUP -->
@@ -626,10 +626,10 @@ function renderChecklist(dayData){
     row.onclick = async () => {
       dayData.items[item.id] = !dayData.items[item.id];
       setDayCache(selectedDate, dayData);
-      await sSet('day:'+selectedDate, dayData);
       renderChecklist(dayData);
       renderHero(dayData.items);
       renderCalendar();
+      sSet('day:'+selectedDate, dayData); // saves in the background, doesn't block the screen update above
     };
     card.appendChild(row);
   });

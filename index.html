@@ -38,102 +38,9 @@
     margin:0; background:var(--bg); color:var(--text);
     font-family:var(--mono); font-size:14px;
     -webkit-font-smoothing:antialiased;
-    padding-bottom:34px;
-    padding-top:54px;
+    padding-bottom:60px;
   }
-  .wrap{max-width:720px;margin:0 auto;padding:16px 16px 40px;}
-
-  /* TOP BAR + DRAWER */
-  .topbar{
-    position:fixed;top:0;left:0;right:0;z-index:920;background:rgba(11,15,20,.92);
-    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
-  }
-  .topbar-inner{max-width:720px;margin:0 auto;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-  .topbar-brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.02em;}
-  .sync-pill{
-    font-family:var(--mono);font-weight:500;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;
-    padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;
-  }
-  .sync-pill.ok{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.10);}
-  .sync-pill.syncing{color:var(--amber);border-color:rgba(232,163,61,.35);background:rgba(232,163,61,.10);}
-  .sync-pill.local{color:var(--muted);border-color:var(--line);background:var(--panel);}
-  .acct-switch{
-    display:flex;align-items:center;gap:7px;max-width:46vw;padding:6px 10px;border-radius:999px;
-    border:1px solid var(--line);background:var(--panel);color:var(--text);font-family:var(--display);
-    font-size:12px;font-weight:600;cursor:pointer;overflow:hidden;
-  }
-  .acct-switch .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .acct-switch .cv{color:var(--muted);font-size:10px;}
-  .acct-switch .dotm{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none;}
-  .sheet-scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1400;display:none;}
-  .sheet-scrim.open{display:block;}
-  .sheet{
-    position:fixed;left:0;right:0;bottom:0;z-index:1401;max-height:78vh;overflow:auto;
-    background:var(--bg);border-top:1px solid var(--line);border-radius:18px 18px 0 0;
-    padding:14px 14px calc(20px + env(safe-area-inset-bottom));transform:translateY(102%);
-    transition:transform .22s ease;
-  }
-  .sheet.open{transform:translateY(0);}
-  .sheet-title{font-family:var(--display);font-weight:700;font-size:14px;margin-bottom:2px;}
-  .sheet-sub{font-size:11px;color:var(--muted);margin-bottom:12px;}
-  .sw-firm{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:14px 2px 6px;}
-  .sw-acc{
-    display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);
-    border-radius:12px;background:var(--panel);margin-bottom:8px;cursor:pointer;
-  }
-  .sw-acc.active{border-color:rgba(62,207,142,.5);background:rgba(62,207,142,.08);}
-  .sw-acc .nm{font-weight:600;font-size:13px;}
-  .sw-acc .mt{font-size:11px;color:var(--muted);margin-top:2px;}
-  .sw-acc .tick{margin-left:auto;color:var(--green);font-size:13px;}
-  .item-group{
-    font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
-    padding:14px 2px 6px;border-top:1px solid var(--line);margin-top:6px;
-  }
-  .item-group:first-child{border-top:none;margin-top:0;padding-top:4px;}
-  .acc-active-tag{
-    display:inline-block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);
-    border:1px solid rgba(62,207,142,.4);border-radius:999px;padding:2px 7px;margin-left:6px;
-  }
-  .acc-card.is-active{border-color:rgba(62,207,142,.45);}
-  .menu-btn{
-    width:38px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3.5px;cursor:pointer;flex:none;
-  }
-  .menu-btn span{display:block;width:15px;height:1.7px;background:var(--text);border-radius:2px;transition:.18s;}
-  .menu-btn.open span:nth-child(1){transform:translateY(5.2px) rotate(45deg);}
-  .menu-btn.open span:nth-child(2){opacity:0;}
-  .menu-btn.open span:nth-child(3){transform:translateY(-5.2px) rotate(-45deg);}
-  .drawer-scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:930;opacity:0;pointer-events:none;transition:.2s;}
-  .drawer-scrim.open{opacity:1;pointer-events:auto;}
-  .drawer{
-    position:fixed;top:0;right:0;bottom:0;width:268px;max-width:84vw;z-index:940;
-    background:var(--panel2);border-left:1px solid var(--line);
-    transform:translateX(105%);transition:transform .22s ease;
-    padding:16px 14px calc(18px + env(safe-area-inset-bottom,0));overflow-y:auto;
-    display:flex;flex-direction:column;
-  }
-  .drawer.open{transform:translateX(0);}
-  .drawer-head{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:6px 4px 12px;}
-  .drawer-item{
-    display:flex;align-items:center;gap:11px;padding:12px 12px;border-radius:10px;cursor:pointer;
-    border:1px solid transparent;margin-bottom:4px;
-  }
-  .drawer-item svg{width:19px;height:19px;stroke:var(--dim);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;}
-  .drawer-item span{font-family:var(--display);font-weight:600;font-size:13.5px;color:var(--muted);}
-  .drawer-item.active{background:rgba(62,207,142,.09);border-color:rgba(62,207,142,.30);}
-  .drawer-item.active svg{stroke:var(--green);}
-  .drawer-item.active span{color:var(--green);}
-  .drawer-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);}
-  .drawer-sync-line{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:9px;}
-
-  /* TEMPLATES */
-  .tpl-card{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:11px 12px;margin-bottom:9px;}
-  .tpl-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
-  .tpl-name{font-family:var(--display);font-weight:600;font-size:13.5px;}
-  .tpl-meta{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;}
-  .tpl-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
-  .acc-mini-actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;}
-  .subhead{font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--muted);margin:18px 2px 9px;}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 40px;}
 
   /* HERO */
   .hero{
@@ -276,7 +183,6 @@
     background:var(--panel2);border:1px solid var(--green);color:var(--green);
     padding:8px 16px;border-radius:99px;font-size:12px;opacity:0;transition:.25s;pointer-events:none;
   }
-  .save-toast{bottom:78px;}
   .save-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* ALARM BANNER */
@@ -293,7 +199,7 @@
   .tracker.urgent{background:rgba(232,84,77,.10);border-radius:8px;padding:10px 8px;margin:2px 0;animation:pulse 1.6s ease-in-out infinite;}
 
   /* RISK LADDER */
-  .risk-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+  .risk-tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
   .risk-tier{
     background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;
   }
@@ -390,103 +296,6 @@
     background:none;border:none;color:var(--muted);font-family:var(--mono);
     font-size:11px;cursor:pointer;text-decoration:underline;
   }
-
-  .view-panel{display:none;}
-  .view-panel.active{display:block;}
-
-  /* PROFILE */
-  .profile-card{display:flex;align-items:center;gap:14px;}
-  .profile-avatar{
-    width:52px;height:52px;border-radius:50%;background:rgba(62,207,142,.14);
-    border:1px solid rgba(62,207,142,.35);color:var(--green);
-    display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:19px;flex:none;
-  }
-  .profile-name-input{font-family:var(--display);font-weight:700;font-size:16px;background:none;border:none;color:var(--text);padding:2px 0;width:100%;border-bottom:1px solid transparent;}
-  .profile-name-input:focus{outline:none;border-bottom-color:var(--green);}
-  .profile-email{font-size:12px;color:var(--muted);margin-top:2px;}
-  .signout-btn{
-    width:100%;margin-top:16px;padding:11px;border-radius:9px;border:1px solid rgba(232,84,77,.35);
-    background:rgba(232,84,77,.1);color:var(--red);font-family:var(--display);font-weight:600;font-size:13.5px;cursor:pointer;
-  }
-
-  /* ADD BUTTON / SELECT / CHIPS */
-  .add-btn{
-    width:100%;padding:11px;border-radius:10px;border:1px dashed var(--line);
-    background:none;color:var(--muted);font-family:var(--display);font-weight:600;font-size:13px;cursor:pointer;margin-bottom:14px;
-  }
-  .add-btn:active{border-color:var(--green);color:var(--green);}
-  .select-input{
-    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;
-    color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:13px;
-  }
-  .select-input:focus{outline:none;border-color:var(--green);}
-  .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-  .acc-chip{
-    background:var(--panel);border:1px solid var(--line);border-radius:10px;
-    padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:7px;
-  }
-  .acc-chip.active{border-color:var(--green);background:rgba(62,207,142,.08);}
-  .acc-chip-label{font-family:var(--display);font-weight:600;font-size:11.5px;color:var(--muted);}
-  .acc-chip.active .acc-chip-label{color:var(--green);}
-  .acc-chip-count{font-family:var(--display);font-weight:700;font-size:12.5px;color:var(--text);background:var(--bg);border-radius:99px;padding:1px 7px;min-width:18px;text-align:center;}
-
-  /* ACCOUNT CARDS */
-  .acc-card{
-    border:1px solid var(--line);border-radius:12px;background:var(--panel);
-    padding:12px 14px;margin-bottom:10px;cursor:pointer;
-  }
-  .acc-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-  .acc-name{font-family:var(--display);font-weight:600;font-size:14px;}
-  .acc-firm{font-size:11.5px;color:var(--muted);margin-top:2px;}
-  .acc-status-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em;}
-  .status-ongoing{background:rgba(232,163,61,.14);color:var(--amber);border:1px solid rgba(232,163,61,.35);}
-  .status-active{background:rgba(62,207,142,.14);color:var(--green);border:1px solid rgba(62,207,142,.35);}
-  .status-passed{background:rgba(62,207,142,.14);color:var(--green);border:1px solid rgba(62,207,142,.35);}
-  .status-failed{background:rgba(232,84,77,.14);color:var(--red);border:1px solid rgba(232,84,77,.35);}
-  .status-planned{background:rgba(122,136,148,.14);color:var(--muted);border:1px solid var(--line);}
-  .acc-card-bottom{display:flex;justify-content:space-between;margin-top:9px;font-size:11.5px;color:var(--muted);font-family:var(--mono);}
-
-  /* PROP FIRM RULES */
-  .firm-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 14px;margin-bottom:12px;}
-  .firm-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
-  .firm-name{font-family:var(--display);font-weight:700;font-size:15px;}
-  .firm-actions{display:flex;gap:6px;}
-  .mini-btn{
-    background:var(--bg);border:1px solid var(--line);color:var(--muted);
-    font-family:var(--display);font-weight:600;font-size:10.5px;padding:5px 9px;border-radius:7px;cursor:pointer;white-space:nowrap;
-  }
-  .mini-btn:active{border-color:var(--green);color:var(--green);}
-  .mini-btn.danger:active{border-color:var(--red);color:var(--red);}
-  .plan-card{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:11px 12px;margin-top:9px;}
-  .plan-head{display:flex;justify-content:space-between;align-items:center;gap:8px;}
-  .plan-name{font-family:var(--display);font-weight:600;font-size:13px;}
-  .plan-rules{
-    width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--text);
-    padding:9px 10px;font-family:var(--mono);font-size:12px;margin-top:8px;min-height:70px;resize:vertical;line-height:1.5;
-    box-sizing:border-box;
-  }
-  .plan-rules:focus{outline:none;border-color:var(--green);}
-  .notices-wrap{margin-top:9px;}
-  .notice-item{
-    background:rgba(232,84,77,.1);border:1px solid rgba(232,84,77,.35);border-radius:8px;
-    padding:8px 10px;margin-top:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;
-  }
-  .notice-text{font-size:12.5px;font-weight:700;color:var(--red);line-height:1.4;}
-  .notice-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;flex:none;padding:0 2px;}
-
-  /* MODAL (account add/edit) */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:950;
-    display:flex;align-items:flex-end;justify-content:center;padding:0;
-  }
-  .modal-card{
-    width:100%;max-width:480px;max-height:88vh;overflow-y:auto;
-    background:var(--panel2);border:1px solid var(--line);border-top-left-radius:18px;border-top-right-radius:18px;
-    padding:20px 18px calc(20px + env(safe-area-inset-bottom,0));
-  }
-  .modal-title{font-family:var(--display);font-weight:700;font-size:16px;}
-  .btn-row{display:flex;gap:10px;margin-top:14px;}
-  .btn-row .auth-btn{margin-top:0;}
 </style>
 </head>
 <body>
@@ -511,9 +320,6 @@
     <button class="auth-btn primary" id="authSignInBtn">Sign In</button>
     <button class="auth-btn secondary" id="authSignUpBtn">Create Account</button>
     <button class="auth-link" id="authForgotBtn" type="button">Forgot password?</button>
-    <div class="auth-divider"><span>no connection?</span></div>
-    <button class="auth-btn secondary" id="authOfflineBtn" style="margin-top:0;">Work offline on this device</button>
-    <div class="auth-loading" style="margin-top:8px;line-height:1.5;text-align:left;">If the cloud is blocked on this network, offline mode keeps every entry on this computer and uploads it automatically the next time the cloud answers.</div>
     <div class="auth-error" id="authError"></div>
     <div class="auth-status" id="authStatus"></div>
     <div class="auth-loading" id="authLoading" style="display:none;">Connecting…</div>
@@ -522,7 +328,10 @@
 
 <div class="wrap">
 
-<div class="view-panel active" data-view="checklist">
+  <div class="account-bar">
+    <span id="accountEmail"></span>
+    <button id="signOutBtn">Sign out</button>
+  </div>
 
   <div id="alarmSlot"></div>
 
@@ -553,8 +362,8 @@
     <div class="section-head"><span class="section-num">00</span><span class="section-title">Account</span></div>
     <div class="card">
       <div class="stage-select" id="stageSelect">
-        <div class="stage-btn" data-stage="challenge1">Challenge 1<br><span id="stageT1">Target —</span></div>
-        <div class="stage-btn" data-stage="challenge2">Challenge 2<br><span id="stageT2">Target —</span></div>
+        <div class="stage-btn" data-stage="challenge1">Challenge 1<br>Target $5,500</div>
+        <div class="stage-btn" data-stage="challenge2">Challenge 2<br>Target $5,250</div>
         <div class="stage-btn" data-stage="real">Real Account</div>
       </div>
       <div class="inputs-row">
@@ -590,15 +399,11 @@
       </div>
       <div class="calc-row">
         <div class="calc-pill">
-          <div class="k" id="dailyDDLabel">Daily drawdown limit (5%)</div>
+          <div class="k">Daily drawdown limit (5%)</div>
           <div class="v" id="dailyDDVal">—</div>
         </div>
-        <div class="calc-pill">
-          <div class="k">Account floor — max it can drop to today</div>
-          <div class="v" id="dailyDDFloor" style="color:var(--red);">—</div>
-        </div>
       </div>
-      <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's. The floor is today's starting balance minus the 5% limit — if equity touches that number (or a dollar below it), that's max daily drawdown hit.</div>
+      <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's.</div>
     </div>
   </div>
 
@@ -612,7 +417,7 @@
       </div>
       <div class="calc-row">
         <div class="calc-pill">
-          <div class="k" id="openDDLabel">Max open-position DD (3%)</div>
+          <div class="k">Max open-position DD (3%)</div>
           <div class="v" id="openDDVal">—</div>
         </div>
       </div>
@@ -679,7 +484,7 @@
         <div class="risk-btn win" id="riskWinBtn">Won last trade — step up</div>
         <div class="risk-btn loss" id="riskLossBtn">Lost last trade — reset to 0.5%</div>
       </div>
-      <div class="hint">First trade risks 1% of Real Balance. Win → step up (1%→2%→3%→4%→5%, capped at 5%). Lose → reset straight to 0.5% and build back up.</div>
+      <div class="hint">First trade risks 1% of Real Balance. Win → step up (1%→2%→3%, capped at 3%). Lose → reset straight to 0.5% and build back up.</div>
     </div>
   </div>
   </div><!-- /panel: realbalance -->
@@ -729,205 +534,21 @@
   </div>
   </div><!-- /panel: calendar -->
 
-</div><!-- /view: checklist -->
-
-<div class="view-panel" data-view="accounts">
-  <div class="section">
-    <div class="section-head"><span class="section-num">A1</span><span class="section-title">Your prop accounts</span></div>
-    <div class="chip-row" id="accStatusChips"></div>
-    <button class="add-btn" id="addAccountBtn">+ Add account</button>
-    <div id="accountsList"></div>
-    <div class="subhead">Reusable setups (step stones)</div>
-    <div id="templatesList"></div>
-    <div class="hint">A setup carries the targets, daily/total drawdowns, phase and the whole instructions text. Use one as the starting point for a new account, or copy it out as text to paste anywhere.</div>
-  </div>
-</div><!-- /view: accounts -->
-
-<div class="view-panel" data-view="rules">
-  <div class="section">
-    <div class="section-head"><span class="section-num">R1</span><span class="section-title">Prop firms &amp; rules library</span></div>
-    <button class="add-btn" id="addFirmBtn">+ Add prop firm</button>
-    <div id="firmsList"></div>
-    <div class="hint">Copy any plan and paste it into another firm — the rules text and every notice come with it. Paste each plan's rules & regulations into its box — it autosaves as you type. Use "+ Add notice" for the rules you keep forgetting; they show boldly highlighted so they're hard to miss.</div>
-  </div>
-</div><!-- /view: rules -->
-
-<div class="view-panel" data-view="profile">
-  <div class="section">
-    <div class="section-head"><span class="section-num">P1</span><span class="section-title">Profile</span></div>
-    <div class="card profile-card">
-      <div class="profile-avatar" id="profileAvatarInitial">?</div>
-      <div style="flex:1;min-width:0;">
-        <input type="text" id="profileNameInput" class="profile-name-input" placeholder="Your name">
-        <div class="profile-email" id="profileEmailText"></div>
-      </div>
-    </div>
-    <div class="subhead">Sync</div>
-    <div class="card">
-      <div class="tracker" style="border-bottom:none;padding-top:2px;">
-        <div class="label" id="profileSyncText">Checking…</div>
-        <div class="val" id="profileSyncBadge">—</div>
-      </div>
-      <div class="risk-actions" style="margin-top:6px;">
-        <div class="risk-btn win" id="profileSyncNow">Sync now</div>
-        <div class="risk-btn loss" id="profileOfflineToggle">Work offline</div>
-      </div>
-      <div class="hint">Offline mode is for networks where the cloud is blocked. Nothing is ever lost: entries are written to this device first, queued, and pushed up as soon as a connection works. On a device where the cloud is reachable (phone with VPN on), everything merges back together.</div>
-    </div>
-    <button class="signout-btn" id="signOutBtn">Sign out</button>
-  </div>
-</div><!-- /view: profile -->
-
-</div><!-- /wrap -->
-
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="topbar-brand">Gate <span class="sync-pill" id="syncPill">…</span></div>
-    <button class="acct-switch" id="acctSwitchBtn" aria-label="Switch account">
-      <span class="dotm"></span><span class="nm" id="acctSwitchName">No account</span><span class="cv">▾</span>
-    </button>
-    <button class="menu-btn" id="menuBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
-  </div>
 </div>
-
-<div class="drawer-scrim" id="drawerScrim"></div>
-<aside class="drawer" id="drawer">
-  <div class="drawer-head">Go to</div>
-  <div class="drawer-item active" data-view="checklist">
-    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Checklist</span>
-  </div>
-  <div class="drawer-item" data-view="accounts">
-    <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Accounts</span>
-  </div>
-  <div class="drawer-item" data-view="rules">
-    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Prop firms &amp; rules</span>
-  </div>
-  <div class="drawer-item" data-view="profile">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Profile</span>
-  </div>
-  <div class="drawer-foot">
-    <div class="drawer-sync-line" id="drawerSyncLine">Checking sync…</div>
-    <button class="mini-btn" id="drawerSyncBtn" style="width:100%;padding:9px;">Sync now</button>
-  </div>
-</aside>
-
-<div id="accountModalOverlay" class="modal-overlay" style="display:none;">
-  <div class="modal-card">
-    <div class="modal-title" id="accountModalTitle">Add account</div>
-    <div class="field" style="margin-top:12px;" id="accForm_templateWrap">
-      <label>Start from a saved setup (copies targets, drawdowns &amp; instructions)</label>
-      <select class="select-input" id="accForm_template"></select>
-    </div>
-    <div class="field" style="margin-top:12px;">
-      <label>Account name</label>
-      <input type="text" id="accForm_name" placeholder="e.g. FTMO 100k #1">
-    </div>
-    <div class="inputs-row" style="margin-top:10px;">
-      <div class="field">
-        <label>Prop firm</label>
-        <select class="select-input" id="accForm_firm"></select>
-      </div>
-      <div class="field">
-        <label>Plan / stage</label>
-        <select class="select-input" id="accForm_plan"></select>
-      </div>
-    </div>
-    <div class="inputs-row" style="margin-top:10px;">
-      <div class="field">
-        <label>Balance ($)</label>
-        <input type="number" id="accForm_balance" placeholder="e.g. 100000">
-      </div>
-      <div class="field">
-        <label>Status</label>
-        <select class="select-input" id="accForm_status">
-          <option value="ongoing">Ongoing</option>
-          <option value="active">Active</option>
-          <option value="passed">Passed</option>
-          <option value="failed">Failed</option>
-          <option value="planned">Planned (future buy)</option>
-        </select>
-      </div>
-    </div>
-    <div class="field" style="margin-top:10px;">
-      <label>Purchase date</label>
-      <input type="date" id="accForm_date">
-    </div>
-    <div class="inputs-row" style="margin-top:10px;">
-      <div class="field">
-        <label>Profit target ($)</label>
-        <input type="number" id="accForm_target" placeholder="5500">
-      </div>
-      <div class="field">
-        <label>Phase</label>
-        <select class="select-input" id="accForm_phase">
-          <option value="single">Single phase</option>
-          <option value="two">Two phase</option>
-          <option value="funded">Funded / real</option>
-        </select>
-      </div>
-    </div>
-    <div class="inputs-row" style="margin-top:10px;">
-      <div class="field">
-        <label>Daily drawdown (%)</label>
-        <input type="number" id="accForm_dailyDD" placeholder="5">
-      </div>
-      <div class="field">
-        <label>Total drawdown (%)</label>
-        <input type="number" id="accForm_totalDD" placeholder="12">
-      </div>
-    </div>
-    <div class="inputs-row" style="margin-top:10px;">
-      <div class="field">
-        <label>Phase 2 target ($, optional)</label>
-        <input type="number" id="accForm_target2" placeholder="5250">
-      </div>
-      <div class="field">
-        <label>Max open-trade DD (%)</label>
-        <input type="number" id="accForm_openDD" placeholder="3">
-      </div>
-    </div>
-    <div class="field" style="margin-top:10px;">
-      <label>Instructions &amp; rules for this account</label>
-      <textarea class="plan-rules" id="accForm_instructions" placeholder="Targets, drawdowns, payout rules — everything this account must obey."></textarea>
-    </div>
-    <div class="tpl-actions">
-      <button class="mini-btn" id="accForm_copySetup">Copy setup</button>
-      <button class="mini-btn" id="accForm_pasteSetup">Paste setup</button>
-      <button class="mini-btn" id="accForm_saveTemplate">Save as reusable setup</button>
-    </div>
-    <div class="field" style="margin-top:10px;">
-      <label>Notes (optional)</label>
-      <input type="text" id="accForm_notes" placeholder="anything worth remembering">
-    </div>
-    <div class="btn-row">
-      <button class="auth-btn secondary" id="accForm_cancel">Cancel</button>
-      <button class="auth-btn primary" id="accForm_save">Save</button>
-    </div>
-    <button class="auth-btn secondary" id="accForm_delete" style="margin-top:8px;border-color:rgba(232,84,77,.35);color:var(--red);display:none;">Delete account</button>
-  </div>
-</div>
-
-<div class="sheet-scrim" id="switchScrim"></div>
-<aside class="sheet" id="switchSheet">
-  <div class="sheet-title">Switch account</div>
-  <div class="sheet-sub">Each account keeps its own checklist, drawdowns, calendar and trackers.</div>
-  <div id="switchList"></div>
-  <button class="add-btn" id="switchAddBtn" style="margin-top:12px;">+ Add another account</button>
-</aside>
 
 <div class="save-toast" id="toast">Saved</div>
 
 <script>
 const DAILY_ITEMS = [
-  {id:'dd_daily', text:"Recalculated <b>today's daily drawdown limit</b> ({{daily}}% of today's starting balance) — checked in the actual dashboard, not assumed."},
-  {id:'dd_open', text:"Recalculated the <b>open-position drawdown limit</b> ({{open}}% of live balance right now) — not yesterday's number, not this morning's, the one from this exact moment."},
+  {id:'dd_daily', text:"Recalculated <b>today's daily drawdown limit</b> (5% of today's starting balance) — checked in the actual dashboard, not assumed."},
+  {id:'dd_open', text:"Recalculated the <b>open-position drawdown limit</b> (3% of live balance right now) — not yesterday's number, not this morning's, the one from this exact moment."},
   {id:'one_trade', text:"<b>Only one trade open</b> at any time — no second position at all, regardless of direction."},
   {id:'ip_stable', text:"<b>Same IP</b> as always — no VPN, no DNS change, no VPS, no new location."},
   {id:'taskbar_vpn', text:"Checked the <b>taskbar / app switcher</b> — no VPN app open or running in the background, even minimized."},
   {id:'weekend_orders', text:"No SL / TP / pending / sell order sitting anywhere that could touch <b>Saturday or Sunday</b>, even unactivated."},
   {id:'mt5_closed', text:"<b>MetaTrader 5 fully closed</b> — from late Friday through early Monday, no app open, no chance of a weekend order."},
   {id:'no_devices', text:"Account not linked to <b>any other device</b> or anyone else's account — zero copy-trading risk."},
-  {id:'target_check', text:"Checked current equity against <b>this stage's target ({{target}})</b> — if hit, I stop now, not after one more trade."},
+  {id:'target_check', text:"Checked current equity against <b>this stage's target</b> — if hit, I stop now, not after one more trade."},
   {id:'scalp_check', text:"Running total of trades held <b>under 30 seconds</b> is still below <b>20%</b> of this stage's target / withdrawal amount."},
 ];
 
@@ -944,7 +565,7 @@ const MILESTONES = [
   {id:'m_withdraw', text:"The instant I hit my withdrawal target: <b>stop trading, close every open trade, submit the withdrawal request</b> — then place zero new trades until payment lands.", note:"One trade after the target, even by accident, fails the account. Keep the target modest ($5,500 → $500 profit) — smaller numbers draw less scrutiny on withdrawal review."},
 ];
 
-const RISK_TIERS = [0.5, 1, 2, 3, 4, 5];
+const RISK_TIERS = [0.5, 1, 2, 3];
 
 // ---------- Storage helpers ----------
 // ---------- Firebase-backed storage ----------
@@ -964,169 +585,30 @@ function withTimeout(promise, ms, label){
   ]);
 }
 
-let offlineMode = false;          // true = deliberately working without the cloud
-let cloudOK = null;               // null unknown, true reachable, false blocked/unreachable
-
-// ---------- Multi-account scoping ----------
-// One trader, many funded/challenge accounts across many firms. Everything that
-// belongs to a single account (checklist days, drawdown numbers, trackers, risk
-// ladder, calendar) is stored under that account's own scope. The keys below are
-// shared by every account.
-const GLOBAL_KEYS = new Set(['accounts-list','propfirms-list','account-templates','profile-meta']);
-let activeAccountId = null;
-let activeAccount = null;
-let activeScope = 'legacy';       // 'legacy' = the original single-account data, kept as-is
-function scopeKey(key){
-  if(GLOBAL_KEYS.has(key) || !activeScope || activeScope === 'legacy') return key;
-  return 'acc@' + activeScope + '@' + key;
-}
-
-function lsKey(key){
-  const uid = (window.currentUser && window.currentUser.uid) || 'local';
-  return 'gate:' + uid + ':' + key;
-}
-function lsGet(key){
-  try{ const raw = localStorage.getItem(lsKey(key)); return raw==null ? null : JSON.parse(raw); }
-  catch(e){ return null; }
-}
-function lsSet(key, val){
-  try{ localStorage.setItem(lsKey(key), JSON.stringify(val)); }
-  catch(e){ console.warn('Local save failed:', e); }
-}
-function pendingKeys(){ try{ return JSON.parse(localStorage.getItem(lsKey('__pending')) || '[]'); }catch(e){ return []; } }
-function setPendingKeys(list){ try{ localStorage.setItem(lsKey('__pending'), JSON.stringify(list)); }catch(e){} }
-function markPending(key){ const p = pendingKeys(); if(!p.includes(key)){ p.push(key); setPendingKeys(p); } setSyncStatus(); }
-
-function cloudReady(){
-  return !offlineMode && !!window.currentUser && window.currentUser.uid !== 'local'
-      && !!window._fb && !!window._fb.db;
-}
-
-// withTimeout resolves undefined, which is also a normal setDoc result — this
-// variant reports the difference so a silently hanging write (Firebase blocked
-// on the network) is treated as a failure instead of a success.
-function raceTimeout(promise, ms){
-  return Promise.race([ promise.then(()=> 'ok'), new Promise(r => setTimeout(()=> r('timeout'), ms)) ]);
-}
-
-function setSyncStatus(){
-  const pill = document.getElementById('syncPill');
-  const line = document.getElementById('drawerSyncLine');
-  const pend = pendingKeys().length;
-  let cls='local', txt='This device', detail='';
-  if(!window.currentUser){ cls='local'; txt='Signed out'; detail='Sign in to sync across devices.'; }
-  else if(!cloudReady()){
-    cls='local'; txt='On this device' + (pend ? ' · '+pend : '');
-    detail = 'Working offline — everything is saved on this device' + (pend ? ' ('+pend+' change'+(pend===1?'':'s')+' waiting to upload).' : '.');
-  }
-  else if(cloudOK === false){
-    cls='local'; txt='No cloud' + (pend ? ' · '+pend : '');
-    detail = 'Cloud unreachable (blocked or offline). Saved here' + (pend ? ', '+pend+' change'+(pend===1?'':'s')+' queued.' : '.');
-  }
-  else if(pend){ cls='syncing'; txt='Syncing '+pend; detail = pend+' change'+(pend===1?'':'s')+' uploading…'; }
-  else { cls='ok'; txt='Synced'; detail='Everything is synced to your account.'; }
-  if(pill){ pill.className = 'sync-pill ' + cls; pill.textContent = txt; }
-  if(line) line.textContent = detail;
-}
-
 async function sGet(key){
-  key = scopeKey(key);
-  const local = lsGet(key);
-  if(!cloudReady()) return local;
+  if(!window.currentUser) return null;
   try{
     const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
     const snap = await withTimeout(window._fb.getDoc(ref), 8000, 'sGet:'+key);
-    if(snap === undefined){ cloudOK = false; setSyncStatus(); return local; }
-    cloudOK = true;
-    // A local edit that hasn't uploaded yet always beats the cloud copy.
-    if(pendingKeys().includes(key)){ setSyncStatus(); return local; }
-    if(!snap.exists()){ setSyncStatus(); return local; }
-    const remote = JSON.parse(snap.data().value);
-    lsSet(key, remote);
-    setSyncStatus();
-    return remote;
-  }catch(e){
-    console.error('Cloud read failed:', key, e);
-    cloudOK = false; setSyncStatus();
-    return local;
-  }
+    if(snap === undefined) return null; // timed out
+    return snap.exists() ? JSON.parse(snap.data().value) : null;
+  }catch(e){ console.error('Firestore read failed:', key, e); return null; }
 }
-
-async function sSet(key, val){ return sSetRaw(scopeKey(key), val); }
-async function sSetRaw(key, val){
-  lsSet(key, val);                       // device first — never lose a keystroke to a blocked network
-  if(!cloudReady()){ markPending(key); showToast('Saved on this device'); return; }
+async function sSet(key, val){
+  if(!window.currentUser) return;
   try{
     const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
-    const r = await raceTimeout(window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() }), 8000);
-    if(r === 'timeout'){ cloudOK = false; markPending(key); showToast('Saved here — cloud not responding'); return; }
-    cloudOK = true;
-    setPendingKeys(pendingKeys().filter(k => k !== key));
-    setSyncStatus();
-    showToast('Saved & synced');
-  }catch(e){
-    console.error('Cloud write failed:', e);
-    cloudOK = false; markPending(key);
-    showToast('Saved here — will sync later');
-  }
+    await window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() });
+    showToast();
+  }catch(e){ console.error('Firestore write failed:', e); showToast('Sync failed — will retry'); }
 }
-
-let _flushing = false;
-async function flushPending(){
-  if(_flushing || !cloudReady()) { setSyncStatus(); return; }
-  const queue = pendingKeys();
-  if(!queue.length){ setSyncStatus(); return; }
-  _flushing = true;
-  setSyncStatus();
-  for(const key of queue){
-    const val = lsGet(key);
-    if(val === null){ setPendingKeys(pendingKeys().filter(k=>k!==key)); continue; }
-    try{
-      const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
-      const r = await raceTimeout(window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() }), 8000);
-      if(r === 'timeout'){ cloudOK = false; break; }
-      cloudOK = true;
-      setPendingKeys(pendingKeys().filter(k=>k!==key));
-    }catch(e){ cloudOK = false; break; }
-  }
-  _flushing = false;
-  setSyncStatus();
-}
-window.flushPending = flushPending;
-window.addEventListener('online', ()=> flushPending());
-document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') flushPending(); });
-setInterval(()=> flushPending(), 60000);
-
-// Anything saved while offline (uid "local") is adopted by the account on the
-// first successful sign-in, then queued for upload.
-function adoptLocalData(uid){
-  try{
-    const from = 'gate:local:', to = 'gate:'+uid+':';
-    const moved = [];
-    for(let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      if(!k || !k.startsWith(from)) continue;
-      const suffix = k.slice(from.length);
-      if(suffix === '__pending') continue;
-      if(localStorage.getItem(to+suffix) === null){ moved.push([to+suffix, suffix, localStorage.getItem(k)]); }
-    }
-    if(!moved.length) return;
-    const pend = new Set(JSON.parse(localStorage.getItem(to+'__pending') || '[]'));
-    moved.forEach(([full, suffix, raw]) => { localStorage.setItem(full, raw); pend.add(suffix); });
-    localStorage.setItem(to+'__pending', JSON.stringify([...pend]));
-  }catch(e){ console.warn('Adopting offline data failed:', e); }
-}
-window.adoptLocalData = adoptLocalData;
-
 function showToast(msg){ const t=document.getElementById('toast'); if(msg) t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>{ t.classList.remove('show'); t.textContent = 'Saved'; }, 1400); }
 
 // Debounced writer — avoids hammering storage on every keystroke (rate limit protection)
 const _debounceTimers = {};
 function sSetDebounced(key, val, delay=700){
-  key = scopeKey(key);
-  lsSet(key, val);                       // device first, immediately — never wait on the debounce
   clearTimeout(_debounceTimers[key]);
-  _debounceTimers[key] = setTimeout(()=>{ sSetRaw(key, val); }, delay);
+  _debounceTimers[key] = setTimeout(()=>{ sSet(key, val); }, delay);
 }
 
 function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
@@ -1147,51 +629,12 @@ let selectedDate = todayISO();
 let accountMeta = { stage:'challenge1', accountStart: todayISO(), lastTradeDate: todayISO(), withdrawTarget: '', realAccountDate: '' };
 let calViewDate = new Date();
 
-// ---------- Active account helpers ----------
-// Every number on the checklist screen comes from the account currently being
-// traded, so switching accounts re-points the whole app at that rulebook.
-function accNum(field, dflt){
-  const n = parseFloat(activeAccount && activeAccount[field]);
-  return isFinite(n) && n > 0 ? n : dflt;
-}
-function dailyPct(){ return accNum('dailyDDPct', 5); }
-function openPct(){ return accNum('openDDPct', 3); }
-function totalPct(){ return accNum('totalDDPct', 12); }
-function accSize(){ return accNum('balance', 5000); }
-function stageTarget(stage){
-  const st = stage || accountMeta.stage;
-  if(st === 'real') return parseFloat(accountMeta.withdrawTarget || 0) || 0;
-  if(st === 'challenge2') return accNum('profitTarget2', 0) || accNum('profitTarget', 0);
-  return accNum('profitTarget', 0);
-}
-function money(n){ return '$' + Number(n).toLocaleString(undefined,{maximumFractionDigits:2}); }
-function fillTokens(text){
-  const t = stageTarget();
-  return text
-    .replace('{{daily}}', dailyPct())
-    .replace('{{open}}', openPct())
-    .replace('{{target}}', t ? money(t) : 'set it in this account');
-}
-function applyAccountLabels(){
-  const dl = document.getElementById('dailyDDLabel');
-  if(dl) dl.textContent = 'Daily drawdown limit (' + dailyPct() + '%)';
-  const ol = document.getElementById('openDDLabel');
-  if(ol) ol.textContent = 'Max open-position DD (' + openPct() + '%)';
-  const t1 = document.getElementById('stageT1');
-  if(t1) t1.textContent = accNum('profitTarget',0) ? 'Target ' + money(accNum('profitTarget',0)) : 'Target —';
-  const t2 = document.getElementById('stageT2');
-  if(t2) t2.textContent = accNum('profitTarget2',0) ? 'Target ' + money(accNum('profitTarget2',0)) : (accNum('profitTarget',0) ? 'Target ' + money(accNum('profitTarget',0)) : 'Target —');
-  const nm = document.getElementById('acctSwitchName');
-  if(nm) nm.textContent = activeAccount ? (activeAccount.name || 'Unnamed account') : 'No account';
-}
-
 // ---------- Render: hero ----------
 function renderHero(dayItems){
   document.getElementById('heroDate').textContent = fmtDate(selectedDate);
   document.getElementById('dowLabel').textContent = selectedDate === todayISO() ? 'Today' : (selectedDate > todayISO() ? 'Upcoming' : 'Past day');
-  const all = checklistGroups().reduce((acc,g)=> acc.concat(g.items), []);
-  const total = all.length || 1;
-  const checked = all.filter(i => dayItems[i.id]).length;
+  const total = DAILY_ITEMS.length;
+  const checked = DAILY_ITEMS.filter(i => dayItems[i.id]).length;
   document.getElementById('heroFill').style.width = (checked/total*100)+'%';
   document.getElementById('heroSub').textContent = `${checked} of ${total} checked`;
   const badge = document.getElementById('gateBadge');
@@ -1201,91 +644,40 @@ function renderHero(dayItems){
 }
 
 // ---------- Render: checklist ----------
-function ruleLinesFrom(text){
-  return String(text||'').split('\n')
-    .map(l => l.replace(/^\s*[•\-\*\u2022\d.)]+\s*/,'').trim())
-    .filter(l => l.length > 3 && /[a-z]/.test(l));   // skips ALL-CAPS headings and blank lines
-}
-// The checklist is: the universal pre-flight rules, plus this account's firm
-// plan rules, plus its notices, plus anything written in its own instructions.
-function checklistGroups(){
-  const groups = [{ title:'Universal pre-flight', items: DAILY_ITEMS.map(i => ({ id:i.id, text: fillTokens(i.text) })) }];
-  const acc = activeAccount;
-  if(acc){
-    const firm = propFirmsList.find(f => f.id === acc.firmId);
-    const plan = firm ? (firm.plans||[]).find(pl => pl.id === acc.planId) : null;
-    if(plan){
-      const lines = ruleLinesFrom(plan.rulesText);
-      if(lines.length){
-        groups.push({
-          title: (firm.name||'Firm') + ' — ' + (plan.name||'plan') + ' rules',
-          items: lines.map((t,i) => ({ id:'plan_'+plan.id+'_'+i, text: escapeHtml(t) }))
-        });
-      }
-      const notices = plan.notices || [];
-      if(notices.length){
-        groups.push({
-          title: 'Easy to forget — ' + (firm.name||'firm'),
-          items: notices.map(n => ({ id:'note_'+n.id, text: '⚠ ' + escapeHtml(n.text) }))
-        });
-      }
-    }
-    const own = ruleLinesFrom(acc.instructions);
-    if(own.length){
-      groups.push({
-        title: (acc.name || 'This account') + ' — own rules',
-        items: own.map((t,i) => ({ id:'ins_'+acc.id+'_'+i, text: escapeHtml(t) }))
-      });
-    }
-  }
-  return groups;
-}
 function renderChecklist(dayData){
   const card = document.getElementById('checklistCard');
   card.innerHTML = '';
   const dow = new Date(selectedDate+'T12:00:00').getDay(); // 0 Sun,1 Mon,5 Fri,6 Sat
   const isWeekendWindow = dow===5 || dow===6 || dow===0 || dow===1; // Fri, Sat, Sun, Mon
-  let n = 0;
-  checklistGroups().forEach(group => {
-    const head = document.createElement('div');
-    head.className = 'item-group';
-    head.textContent = group.title;
-    card.appendChild(head);
-    group.items.forEach(item => {
-      n++;
-      const idx = n;
-      const checked = !!dayData.items[item.id];
-      const isUrgent = item.id==='mt5_closed' && isWeekendWindow && !checked;
-      const row = document.createElement('div');
-      row.className = 'item' + (checked?' checked':'') + (isUrgent?' urgent':'');
-      const tag = isUrgent ? '<span class="urgent-tag">DO NOW</span>' : '';
-      row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text"><b>${idx}.</b> ${item.text}${tag}</div>`;
-      row.onclick = async () => {
-        dayData.items[item.id] = !dayData.items[item.id];
-        setDayCache(selectedDate, dayData);
-        renderChecklist(dayData);
-        renderHero(dayData.items);
-        renderCalendar();
-        sSet('day:'+selectedDate, dayData); // saves in the background, doesn't block the screen update above
-      };
-      card.appendChild(row);
-    });
+  DAILY_ITEMS.forEach((item, idx) => {
+    const checked = !!dayData.items[item.id];
+    const isUrgent = item.id==='mt5_closed' && isWeekendWindow && !checked;
+    const row = document.createElement('div');
+    row.className = 'item' + (checked?' checked':'') + (isUrgent?' urgent':'');
+    const tag = isUrgent ? '<span class="urgent-tag">DO NOW</span>' : '';
+    row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text"><b>${idx+1}.</b> ${item.text}${tag}</div>`;
+    row.onclick = async () => {
+      dayData.items[item.id] = !dayData.items[item.id];
+      setDayCache(selectedDate, dayData);
+      renderChecklist(dayData);
+      renderHero(dayData.items);
+      renderCalendar();
+      sSet('day:'+selectedDate, dayData); // saves in the background, doesn't block the screen update above
+    };
+    card.appendChild(row);
   });
 }
 
 // ---------- Render: today's DD numbers ----------
 function renderCalc(dayData){
   const bal = parseFloat(dayData.balance || 0);
-  const ddAmt = bal ? bal*dailyPct()/100 : 0;
   const dd5 = document.getElementById('dailyDDVal');
-  dd5.textContent = bal ? '$' + ddAmt.toFixed(2) : '—';
-  const floorEl = document.getElementById('dailyDDFloor');
-  floorEl.textContent = bal ? '$' + (bal - ddAmt).toFixed(2) : '—';
+  dd5.textContent = bal ? '$' + (bal*0.05).toFixed(2) : '—';
 }
 function renderLiveCalc(dayData){
   const live = parseFloat(dayData.liveBalance || 0);
   const dd3 = document.getElementById('openDDVal');
-  dd3.textContent = live ? '$' + (live*openPct()/100).toFixed(2) : '—';
+  dd3.textContent = live ? '$' + (live*0.03).toFixed(2) : '—';
 }
 
 // ---------- Load a given day ----------
@@ -1299,34 +691,20 @@ let historyPrefetched = false;
 // online, the calendar keeps working fully offline indefinitely — it doesn't
 // re-fetch from the network on every visit.
 async function prefetchHistory(){
-  // Seed every day from this device first, so the calendar is fully populated
-  // even when the cloud can't be reached at all.
-  try{
-    const prefix = lsKey(scopeKey('day:'));
-    for(let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      if(!k || !k.startsWith(prefix)) continue;
-      try{ dayCache[k.slice(prefix.length)] = JSON.parse(localStorage.getItem(k)); }catch(e){}
-    }
-  }catch(e){ console.warn('Local history seed failed:', e); }
-  if(!cloudReady() || !window._fb || !window._fb.getDocs) { setSyncStatus(); return; }
+  if(!window.currentUser || !window._fb.getDocs) return;
   try{
     const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
     const snap = await withTimeout(window._fb.getDocs(colRef), 8000, 'prefetchHistory');
-    if(!snap){ cloudOK = false; setSyncStatus(); return; } // timed out — device copy stands
-    const dayPrefix = scopeKey('day:');
+    if(!snap) return; // timed out — fall back to per-day reads as needed
     snap.forEach((docSnap) => {
       const key = docSnap.id;
-      if(key.startsWith(dayPrefix)){
-        const iso = key.slice(dayPrefix.length);
+      if(key.startsWith('day:')){
+        const iso = key.slice(4);
         try{ dayCache[iso] = JSON.parse(docSnap.data().value); }catch(e){ dayCache[iso] = null; }
       }
     });
     historyPrefetched = true;
-    cloudOK = true;
-    setSyncStatus();
   }catch(e){
-    cloudOK = false;
     console.error('History prefetch failed (falling back to per-day reads):', e);
   }
 }
@@ -1373,24 +751,11 @@ document.getElementById('liveBalance').addEventListener('input', async (e)=>{
   renderAlarmBanner(dayData);
 });
 
-// Auto-updates the "Last trade date" field to whichever day the person is
-// logging trades/P&L for — so it never has to be set by hand.
-async function autoUpdateLastTradeDate(){
-  if(accountMeta.lastTradeDate === selectedDate) return;
-  accountMeta.lastTradeDate = selectedDate;
-  const input = document.getElementById('lastTradeDate');
-  if(input) input.value = selectedDate;
-  await sSet('account-meta', accountMeta);
-  renderTrackers();
-  renderMilestones();
-}
-
 document.getElementById('dayTradeCount').addEventListener('input', async (e)=>{
   let dayData = (await getDayCached(selectedDate)) || {items:{}, balance:'', liveBalance:'', tradeCount:'', pnl:''};
   dayData.tradeCount = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
-  if(e.target.value !== '') autoUpdateLastTradeDate();
 });
 
 document.getElementById('dayPnl').addEventListener('input', async (e)=>{
@@ -1398,24 +763,17 @@ document.getElementById('dayPnl').addEventListener('input', async (e)=>{
   dayData.pnl = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
-  if(e.target.value !== '') autoUpdateLastTradeDate();
 });
 
 // ---------- Account meta ----------
-function defaultAccountMeta(){
-  const start = (activeAccount && activeAccount.purchaseDate) || todayISO();
-  const stage = (activeAccount && activeAccount.phase === 'funded') ? 'real' : 'challenge1';
-  return { stage, accountStart:start, lastTradeDate:start, withdrawTarget:'', realAccountDate:'' };
-}
 async function loadAccountMeta(){
   const saved = await sGet('account-meta');
-  accountMeta = saved || defaultAccountMeta();
+  if(saved) accountMeta = saved;
   document.getElementById('accountStart').value = accountMeta.accountStart;
   document.getElementById('lastTradeDate').value = accountMeta.lastTradeDate;
   document.getElementById('withdrawTarget').value = accountMeta.withdrawTarget || '';
   document.getElementById('realAccountDate').value = accountMeta.realAccountDate || '';
   setStageUI(accountMeta.stage);
-  applyAccountLabels();
 }
 function setStageUI(stage){
   accountMeta.stage = stage;
@@ -1460,10 +818,10 @@ function renderTrackers(){
   });
 
   // stage target
-  const tgt = stageTarget() || null;
+  const stageTarget = accountMeta.stage==='challenge1' ? 5500 : accountMeta.stage==='challenge2' ? 5250 : (accountMeta.withdrawTarget || null);
   rows.push({
     label: accountMeta.stage==='real' ? 'My next withdrawal target' : 'Current stage target',
-    val: tgt ? money(tgt) : 'set a target on this account',
+    val: stageTarget ? '$'+Number(stageTarget).toLocaleString() : 'set a target above',
     cls: 'ok'
   });
 
@@ -1495,7 +853,7 @@ function renderTrackers(){
 
 // ---------- Real Balance / Risk Ladder ----------
 async function loadRealBalanceMeta(){
-  const saved = await sGet('real-balance-meta') || { accountSize: accSize(), ddPercent: totalPct() };
+  const saved = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
   document.getElementById('rbAccountSize').value = saved.accountSize;
   document.getElementById('rbDDPercent').value = saved.ddPercent;
   renderRealBalance(saved);
@@ -1535,13 +893,13 @@ document.getElementById('riskWinBtn').onclick = async ()=>{
   const ladder = await sGet('risk-ladder') || { stepIndex: 1 };
   ladder.stepIndex = Math.min(ladder.stepIndex+1, RISK_TIERS.length-1);
   await sSet('risk-ladder', ladder);
-  const meta = await sGet('real-balance-meta') || { accountSize: accSize(), ddPercent: totalPct() };
+  const meta = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
   renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100, parseFloat(meta.accountSize||0));
 };
 document.getElementById('riskLossBtn').onclick = async ()=>{
   const ladder = { stepIndex: 0 };
   await sSet('risk-ladder', ladder);
-  const meta = await sGet('real-balance-meta') || { accountSize: accSize(), ddPercent: totalPct() };
+  const meta = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
   renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100, parseFloat(meta.accountSize||0));
 };
 
@@ -1570,9 +928,9 @@ async function renderWeekly(){
 // ---------- Target-hit alarm banner ----------
 function renderAlarmBanner(dayData){
   const slot = document.getElementById('alarmSlot');
-  const tgt = stageTarget();
+  const stageTarget = accountMeta.stage==='challenge1' ? 5500 : accountMeta.stage==='challenge2' ? 5250 : parseFloat(accountMeta.withdrawTarget||0);
   const bal = Math.max(parseFloat(dayData.balance||0), parseFloat(dayData.liveBalance||0));
-  if(tgt && bal >= tgt){
+  if(stageTarget && bal >= stageTarget){
     const label = accountMeta.stage==='real' ? 'WITHDRAWAL TARGET HIT' : 'CHALLENGE TARGET HIT';
     slot.innerHTML = `
       <div class="alarm">
@@ -1676,739 +1034,6 @@ async function renderCalendar(){
 document.getElementById('prevMonth').onclick = ()=>{ calViewDate.setMonth(calViewDate.getMonth()-1); renderCalendar(); };
 document.getElementById('nextMonth').onclick = ()=>{ calViewDate.setMonth(calViewDate.getMonth()+1); renderCalendar(); };
 
-// ---------- Small helpers ----------
-function uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
-function escapeHtml(str){
-  return String(str==null?'':str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function fmtShortDate(iso){
-  if(!iso) return '—';
-  try{ const d = new Date(iso+'T00:00:00'); return d.toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'}); }
-  catch(e){ return iso; }
-}
-function statusLabel(s){
-  return {ongoing:'Ongoing', active:'Active', passed:'Passed', failed:'Failed', planned:'Planned'}[s] || s || '—';
-}
-
-// ---------- Drawer nav (Checklist / Accounts / Rules / Profile) ----------
-function setDrawer(open){
-  document.getElementById('drawer').classList.toggle('open', open);
-  document.getElementById('drawerScrim').classList.toggle('open', open);
-  document.getElementById('menuBtn').classList.toggle('open', open);
-  if(open) setSyncStatus();
-}
-document.getElementById('menuBtn').addEventListener('click', ()=>{
-  setDrawer(!document.getElementById('drawer').classList.contains('open'));
-});
-document.getElementById('drawerScrim').addEventListener('click', ()=> setDrawer(false));
-document.getElementById('drawerSyncBtn').addEventListener('click', async ()=>{
-  if(!cloudReady()){ showToast('Offline — nothing to sync yet'); return; }
-  showToast('Syncing…');
-  await flushPending();
-});
-function goToView(view){
-  document.querySelectorAll('.drawer-item').forEach(i=>i.classList.toggle('active', i.dataset.view===view));
-  document.querySelectorAll('.view-panel').forEach(p=>p.classList.toggle('active', p.dataset.view===view));
-  setDrawer(false);
-  window.scrollTo({top:0, behavior:'instant'});
-}
-window.goToView = goToView;
-document.querySelectorAll('.drawer-item').forEach(item=>{
-  item.addEventListener('click', ()=> goToView(item.dataset.view));
-});
-
-// ---------- Profile ----------
-let profileMeta = { displayName:'' };
-function updateProfileAvatar(){
-  const nameInput = document.getElementById('profileNameInput');
-  const email = window.currentUser ? window.currentUser.email : '';
-  const source = (nameInput && nameInput.value) || email || '?';
-  document.getElementById('profileAvatarInitial').textContent = source.trim().charAt(0).toUpperCase() || '?';
-}
-async function loadProfile(){
-  profileMeta = await sGet('profile-meta') || { displayName:'' };
-  const nameInput = document.getElementById('profileNameInput');
-  nameInput.value = profileMeta.displayName || (window.currentUser && window.currentUser.displayName) || '';
-  if(window.currentUser) document.getElementById('profileEmailText').textContent = window.currentUser.email;
-  updateProfileAvatar();
-}
-document.getElementById('profileNameInput').addEventListener('input', (e)=>{
-  profileMeta.displayName = e.target.value;
-  sSetDebounced('profile-meta', profileMeta);
-  updateProfileAvatar();
-});
-
-// ---------- Account setups (templates) ----------
-// The $5,000 single-phase account already in use is seeded as the first
-// reusable setup, so every new account can start from that exact rulebook.
-const BASELINE_TEMPLATE = {
-  id: 'tpl_baseline_5k',
-  name: '$5,000 single-phase (my baseline)',
-  firmName: '',
-  balance: 5000,
-  profitTarget: 5500,
-  dailyDDPct: 5,
-  totalDDPct: 12,
-  phase: 'single',
-  instructions: [
-    'ACCOUNT: $5,000 — single phase.',
-    '',
-    'TARGETS',
-    '• Phase target: $5,500 (+$500).',
-    '• Second challenge target (if the firm runs one): $5,250 (+$250).',
-    '• Withdrawal target: keep it modest ($500 profit) — small numbers draw less scrutiny at payout review.',
-    '',
-    'DRAWDOWNS',
-    '• Daily drawdown: 5% of the balance the day STARTED with. Resets at broker 00:00. Floor = day-start balance − 5%.',
-    '• Open-position drawdown: 3% of the live balance at the exact moment the trade is opened — recalculate every single trade.',
-    '• Total / overall drawdown: 12% of the starting account size.',
-    '',
-    'HARD RULES',
-    '• Only ONE trade open at a time, either direction.',
-    '• Same IP always — no VPN, no VPS, no DNS change, no new location. Check the taskbar for a VPN running in the background.',
-    '• No SL / TP / pending order that can touch Saturday or Sunday. MetaTrader fully closed from late Friday to early Monday.',
-    '• Account never linked to another device or another person (copy-trading flag).',
-    '• Trades held under 30 seconds must stay under 20% of the stage target / withdrawal amount.',
-    '• Trade at least once every 30 days (a 0.01 lot open+close counts).',
-    '',
-    'AFTER PASSING',
-    '• Send ID + selfie for verification once both challenges are passed.',
-    '• Request the 20% refund within 45 days of receiving the real account — after that it is denied.',
-    '• 3 months after the real account, with total profit ≥ 8%, request the 40% fund raise.',
-    '• The instant the target is hit: stop, close everything, submit the withdrawal, then place zero trades until payment lands.'
-  ].join('\n')
-};
-
-let templatesList = [];
-const SETUP_CLIPBOARD_KEY = 'gate:setup-clipboard';
-
-async function loadTemplates(){
-  templatesList = await sGet('account-templates') || null;
-  if(!templatesList){
-    templatesList = [ { ...BASELINE_TEMPLATE } ];
-    await sSet('account-templates', templatesList);
-  }
-  renderTemplates();
-}
-async function saveTemplates(){ await sSet('account-templates', templatesList); renderTemplates(); }
-
-function setupSummary(t){
-  const bits = [];
-  if(t.balance) bits.push('$'+Number(t.balance).toLocaleString());
-  if(t.profitTarget) bits.push('target $'+Number(t.profitTarget).toLocaleString());
-  if(t.dailyDDPct) bits.push(t.dailyDDPct+'% daily');
-  if(t.totalDDPct) bits.push(t.totalDDPct+'% total');
-  bits.push({single:'single phase', two:'two phase', funded:'funded'}[t.phase] || 'single phase');
-  return bits.join(' · ');
-}
-function setupAsText(t){
-  return [
-    (t.name || 'Account setup'),
-    'Balance: ' + (t.balance ? '$'+Number(t.balance).toLocaleString() : '—'),
-    'Profit target: ' + (t.profitTarget ? '$'+Number(t.profitTarget).toLocaleString() : '—'),
-    'Daily drawdown: ' + (t.dailyDDPct || '—') + '%',
-    'Total drawdown: ' + (t.totalDDPct || '—') + '%',
-    'Phase: ' + ({single:'single phase', two:'two phase', funded:'funded'}[t.phase] || 'single phase'),
-    '',
-    (t.instructions || '')
-  ].join('\n');
-}
-function copyText(text, label){
-  const done = ()=> showToast(label || 'Copied');
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(done).catch(()=>{ fallbackCopy(text); done(); });
-  } else { fallbackCopy(text); done(); }
-}
-function fallbackCopy(text){
-  const ta = document.createElement('textarea');
-  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
-  document.body.appendChild(ta); ta.select();
-  try{ document.execCommand('copy'); }catch(e){}
-  ta.remove();
-}
-function stashSetup(t){
-  try{ localStorage.setItem(SETUP_CLIPBOARD_KEY, JSON.stringify(t)); }catch(e){}
-}
-function readStashedSetup(){
-  try{ const raw = localStorage.getItem(SETUP_CLIPBOARD_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
-}
-
-function renderTemplates(){
-  const wrap = document.getElementById('templatesList');
-  if(!wrap) return;
-  if(!templatesList.length){
-    wrap.innerHTML = '<div class="hint" style="padding:4px 4px 10px;">No saved setups yet — open any account and tap "Save as reusable setup".</div>';
-    return;
-  }
-  wrap.innerHTML = templatesList.map(t=>`
-    <div class="tpl-card" data-id="${t.id}">
-      <div class="tpl-head">
-        <div>
-          <div class="tpl-name">${escapeHtml(t.name || 'Untitled setup')}</div>
-          <div class="tpl-meta">${escapeHtml(setupSummary(t))}</div>
-        </div>
-      </div>
-      <div class="tpl-actions">
-        <button class="mini-btn" data-tpl-act="use" data-id="${t.id}">New account from this</button>
-        <button class="mini-btn" data-tpl-act="copy" data-id="${t.id}">Copy instructions</button>
-        <button class="mini-btn" data-tpl-act="rename" data-id="${t.id}">Rename</button>
-        <button class="mini-btn danger" data-tpl-act="del" data-id="${t.id}">Delete</button>
-      </div>
-    </div>`).join('');
-}
-document.getElementById('templatesList').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('[data-tpl-act]');
-  if(!btn) return;
-  const t = templatesList.find(x=>x.id===btn.dataset.id);
-  if(!t) return;
-  const act = btn.dataset.tplAct;
-  if(act === 'use'){ openAccountForm(null, t); }
-  else if(act === 'copy'){ stashSetup(t); copyText(setupAsText(t), 'Setup copied'); }
-  else if(act === 'rename'){
-    const name = prompt('Setup name:', t.name || '');
-    if(!name || !name.trim()) return;
-    t.name = name.trim(); await saveTemplates();
-  }
-  else if(act === 'del'){
-    if(!confirm('Delete this saved setup? Accounts already created from it are untouched.')) return;
-    templatesList = templatesList.filter(x=>x.id!==t.id);
-    await saveTemplates();
-  }
-});
-
-// ---------- Active account switching ----------
-// An account's data scope is fixed for its whole life. The very first account
-// keeps the 'legacy' scope so all history from the single-account version of
-// Gate stays exactly where it is.
-const ACTIVE_KEY = 'active-account';
-function scopeOf(a){ return (a && a.scope) || 'legacy'; }
-async function ensureAccountScopes(){
-  let changed = false;
-  if(!accountsList.length){
-    accountsList = [{
-      id: uid(), scope: 'legacy', name: 'My first account',
-      firmId:'', firmName:'', planId:'', planName:'',
-      balance: BASELINE_TEMPLATE.balance, profitTarget: BASELINE_TEMPLATE.profitTarget,
-      profitTarget2: 5250, dailyDDPct: BASELINE_TEMPLATE.dailyDDPct, openDDPct: 3,
-      totalDDPct: BASELINE_TEMPLATE.totalDDPct, phase: 'single',
-      instructions: BASELINE_TEMPLATE.instructions, status: 'ongoing',
-      purchaseDate: todayISO(), notes: ''
-    }];
-    changed = true;
-  }
-  if(!accountsList.some(a => a.scope === 'legacy')){
-    accountsList[0].scope = 'legacy';
-    changed = true;
-  }
-  accountsList.forEach(a => { if(!a.scope){ a.scope = a.id; changed = true; } });
-  if(changed) await sSet('accounts-list', accountsList);
-}
-function setActiveAccountRef(id){
-  activeAccount = accountsList.find(a => a.id === id) || accountsList[0] || null;
-  activeAccountId = activeAccount ? activeAccount.id : null;
-  activeScope = scopeOf(activeAccount);
-}
-async function resolveActiveAccount(){
-  await ensureAccountScopes();
-  setActiveAccountRef(lsGet(ACTIVE_KEY));
-  lsSet(ACTIVE_KEY, activeAccountId);
-  applyAccountLabels();
-}
-async function reloadAccountData(){
-  Object.keys(dayCache).forEach(k => delete dayCache[k]);
-  historyPrefetched = false;
-  applyAccountLabels();
-  await prefetchHistory();
-  await loadAccountMeta();
-  await loadDay(todayISO());
-  renderTrackers();
-  renderMilestones();
-  await loadRealBalanceMeta();
-  await renderWeekly();
-  renderAccountsView();
-  renderSwitcher();
-}
-async function switchAccount(id){
-  if(id === activeAccountId){ setSwitchSheet(false); return; }
-  setActiveAccountRef(id);
-  lsSet(ACTIVE_KEY, activeAccountId);
-  setSwitchSheet(false);
-  goToView('checklist');
-  showToast('Now trading: ' + (activeAccount ? activeAccount.name : ''));
-  await reloadAccountData();
-}
-window.switchAccount = switchAccount;
-function setSwitchSheet(open){
-  document.getElementById('switchSheet').classList.toggle('open', open);
-  document.getElementById('switchScrim').classList.toggle('open', open);
-  if(open) renderSwitcher();
-}
-function renderSwitcher(){
-  const wrap = document.getElementById('switchList');
-  if(!wrap) return;
-  const live = accountsList.filter(a => a.status !== 'planned');
-  if(!live.length){ wrap.innerHTML = '<div class="hint">No accounts yet — add one below.</div>'; return; }
-  const groups = {};
-  live.forEach(a => {
-    const k = a.firmName || 'No firm';
-    (groups[k] = groups[k] || []).push(a);
-  });
-  wrap.innerHTML = Object.keys(groups).sort().map(firm => `
-    <div class="sw-firm">${escapeHtml(firm)}</div>
-    ${groups[firm].map(a => `
-      <div class="sw-acc ${a.id===activeAccountId?'active':''}" data-switch="${a.id}">
-        <div>
-          <div class="nm">${escapeHtml(a.name||'Unnamed account')}</div>
-          <div class="mt">${a.balance ? '$'+Number(a.balance).toLocaleString() : '—'} · ${escapeHtml(a.planName||statusLabel(a.status))} · ${a.dailyDDPct||5}% daily / ${a.totalDDPct||12}% total</div>
-        </div>
-        ${a.id===activeAccountId ? '<div class="tick">● trading</div>' : ''}
-      </div>`).join('')}`).join('');
-  wrap.querySelectorAll('[data-switch]').forEach(el => {
-    el.onclick = () => switchAccount(el.dataset.switch);
-  });
-}
-document.getElementById('acctSwitchBtn').addEventListener('click', ()=> setSwitchSheet(true));
-document.getElementById('switchScrim').addEventListener('click', ()=> setSwitchSheet(false));
-document.getElementById('switchAddBtn').addEventListener('click', ()=>{
-  setSwitchSheet(false);
-  goToView('accounts');
-  openAccountForm(null);
-});
-
-// ---------- Accounts ----------
-let accountsList = [];
-let accountsFilter = 'all';
-let editingAccountId = null;
-let justCreatedId = null;
-const ACCOUNT_STATUSES = [
-  {key:'all', label:'All'},
-  {key:'ongoing', label:'Ongoing'},
-  {key:'active', label:'Active'},
-  {key:'passed', label:'Passed'},
-  {key:'failed', label:'Failed'},
-  {key:'planned', label:'Planned'},
-];
-async function loadAccounts(){
-  accountsList = await sGet('accounts-list') || [];
-  renderAccountsView();
-  renderTemplates();
-}
-function renderAccountsView(){
-  renderSwitcher();
-  const counts = { all:0, ongoing:0, active:0, passed:0, failed:0, planned:0 };
-  accountsList.forEach(a=>{
-    if(a.status === 'planned') counts.planned++;
-    else { counts.all++; counts[a.status] = (counts[a.status]||0)+1; }
-  });
-  const chipsWrap = document.getElementById('accStatusChips');
-  chipsWrap.innerHTML = ACCOUNT_STATUSES.map(s=>`
-    <div class="acc-chip ${accountsFilter===s.key?'active':''}" data-status="${s.key}">
-      <span class="acc-chip-label">${s.label}</span><span class="acc-chip-count">${counts[s.key]||0}</span>
-    </div>`).join('');
-  chipsWrap.querySelectorAll('.acc-chip').forEach(chip=>{
-    chip.onclick = ()=>{ accountsFilter = chip.dataset.status; renderAccountsView(); };
-  });
-
-  const list = accountsList.filter(a => accountsFilter==='all' ? a.status!=='planned' : a.status===accountsFilter);
-  const listEl = document.getElementById('accountsList');
-  if(!list.length){
-    listEl.innerHTML = '<div class="hint" style="padding:10px 4px 4px;">Nothing here yet.</div>';
-    return;
-  }
-  listEl.innerHTML = list.map(a=>`
-    <div class="acc-card ${a.id===activeAccountId?'is-active':''}" data-id="${a.id}">
-      <div class="acc-card-top">
-        <div>
-          <div class="acc-name">${escapeHtml(a.name||'Unnamed account')}${a.id===activeAccountId?'<span class="acc-active-tag">trading</span>':''}</div>
-          <div class="acc-firm">${escapeHtml(a.firmName||'No firm set')}${a.planName ? ' · '+escapeHtml(a.planName) : ''}</div>
-        </div>
-        <div class="acc-status-badge status-${a.status}">${statusLabel(a.status)}</div>
-      </div>
-      <div class="acc-card-bottom">
-        <span>${a.balance ? '$'+Number(a.balance).toLocaleString() : '—'}</span>
-        <span>${a.purchaseDate ? fmtShortDate(a.purchaseDate) : (a.status==='planned' ? 'not bought yet' : '—')}</span>
-      </div>
-      <div class="tpl-meta">${escapeHtml(setupSummary(a))}</div>
-      <div class="acc-mini-actions">
-        ${a.id===activeAccountId ? '' : `<button class="mini-btn" data-acc-act="use" data-id="${a.id}">Trade this account</button>`}
-        <button class="mini-btn" data-acc-act="duplicate" data-id="${a.id}">Duplicate</button>
-        <button class="mini-btn" data-acc-act="template" data-id="${a.id}">Save as setup</button>
-        <button class="mini-btn" data-acc-act="copy" data-id="${a.id}">Copy instructions</button>
-      </div>
-    </div>`).join('');
-  listEl.querySelectorAll('.acc-card').forEach(card=>{
-    card.onclick = (e)=>{
-      if(e.target.closest('[data-acc-act]')) return;
-      openAccountForm(card.dataset.id);
-    };
-  });
-  listEl.querySelectorAll('[data-acc-act]').forEach(btn=>{
-    btn.onclick = async (e)=>{
-      e.stopPropagation();
-      const acc = accountsList.find(a=>a.id===btn.dataset.id);
-      if(!acc) return;
-      const act = btn.dataset.accAct;
-      if(act === 'use'){
-        await switchAccount(acc.id);
-      } else if(act === 'duplicate'){
-        openAccountForm(null, { ...acc, name: acc.name + ' (copy)' });
-      } else if(act === 'template'){
-        const name = prompt('Name this reusable setup:', acc.name || 'New setup');
-        if(!name || !name.trim()) return;
-        templatesList.push({
-          id: uid(), name: name.trim(), firmName: acc.firmName || '', balance: acc.balance,
-          profitTarget: acc.profitTarget, dailyDDPct: acc.dailyDDPct, totalDDPct: acc.totalDDPct,
-          phase: acc.phase || 'single', instructions: acc.instructions || ''
-        });
-        await saveTemplates();
-        showToast('Saved as reusable setup');
-      } else if(act === 'copy'){
-        stashSetup(acc);
-        copyText(setupAsText(acc), 'Setup copied');
-      }
-    };
-  });
-}
-function refreshAccFormPlans(){
-  const firmSelect = document.getElementById('accForm_firm');
-  const planSelect = document.getElementById('accForm_plan');
-  const firm = propFirmsList.find(f=>f.id===firmSelect.value);
-  planSelect.innerHTML = '<option value="">— none —</option>' + ((firm && firm.plans) || []).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
-}
-function fillAccountForm(src){
-  document.getElementById('accForm_balance').value = src.balance != null ? src.balance : '';
-  document.getElementById('accForm_target').value = src.profitTarget != null ? src.profitTarget : '';
-  document.getElementById('accForm_dailyDD').value = src.dailyDDPct != null ? src.dailyDDPct : '';
-  document.getElementById('accForm_totalDD').value = src.totalDDPct != null ? src.totalDDPct : '';
-  document.getElementById('accForm_target2').value = src.profitTarget2 != null ? src.profitTarget2 : '';
-  document.getElementById('accForm_openDD').value = src.openDDPct != null ? src.openDDPct : '';
-  document.getElementById('accForm_phase').value = src.phase || 'single';
-  document.getElementById('accForm_instructions').value = src.instructions || '';
-}
-function refreshTemplateSelect(){
-  const sel = document.getElementById('accForm_template');
-  sel.innerHTML = '<option value="">— blank —</option>'
-    + templatesList.map(t=>`<option value="tpl:${t.id}">${escapeHtml(t.name)}</option>`).join('')
-    + (accountsList.length ? '<optgroup label="Existing accounts">' + accountsList.map(a=>`<option value="acc:${a.id}">${escapeHtml(a.name||'Unnamed')}</option>`).join('') + '</optgroup>' : '');
-  sel.value = '';
-  sel.onchange = ()=>{
-    const v = sel.value;
-    if(!v) return;
-    const [kind, refId] = v.split(':');
-    const src = kind === 'tpl' ? templatesList.find(t=>t.id===refId) : accountsList.find(a=>a.id===refId);
-    if(src) fillAccountForm(src);
-  };
-}
-function openAccountForm(id, prefill){
-  editingAccountId = id || null;
-  const firmSelect = document.getElementById('accForm_firm');
-  firmSelect.innerHTML = '<option value="">— none —</option>' + propFirmsList.map(f=>`<option value="${f.id}">${escapeHtml(f.name)}</option>`).join('');
-  firmSelect.onchange = refreshAccFormPlans;
-
-  refreshTemplateSelect();
-  document.getElementById('accForm_templateWrap').style.display = id ? 'none' : '';
-
-  if(id){
-    const acc = accountsList.find(a=>a.id===id);
-    document.getElementById('accountModalTitle').textContent = 'Edit account';
-    document.getElementById('accForm_name').value = acc.name || '';
-    fillAccountForm(acc);
-    firmSelect.value = acc.firmId || '';
-    refreshAccFormPlans();
-    document.getElementById('accForm_plan').value = acc.planId || '';
-    document.getElementById('accForm_status').value = acc.status || 'ongoing';
-    document.getElementById('accForm_date').value = acc.purchaseDate || '';
-    document.getElementById('accForm_notes').value = acc.notes || '';
-    document.getElementById('accForm_delete').style.display = '';
-  } else {
-    document.getElementById('accountModalTitle').textContent = 'Add account';
-    document.getElementById('accountModalTitle').textContent = prefill ? 'New account from setup' : 'Add account';
-    document.getElementById('accForm_name').value = (prefill && prefill.name) || '';
-    if(prefill && prefill.firmId){ firmSelect.value = prefill.firmId; }
-    else if(activeAccount && activeAccount.firmId && !prefill){ firmSelect.value = activeAccount.firmId; }
-    refreshAccFormPlans();
-    if(prefill && prefill.planId){ document.getElementById('accForm_plan').value = prefill.planId; }
-    fillAccountForm(prefill || { phase:'single' });
-    document.getElementById('accForm_status').value = (prefill && prefill.status) || 'ongoing';
-    document.getElementById('accForm_date').value = todayISO();
-    document.getElementById('accForm_notes').value = '';
-    document.getElementById('accForm_delete').style.display = 'none';
-  }
-  document.getElementById('accountModalOverlay').style.display = 'flex';
-}
-function closeAccountForm(){
-  document.getElementById('accountModalOverlay').style.display = 'none';
-  editingAccountId = null;
-}
-document.getElementById('addAccountBtn').addEventListener('click', ()=>openAccountForm(null));
-document.getElementById('accForm_cancel').addEventListener('click', closeAccountForm);
-document.getElementById('accountModalOverlay').addEventListener('click', (e)=>{
-  if(e.target.id === 'accountModalOverlay') closeAccountForm();
-});
-document.getElementById('accForm_save').addEventListener('click', async ()=>{
-  const firmSelect = document.getElementById('accForm_firm');
-  const planSelect = document.getElementById('accForm_plan');
-  const firm = propFirmsList.find(f=>f.id===firmSelect.value);
-  const plan = firm ? (firm.plans||[]).find(p=>p.id===planSelect.value) : null;
-  const name = document.getElementById('accForm_name').value.trim();
-  if(!name){ alert('Give the account a name first.'); return; }
-  const data = {
-    name,
-    firmId: firmSelect.value || '',
-    firmName: firm ? firm.name : '',
-    planId: planSelect.value || '',
-    planName: plan ? plan.name : '',
-    balance: document.getElementById('accForm_balance').value,
-    profitTarget: document.getElementById('accForm_target').value,
-    dailyDDPct: document.getElementById('accForm_dailyDD').value,
-    totalDDPct: document.getElementById('accForm_totalDD').value,
-    profitTarget2: document.getElementById('accForm_target2').value,
-    openDDPct: document.getElementById('accForm_openDD').value,
-    phase: document.getElementById('accForm_phase').value,
-    instructions: document.getElementById('accForm_instructions').value,
-    status: document.getElementById('accForm_status').value,
-    purchaseDate: document.getElementById('accForm_date').value,
-    notes: document.getElementById('accForm_notes').value,
-  };
-  if(editingAccountId){
-    const idx = accountsList.findIndex(a=>a.id===editingAccountId);
-    if(idx > -1) accountsList[idx] = { ...accountsList[idx], ...data };
-  } else {
-    const newId = uid();
-    accountsList.push({ id: newId, scope: accountsList.length ? newId : 'legacy', ...data });
-    justCreatedId = newId;
-  }
-  await sSet('accounts-list', accountsList);
-  if(editingAccountId === activeAccountId) setActiveAccountRef(activeAccountId);
-  renderAccountsView();
-  applyAccountLabels();
-  const wasEditingActive = editingAccountId === activeAccountId;
-  closeAccountForm();
-  if(justCreatedId){
-    const created = justCreatedId; justCreatedId = null;
-    if(confirm('Account saved. Switch to it now?')) await switchAccount(created);
-  } else if(wasEditingActive){
-    await loadDay(selectedDate);
-    renderTrackers();
-  }
-});
-function currentFormSetup(){
-  return {
-    name: document.getElementById('accForm_name').value.trim() || 'Account setup',
-    balance: document.getElementById('accForm_balance').value,
-    profitTarget: document.getElementById('accForm_target').value,
-    dailyDDPct: document.getElementById('accForm_dailyDD').value,
-    totalDDPct: document.getElementById('accForm_totalDD').value,
-    profitTarget2: document.getElementById('accForm_target2').value,
-    openDDPct: document.getElementById('accForm_openDD').value,
-    phase: document.getElementById('accForm_phase').value,
-    instructions: document.getElementById('accForm_instructions').value,
-  };
-}
-document.getElementById('accForm_copySetup').addEventListener('click', ()=>{
-  const setup = currentFormSetup();
-  stashSetup(setup);
-  copyText(setupAsText(setup), 'Setup copied');
-});
-document.getElementById('accForm_pasteSetup').addEventListener('click', ()=>{
-  const stashed = readStashedSetup();
-  if(!stashed){ showToast('Copy a setup first'); return; }
-  fillAccountForm(stashed);
-  showToast('Setup pasted');
-});
-document.getElementById('accForm_saveTemplate').addEventListener('click', async ()=>{
-  const setup = currentFormSetup();
-  const name = prompt('Name this reusable setup:', setup.name);
-  if(!name || !name.trim()) return;
-  templatesList.push({ id: uid(), ...setup, name: name.trim() });
-  await saveTemplates();
-  showToast('Saved as reusable setup');
-});
-document.getElementById('accForm_delete').addEventListener('click', async ()=>{
-  if(!editingAccountId) return;
-  if(!confirm('Delete this account? This cannot be undone.')) return;
-  const wasActive = editingAccountId === activeAccountId;
-  accountsList = accountsList.filter(a=>a.id!==editingAccountId);
-  await sSet('accounts-list', accountsList);
-  closeAccountForm();
-  await ensureAccountScopes();
-  if(wasActive){
-    setActiveAccountRef(accountsList[0] && accountsList[0].id);
-    lsSet(ACTIVE_KEY, activeAccountId);
-    await reloadAccountData();
-  } else {
-    renderAccountsView();
-  }
-});
-
-// ---------- Prop firms & rules library ----------
-// Plans are copy/paste-able so a rulebook written once can seed every other
-// firm or plan instead of being retyped.
-const PLAN_CLIPBOARD_KEY = 'gate:plan-clipboard';
-function clonePlan(plan, name){
-  return {
-    id: uid(),
-    name: name || plan.name,
-    rulesText: plan.rulesText || '',
-    notices: (plan.notices||[]).map(n => ({ id: uid(), text: n.text }))
-  };
-}
-function stashPlan(plan){ try{ localStorage.setItem(PLAN_CLIPBOARD_KEY, JSON.stringify(plan)); }catch(e){} }
-function readStashedPlan(){ try{ const raw = localStorage.getItem(PLAN_CLIPBOARD_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
-function planAsText(firm, plan){
-  return [
-    (firm.name || 'Prop firm') + ' — ' + (plan.name || 'Plan'),
-    '',
-    (plan.rulesText || ''),
-    '',
-    ...((plan.notices||[]).map(n => '⚠ ' + n.text))
-  ].join('\n');
-}
-
-let propFirmsList = [];
-async function loadPropFirms(){
-  propFirmsList = await sGet('propfirms-list') || [];
-  renderRulesView();
-}
-async function savePropFirms(){ await sSet('propfirms-list', propFirmsList); }
-function renderRulesView(){
-  const wrap = document.getElementById('firmsList');
-  if(!propFirmsList.length){
-    wrap.innerHTML = '<div class="hint" style="padding:6px 4px 14px;">No prop firms yet — tap "+ Add prop firm" above to start your rules library.</div>';
-    return;
-  }
-  wrap.innerHTML = propFirmsList.map(firm => `
-    <div class="firm-card">
-      <div class="firm-head">
-        <div class="firm-name">${escapeHtml(firm.name)}</div>
-        <div class="firm-actions">
-          <button class="mini-btn" data-act="addacct" data-firm="${firm.id}">+ Account</button>
-          <button class="mini-btn" data-act="addplan" data-firm="${firm.id}">+ Plan</button>
-          <button class="mini-btn" data-act="pasteplan" data-firm="${firm.id}">Paste plan</button>
-          <button class="mini-btn" data-act="dupfirm" data-firm="${firm.id}">Duplicate firm</button>
-          <button class="mini-btn danger" data-act="delfirm" data-firm="${firm.id}">Delete firm</button>
-        </div>
-      </div>
-      ${(firm.plans||[]).map(plan => `
-        <div class="plan-card">
-          <div class="plan-head">
-            <div class="plan-name">${escapeHtml(plan.name)}</div>
-            <div class="firm-actions">
-              <button class="mini-btn" data-act="addacct" data-firm="${firm.id}" data-plan="${plan.id}">+ Account</button>
-              <button class="mini-btn" data-act="copyplan" data-firm="${firm.id}" data-plan="${plan.id}">Copy plan</button>
-              <button class="mini-btn" data-act="dupplan" data-firm="${firm.id}" data-plan="${plan.id}">Duplicate</button>
-              <button class="mini-btn danger" data-act="delplan" data-firm="${firm.id}" data-plan="${plan.id}">Delete</button>
-            </div>
-          </div>
-          <div class="tpl-meta" style="margin:2px 0 8px;">${accountsList.filter(a=>a.firmId===firm.id && a.planId===plan.id).length ? 'Accounts on this plan: ' + escapeHtml(accountsList.filter(a=>a.firmId===firm.id && a.planId===plan.id).map(a=>a.name).join(', ')) : 'No accounts on this plan yet.'}</div>
-          <textarea class="plan-rules" placeholder="Paste this plan's rules &amp; regulations here…" data-act="rulestext" data-firm="${firm.id}" data-plan="${plan.id}">${escapeHtml(plan.rulesText||'')}</textarea>
-          <div class="notices-wrap">
-            ${(plan.notices||[]).map(n => `
-              <div class="notice-item">
-                <div class="notice-text">⚠ ${escapeHtml(n.text)}</div>
-                <button class="notice-del" data-act="delnotice" data-firm="${firm.id}" data-plan="${plan.id}" data-notice="${n.id}">✕</button>
-              </div>`).join('')}
-            <button class="mini-btn" style="margin-top:8px;" data-act="addnotice" data-firm="${firm.id}" data-plan="${plan.id}">+ Add notice (easy to forget)</button>
-          </div>
-        </div>`).join('') || '<div class="hint" style="padding:8px 2px 2px;">No plans yet — tap "+ Plan" to add one (e.g. "Phase 1", "Funded").</div>'}
-    </div>`).join('');
-}
-document.getElementById('addFirmBtn').addEventListener('click', async ()=>{
-  const name = prompt('Prop firm name (e.g. "FTMO", "MyFundedFX"):');
-  if(!name || !name.trim()) return;
-  propFirmsList.push({ id: uid(), name: name.trim(), plans: [] });
-  await savePropFirms();
-  renderRulesView();
-});
-document.getElementById('firmsList').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('[data-act]');
-  if(!btn) return;
-  const act = btn.dataset.act;
-  const firmId = btn.dataset.firm;
-  const firm = propFirmsList.find(f=>f.id===firmId);
-  if(!firm) return;
-  if(act === 'addacct'){
-    const planId = btn.dataset.plan || '';
-    const plan = (firm.plans||[]).find(pl=>pl.id===planId);
-    goToView('accounts');
-    openAccountForm(null, {
-      name: firm.name + ' ' + (plan ? plan.name + ' ' : '') + '#' + (accountsList.filter(a=>a.firmId===firm.id).length + 1),
-      firmId: firm.id, planId: planId, phase:'single'
-    });
-    return;
-  }
-  if(act === 'addplan'){
-    const name = prompt('Plan / stage name (e.g. "Phase 1", "Funded"):');
-    if(!name || !name.trim()) return;
-    firm.plans = firm.plans || [];
-    firm.plans.push({ id: uid(), name: name.trim(), rulesText:'', notices:[] });
-    await savePropFirms(); renderRulesView();
-  } else if(act === 'copyplan'){
-    const plan = (firm.plans||[]).find(p=>p.id===btn.dataset.plan);
-    if(!plan) return;
-    stashPlan(plan);
-    copyText(planAsText(firm, plan), 'Plan rules copied');
-  } else if(act === 'dupplan'){
-    const plan = (firm.plans||[]).find(p=>p.id===btn.dataset.plan);
-    if(!plan) return;
-    const name = prompt('Name for the duplicate plan:', plan.name + ' (copy)');
-    if(!name || !name.trim()) return;
-    firm.plans.push(clonePlan(plan, name.trim()));
-    await savePropFirms(); renderRulesView();
-  } else if(act === 'pasteplan'){
-    const stashed = readStashedPlan();
-    if(!stashed){ showToast('Copy a plan first'); return; }
-    const name = prompt('Name for the pasted plan:', stashed.name || 'Pasted plan');
-    if(!name || !name.trim()) return;
-    firm.plans = firm.plans || [];
-    firm.plans.push(clonePlan(stashed, name.trim()));
-    await savePropFirms(); renderRulesView();
-    showToast('Plan pasted into ' + firm.name);
-  } else if(act === 'dupfirm'){
-    const name = prompt('Name for the duplicated firm:', firm.name + ' (copy)');
-    if(!name || !name.trim()) return;
-    propFirmsList.push({
-      id: uid(), name: name.trim(),
-      plans: (firm.plans||[]).map(p => clonePlan(p, p.name))
-    });
-    await savePropFirms(); renderRulesView();
-  } else if(act === 'delfirm'){
-    if(!confirm('Delete this prop firm and all its plans and rules?')) return;
-    propFirmsList = propFirmsList.filter(f=>f.id!==firmId);
-    await savePropFirms(); renderRulesView();
-  } else if(act === 'delplan'){
-    const planId = btn.dataset.plan;
-    if(!confirm('Delete this plan and its rules and notices?')) return;
-    firm.plans = (firm.plans||[]).filter(p=>p.id!==planId);
-    await savePropFirms(); renderRulesView();
-  } else if(act === 'addnotice'){
-    const planId = btn.dataset.plan;
-    const plan = (firm.plans||[]).find(p=>p.id===planId);
-    if(!plan) return;
-    const text = prompt('Notice text (an easy-to-forget rule to highlight boldly):');
-    if(!text || !text.trim()) return;
-    plan.notices = plan.notices || [];
-    plan.notices.push({ id: uid(), text: text.trim() });
-    await savePropFirms(); renderRulesView();
-  } else if(act === 'delnotice'){
-    const planId = btn.dataset.plan, noticeId = btn.dataset.notice;
-    const plan = (firm.plans||[]).find(p=>p.id===planId);
-    if(!plan) return;
-    plan.notices = (plan.notices||[]).filter(n=>n.id!==noticeId);
-    await savePropFirms(); renderRulesView();
-  }
-});
-document.getElementById('firmsList').addEventListener('input', (e)=>{
-  const ta = e.target.closest('textarea[data-act="rulestext"]');
-  if(!ta) return;
-  const firm = propFirmsList.find(f=>f.id===ta.dataset.firm);
-  if(!firm) return;
-  const plan = (firm.plans||[]).find(p=>p.id===ta.dataset.plan);
-  if(!plan) return;
-  plan.rulesText = ta.value;
-  sSetDebounced('propfirms-list', propFirmsList, 700);
-});
-
 // ---------- Tabs ----------
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -2419,79 +1044,9 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ---------- Offline mode (for networks where the cloud is blocked) ----------
-const PREFER_OFFLINE_KEY = 'gate:prefer-offline';
-function startOfflineMode(remember){
-  if(remember) { try{ localStorage.setItem(PREFER_OFFLINE_KEY, '1'); }catch(e){} }
-  offlineMode = true;
-  window.__offlineMode = true;
-  if(!window.currentUser) window.currentUser = { uid:'local', email:'this device' };
-  document.getElementById('authOverlay').style.display = 'none';
-  const emailEl = document.getElementById('profileEmailText');
-  if(emailEl && !emailEl.textContent) emailEl.textContent = 'offline — this device only';
-  setSyncStatus();
-  if(!window._appStarted){ window._appStarted = true; initApp(); }
-}
-window.startOfflineMode = startOfflineMode;
-document.getElementById('authOfflineBtn').addEventListener('click', ()=> startOfflineMode(true));
-
-// Remembered choice: don't sit on a sign-in screen that can never resolve.
-if(localStorage.getItem(PREFER_OFFLINE_KEY) === '1'){
-  setTimeout(()=>{ if(!window._appStarted) startOfflineMode(false); }, 1200);
-}
-// Nothing answered at all (blocked CDN / blocked auth) — offer the way out.
-setTimeout(()=>{
-  if(window._appStarted) return;
-  const st = document.getElementById('authStatus');
-  if(st && !st.textContent) st.textContent = 'Still connecting… if this network blocks the cloud, use "Work offline on this device".';
-}, 7000);
-
-document.getElementById('profileSyncNow').addEventListener('click', async ()=>{
-  if(!cloudReady()){
-    try{ localStorage.removeItem(PREFER_OFFLINE_KEY); }catch(e){}
-    if(confirm('Reconnect to the cloud? The app will reload and ask you to sign in.')) location.reload();
-    return;
-  }
-  showToast('Syncing…');
-  await flushPending();
-});
-document.getElementById('profileOfflineToggle').addEventListener('click', ()=>{
-  if(offlineMode){
-    try{ localStorage.removeItem(PREFER_OFFLINE_KEY); }catch(e){}
-    if(confirm('Try the cloud again? The app will reload.')) location.reload();
-  } else {
-    startOfflineMode(true);
-    showToast('Offline mode on');
-  }
-});
-function renderProfileSync(){
-  const badge = document.getElementById('profileSyncBadge');
-  const text = document.getElementById('profileSyncText');
-  const toggle = document.getElementById('profileOfflineToggle');
-  if(!badge) return;
-  const pend = pendingKeys().length;
-  if(!cloudReady()){
-    badge.className = 'val warn'; badge.textContent = 'OFFLINE';
-    text.textContent = 'Saving to this device' + (pend ? ' · '+pend+' change'+(pend===1?'':'s')+' queued' : '');
-  } else if(cloudOK === false){
-    badge.className = 'val bad'; badge.textContent = 'BLOCKED';
-    text.textContent = 'Cloud unreachable' + (pend ? ' · '+pend+' queued' : '');
-  } else {
-    badge.className = 'val ok'; badge.textContent = pend ? 'SYNCING' : 'SYNCED';
-    text.textContent = pend ? pend+' change'+(pend===1?'':'s')+' uploading' : 'All changes are on your account';
-  }
-  if(toggle) toggle.textContent = offlineMode ? 'Try cloud again' : 'Work offline';
-}
-const _origSetSyncStatus = setSyncStatus;
-setSyncStatus = function(){ _origSetSyncStatus(); try{ renderProfileSync(); }catch(e){} };
-
 // ---------- Init (called by the Firebase auth listener once logged in) ----------
 async function initApp(){
   const steps = [
-    ['loadTemplates', loadTemplates],
-    ['loadAccounts', loadAccounts],
-    ['loadPropFirms', loadPropFirms],
-    ['resolveActiveAccount', resolveActiveAccount],
     ['prefetchHistory', prefetchHistory],
     ['loadAccountMeta', loadAccountMeta],
     ['loadDay', () => loadDay(todayISO())],
@@ -2499,9 +1054,6 @@ async function initApp(){
     ['renderMilestones', renderMilestones],
     ['loadRealBalanceMeta', loadRealBalanceMeta],
     ['renderWeekly', renderWeekly],
-    ['renderRulesView', () => renderRulesView()],
-    ['renderAccountsView', () => renderAccountsView()],
-    ['loadProfile', loadProfile],
   ];
   let hadFailure = false;
   for(const [label, fn] of steps){
@@ -2514,7 +1066,7 @@ async function initApp(){
   }
   if(hadFailure){
     const bar = document.createElement('div');
-    bar.style.cssText = 'position:fixed;bottom:64px;left:0;right:0;background:#E8544D;color:#fff;font-family:monospace;font-size:11px;padding:8px 14px;text-align:center;z-index:2000;';
+    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#E8544D;color:#fff;font-family:monospace;font-size:11px;padding:8px 14px;text-align:center;z-index:2000;';
     bar.textContent = 'Some data may not have loaded — pull to refresh or check your connection.';
     document.body.appendChild(bar);
     setTimeout(() => bar.remove(), 6000);
@@ -2558,7 +1110,6 @@ window.initApp = initApp;
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  window._fbReady = true;
 
   // Offline caching so the app still opens (read-only for unsynced data)
   // with no connection, and queues writes until back online.
@@ -2575,7 +1126,7 @@ window.initApp = initApp;
   const loadingEl = document.getElementById('authLoading');
   const emailInput = document.getElementById('authEmail');
   const passInput = document.getElementById('authPassword');
-  const accountEmailEl = document.getElementById('profileEmailText');
+  const accountEmailEl = document.getElementById('accountEmail');
 
   function setLoading(on){
     loadingEl.style.display = on ? 'block' : 'none';
@@ -2685,20 +1236,17 @@ window.initApp = initApp;
     location.reload(); // simplest way to fully reset in-memory state/caches
   });
 
+  let appStarted = false;
   onAuthStateChanged(auth, (user) => {
     if(user){
-      if(window.adoptLocalData) window.adoptLocalData(user.uid);
       window.currentUser = user;
       overlay.style.display = 'none';
       accountEmailEl.textContent = user.email;
-      if(!window._appStarted && window.initApp){
-        window._appStarted = true;
+      if(!appStarted && window.initApp){
+        appStarted = true;
         window.initApp();
-      } else if(window.flushPending){
-        window.flushPending();
       }
     } else {
-      if(window.__offlineMode) return;   // deliberately working without the cloud
       window.currentUser = null;
       overlay.style.display = 'flex';
     }
@@ -2712,7 +1260,7 @@ window.initApp = initApp;
       if(document.getElementById('swUpdateBanner')) return; // already showing
       const bar = document.createElement('div');
       bar.id = 'swUpdateBanner';
-      bar.style.cssText = 'position:fixed;bottom:64px;left:0;right:0;background:#3ECF8E;color:#08130D;font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;padding:12px 16px;text-align:center;z-index:3000;cursor:pointer;';
+      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#3ECF8E;color:#08130D;font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;padding:12px 16px;text-align:center;z-index:3000;cursor:pointer;';
       bar.textContent = 'New version ready — tap to update';
       bar.onclick = () => {
         bar.textContent = 'Updating…';

@@ -38,9 +38,64 @@
     margin:0; background:var(--bg); color:var(--text);
     font-family:var(--mono); font-size:14px;
     -webkit-font-smoothing:antialiased;
-    padding-bottom:92px;
+    padding-bottom:34px;
+    padding-top:54px;
   }
-  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 40px;}
+  .wrap{max-width:720px;margin:0 auto;padding:16px 16px 40px;}
+
+  /* TOP BAR + DRAWER */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:920;background:rgba(11,15,20,.92);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{max-width:720px;margin:0 auto;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .topbar-brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.02em;}
+  .sync-pill{
+    font-family:var(--mono);font-weight:500;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;
+    padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;
+  }
+  .sync-pill.ok{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.10);}
+  .sync-pill.syncing{color:var(--amber);border-color:rgba(232,163,61,.35);background:rgba(232,163,61,.10);}
+  .sync-pill.local{color:var(--muted);border-color:var(--line);background:var(--panel);}
+  .menu-btn{
+    width:38px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3.5px;cursor:pointer;flex:none;
+  }
+  .menu-btn span{display:block;width:15px;height:1.7px;background:var(--text);border-radius:2px;transition:.18s;}
+  .menu-btn.open span:nth-child(1){transform:translateY(5.2px) rotate(45deg);}
+  .menu-btn.open span:nth-child(2){opacity:0;}
+  .menu-btn.open span:nth-child(3){transform:translateY(-5.2px) rotate(-45deg);}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:930;opacity:0;pointer-events:none;transition:.2s;}
+  .drawer-scrim.open{opacity:1;pointer-events:auto;}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:268px;max-width:84vw;z-index:940;
+    background:var(--panel2);border-left:1px solid var(--line);
+    transform:translateX(105%);transition:transform .22s ease;
+    padding:16px 14px calc(18px + env(safe-area-inset-bottom,0));overflow-y:auto;
+    display:flex;flex-direction:column;
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:6px 4px 12px;}
+  .drawer-item{
+    display:flex;align-items:center;gap:11px;padding:12px 12px;border-radius:10px;cursor:pointer;
+    border:1px solid transparent;margin-bottom:4px;
+  }
+  .drawer-item svg{width:19px;height:19px;stroke:var(--dim);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;}
+  .drawer-item span{font-family:var(--display);font-weight:600;font-size:13.5px;color:var(--muted);}
+  .drawer-item.active{background:rgba(62,207,142,.09);border-color:rgba(62,207,142,.30);}
+  .drawer-item.active svg{stroke:var(--green);}
+  .drawer-item.active span{color:var(--green);}
+  .drawer-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);}
+  .drawer-sync-line{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:9px;}
+
+  /* TEMPLATES */
+  .tpl-card{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:11px 12px;margin-bottom:9px;}
+  .tpl-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .tpl-name{font-family:var(--display);font-weight:600;font-size:13.5px;}
+  .tpl-meta{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;}
+  .tpl-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
+  .acc-mini-actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;}
+  .subhead{font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--muted);margin:18px 2px 9px;}
 
   /* HERO */
   .hero{
@@ -298,21 +353,6 @@
     font-size:11px;cursor:pointer;text-decoration:underline;
   }
 
-  /* BOTTOM NAV */
-  .bottom-nav{
-    position:fixed; left:0; right:0; bottom:0; z-index:900;
-    display:flex; background:var(--panel2); border-top:1px solid var(--line);
-    padding-bottom:env(safe-area-inset-bottom,0);
-  }
-  .bn-item{
-    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:3px; padding:9px 4px 7px; cursor:pointer; -webkit-tap-highlight-color:transparent;
-  }
-  .bn-item svg{width:20px;height:20px;display:block;margin:0 auto;stroke:var(--dim);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:.15s;}
-  .bn-item .bn-label{font-family:var(--display);font-weight:600;font-size:9.5px;color:var(--dim);transition:.15s;margin-top:1px;}
-  .bn-item.active svg{stroke:var(--green);}
-  .bn-item.active .bn-label{color:var(--green);}
-
   .view-panel{display:none;}
   .view-panel.active{display:block;}
 
@@ -433,6 +473,9 @@
     <button class="auth-btn primary" id="authSignInBtn">Sign In</button>
     <button class="auth-btn secondary" id="authSignUpBtn">Create Account</button>
     <button class="auth-link" id="authForgotBtn" type="button">Forgot password?</button>
+    <div class="auth-divider"><span>no connection?</span></div>
+    <button class="auth-btn secondary" id="authOfflineBtn" style="margin-top:0;">Work offline on this device</button>
+    <div class="auth-loading" style="margin-top:8px;line-height:1.5;text-align:left;">If the cloud is blocked on this network, offline mode keeps every entry on this computer and uploads it automatically the next time the cloud answers.</div>
     <div class="auth-error" id="authError"></div>
     <div class="auth-status" id="authStatus"></div>
     <div class="auth-loading" id="authLoading" style="display:none;">Connecting…</div>
@@ -656,6 +699,9 @@
     <div class="chip-row" id="accStatusChips"></div>
     <button class="add-btn" id="addAccountBtn">+ Add account</button>
     <div id="accountsList"></div>
+    <div class="subhead">Reusable setups (step stones)</div>
+    <div id="templatesList"></div>
+    <div class="hint">A setup carries the targets, daily/total drawdowns, phase and the whole instructions text. Use one as the starting point for a new account, or copy it out as text to paste anywhere.</div>
   </div>
 </div><!-- /view: accounts -->
 
@@ -664,7 +710,7 @@
     <div class="section-head"><span class="section-num">R1</span><span class="section-title">Prop firms &amp; rules library</span></div>
     <button class="add-btn" id="addFirmBtn">+ Add prop firm</button>
     <div id="firmsList"></div>
-    <div class="hint">Paste each plan's rules & regulations into its box — it autosaves as you type. Use "+ Add notice" for the rules you keep forgetting; they show boldly highlighted so they're hard to miss.</div>
+    <div class="hint">Copy any plan and paste it into another firm — the rules text and every notice come with it. Paste each plan's rules & regulations into its box — it autosaves as you type. Use "+ Add notice" for the rules you keep forgetting; they show boldly highlighted so they're hard to miss.</div>
   </div>
 </div><!-- /view: rules -->
 
@@ -678,34 +724,59 @@
         <div class="profile-email" id="profileEmailText"></div>
       </div>
     </div>
+    <div class="subhead">Sync</div>
+    <div class="card">
+      <div class="tracker" style="border-bottom:none;padding-top:2px;">
+        <div class="label" id="profileSyncText">Checking…</div>
+        <div class="val" id="profileSyncBadge">—</div>
+      </div>
+      <div class="risk-actions" style="margin-top:6px;">
+        <div class="risk-btn win" id="profileSyncNow">Sync now</div>
+        <div class="risk-btn loss" id="profileOfflineToggle">Work offline</div>
+      </div>
+      <div class="hint">Offline mode is for networks where the cloud is blocked. Nothing is ever lost: entries are written to this device first, queued, and pushed up as soon as a connection works. On a device where the cloud is reachable (phone with VPN on), everything merges back together.</div>
+    </div>
     <button class="signout-btn" id="signOutBtn">Sign out</button>
   </div>
 </div><!-- /view: profile -->
 
 </div><!-- /wrap -->
 
-<div class="bottom-nav" id="bottomNav">
-  <div class="bn-item active" data-view="checklist">
-    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    <div class="bn-label">Checklist</div>
-  </div>
-  <div class="bn-item" data-view="accounts">
-    <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-    <div class="bn-label">Accounts</div>
-  </div>
-  <div class="bn-item" data-view="rules">
-    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-    <div class="bn-label">Rules</div>
-  </div>
-  <div class="bn-item" data-view="profile">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-    <div class="bn-label">Profile</div>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">Gate <span class="sync-pill" id="syncPill">…</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
 </div>
+
+<div class="drawer-scrim" id="drawerScrim"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">Go to</div>
+  <div class="drawer-item active" data-view="checklist">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Checklist</span>
+  </div>
+  <div class="drawer-item" data-view="accounts">
+    <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Accounts</span>
+  </div>
+  <div class="drawer-item" data-view="rules">
+    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Prop firms &amp; rules</span>
+  </div>
+  <div class="drawer-item" data-view="profile">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Profile</span>
+  </div>
+  <div class="drawer-foot">
+    <div class="drawer-sync-line" id="drawerSyncLine">Checking sync…</div>
+    <button class="mini-btn" id="drawerSyncBtn" style="width:100%;padding:9px;">Sync now</button>
+  </div>
+</aside>
 
 <div id="accountModalOverlay" class="modal-overlay" style="display:none;">
   <div class="modal-card">
     <div class="modal-title" id="accountModalTitle">Add account</div>
+    <div class="field" style="margin-top:12px;" id="accForm_templateWrap">
+      <label>Start from a saved setup (copies targets, drawdowns &amp; instructions)</label>
+      <select class="select-input" id="accForm_template"></select>
+    </div>
     <div class="field" style="margin-top:12px;">
       <label>Account name</label>
       <input type="text" id="accForm_name" placeholder="e.g. FTMO 100k #1">
@@ -739,6 +810,39 @@
     <div class="field" style="margin-top:10px;">
       <label>Purchase date</label>
       <input type="date" id="accForm_date">
+    </div>
+    <div class="inputs-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Profit target ($)</label>
+        <input type="number" id="accForm_target" placeholder="5500">
+      </div>
+      <div class="field">
+        <label>Phase</label>
+        <select class="select-input" id="accForm_phase">
+          <option value="single">Single phase</option>
+          <option value="two">Two phase</option>
+          <option value="funded">Funded / real</option>
+        </select>
+      </div>
+    </div>
+    <div class="inputs-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Daily drawdown (%)</label>
+        <input type="number" id="accForm_dailyDD" placeholder="5">
+      </div>
+      <div class="field">
+        <label>Total drawdown (%)</label>
+        <input type="number" id="accForm_totalDD" placeholder="12">
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Instructions &amp; rules for this account</label>
+      <textarea class="plan-rules" id="accForm_instructions" placeholder="Targets, drawdowns, payout rules — everything this account must obey."></textarea>
+    </div>
+    <div class="tpl-actions">
+      <button class="mini-btn" id="accForm_copySetup">Copy setup</button>
+      <button class="mini-btn" id="accForm_pasteSetup">Paste setup</button>
+      <button class="mini-btn" id="accForm_saveTemplate">Save as reusable setup</button>
     </div>
     <div class="field" style="margin-top:10px;">
       <label>Notes (optional)</label>
@@ -801,23 +905,144 @@ function withTimeout(promise, ms, label){
   ]);
 }
 
+let offlineMode = false;          // true = deliberately working without the cloud
+let cloudOK = null;               // null unknown, true reachable, false blocked/unreachable
+
+function lsKey(key){
+  const uid = (window.currentUser && window.currentUser.uid) || 'local';
+  return 'gate:' + uid + ':' + key;
+}
+function lsGet(key){
+  try{ const raw = localStorage.getItem(lsKey(key)); return raw==null ? null : JSON.parse(raw); }
+  catch(e){ return null; }
+}
+function lsSet(key, val){
+  try{ localStorage.setItem(lsKey(key), JSON.stringify(val)); }
+  catch(e){ console.warn('Local save failed:', e); }
+}
+function pendingKeys(){ try{ return JSON.parse(localStorage.getItem(lsKey('__pending')) || '[]'); }catch(e){ return []; } }
+function setPendingKeys(list){ try{ localStorage.setItem(lsKey('__pending'), JSON.stringify(list)); }catch(e){} }
+function markPending(key){ const p = pendingKeys(); if(!p.includes(key)){ p.push(key); setPendingKeys(p); } setSyncStatus(); }
+
+function cloudReady(){
+  return !offlineMode && !!window.currentUser && window.currentUser.uid !== 'local'
+      && !!window._fb && !!window._fb.db;
+}
+
+// withTimeout resolves undefined, which is also a normal setDoc result — this
+// variant reports the difference so a silently hanging write (Firebase blocked
+// on the network) is treated as a failure instead of a success.
+function raceTimeout(promise, ms){
+  return Promise.race([ promise.then(()=> 'ok'), new Promise(r => setTimeout(()=> r('timeout'), ms)) ]);
+}
+
+function setSyncStatus(){
+  const pill = document.getElementById('syncPill');
+  const line = document.getElementById('drawerSyncLine');
+  const pend = pendingKeys().length;
+  let cls='local', txt='This device', detail='';
+  if(!window.currentUser){ cls='local'; txt='Signed out'; detail='Sign in to sync across devices.'; }
+  else if(!cloudReady()){
+    cls='local'; txt='On this device' + (pend ? ' · '+pend : '');
+    detail = 'Working offline — everything is saved on this device' + (pend ? ' ('+pend+' change'+(pend===1?'':'s')+' waiting to upload).' : '.');
+  }
+  else if(cloudOK === false){
+    cls='local'; txt='No cloud' + (pend ? ' · '+pend : '');
+    detail = 'Cloud unreachable (blocked or offline). Saved here' + (pend ? ', '+pend+' change'+(pend===1?'':'s')+' queued.' : '.');
+  }
+  else if(pend){ cls='syncing'; txt='Syncing '+pend; detail = pend+' change'+(pend===1?'':'s')+' uploading…'; }
+  else { cls='ok'; txt='Synced'; detail='Everything is synced to your account.'; }
+  if(pill){ pill.className = 'sync-pill ' + cls; pill.textContent = txt; }
+  if(line) line.textContent = detail;
+}
+
 async function sGet(key){
-  if(!window.currentUser) return null;
+  const local = lsGet(key);
+  if(!cloudReady()) return local;
   try{
     const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
     const snap = await withTimeout(window._fb.getDoc(ref), 8000, 'sGet:'+key);
-    if(snap === undefined) return null; // timed out
-    return snap.exists() ? JSON.parse(snap.data().value) : null;
-  }catch(e){ console.error('Firestore read failed:', key, e); return null; }
+    if(snap === undefined){ cloudOK = false; setSyncStatus(); return local; }
+    cloudOK = true;
+    // A local edit that hasn't uploaded yet always beats the cloud copy.
+    if(pendingKeys().includes(key)){ setSyncStatus(); return local; }
+    if(!snap.exists()){ setSyncStatus(); return local; }
+    const remote = JSON.parse(snap.data().value);
+    lsSet(key, remote);
+    setSyncStatus();
+    return remote;
+  }catch(e){
+    console.error('Cloud read failed:', key, e);
+    cloudOK = false; setSyncStatus();
+    return local;
+  }
 }
+
 async function sSet(key, val){
-  if(!window.currentUser) return;
+  lsSet(key, val);                       // device first — never lose a keystroke to a blocked network
+  if(!cloudReady()){ markPending(key); showToast('Saved on this device'); return; }
   try{
     const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
-    await window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() });
-    showToast();
-  }catch(e){ console.error('Firestore write failed:', e); showToast('Sync failed — will retry'); }
+    const r = await raceTimeout(window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() }), 8000);
+    if(r === 'timeout'){ cloudOK = false; markPending(key); showToast('Saved here — cloud not responding'); return; }
+    cloudOK = true;
+    setPendingKeys(pendingKeys().filter(k => k !== key));
+    setSyncStatus();
+    showToast('Saved & synced');
+  }catch(e){
+    console.error('Cloud write failed:', e);
+    cloudOK = false; markPending(key);
+    showToast('Saved here — will sync later');
+  }
 }
+
+let _flushing = false;
+async function flushPending(){
+  if(_flushing || !cloudReady()) { setSyncStatus(); return; }
+  const queue = pendingKeys();
+  if(!queue.length){ setSyncStatus(); return; }
+  _flushing = true;
+  setSyncStatus();
+  for(const key of queue){
+    const val = lsGet(key);
+    if(val === null){ setPendingKeys(pendingKeys().filter(k=>k!==key)); continue; }
+    try{
+      const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
+      const r = await raceTimeout(window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() }), 8000);
+      if(r === 'timeout'){ cloudOK = false; break; }
+      cloudOK = true;
+      setPendingKeys(pendingKeys().filter(k=>k!==key));
+    }catch(e){ cloudOK = false; break; }
+  }
+  _flushing = false;
+  setSyncStatus();
+}
+window.flushPending = flushPending;
+window.addEventListener('online', ()=> flushPending());
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') flushPending(); });
+setInterval(()=> flushPending(), 60000);
+
+// Anything saved while offline (uid "local") is adopted by the account on the
+// first successful sign-in, then queued for upload.
+function adoptLocalData(uid){
+  try{
+    const from = 'gate:local:', to = 'gate:'+uid+':';
+    const moved = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(!k || !k.startsWith(from)) continue;
+      const suffix = k.slice(from.length);
+      if(suffix === '__pending') continue;
+      if(localStorage.getItem(to+suffix) === null){ moved.push([to+suffix, suffix, localStorage.getItem(k)]); }
+    }
+    if(!moved.length) return;
+    const pend = new Set(JSON.parse(localStorage.getItem(to+'__pending') || '[]'));
+    moved.forEach(([full, suffix, raw]) => { localStorage.setItem(full, raw); pend.add(suffix); });
+    localStorage.setItem(to+'__pending', JSON.stringify([...pend]));
+  }catch(e){ console.warn('Adopting offline data failed:', e); }
+}
+window.adoptLocalData = adoptLocalData;
+
 function showToast(msg){ const t=document.getElementById('toast'); if(msg) t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>{ t.classList.remove('show'); t.textContent = 'Saved'; }, 1400); }
 
 // Debounced writer — avoids hammering storage on every keystroke (rate limit protection)
@@ -910,11 +1135,21 @@ let historyPrefetched = false;
 // online, the calendar keeps working fully offline indefinitely — it doesn't
 // re-fetch from the network on every visit.
 async function prefetchHistory(){
-  if(!window.currentUser || !window._fb.getDocs) return;
+  // Seed every day from this device first, so the calendar is fully populated
+  // even when the cloud can't be reached at all.
+  try{
+    const prefix = lsKey('day:');
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(!k || !k.startsWith(prefix)) continue;
+      try{ dayCache[k.slice(prefix.length)] = JSON.parse(localStorage.getItem(k)); }catch(e){}
+    }
+  }catch(e){ console.warn('Local history seed failed:', e); }
+  if(!cloudReady() || !window._fb || !window._fb.getDocs) { setSyncStatus(); return; }
   try{
     const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
     const snap = await withTimeout(window._fb.getDocs(colRef), 8000, 'prefetchHistory');
-    if(!snap) return; // timed out — fall back to per-day reads as needed
+    if(!snap){ cloudOK = false; setSyncStatus(); return; } // timed out — device copy stands
     snap.forEach((docSnap) => {
       const key = docSnap.id;
       if(key.startsWith('day:')){
@@ -923,7 +1158,10 @@ async function prefetchHistory(){
       }
     });
     historyPrefetched = true;
+    cloudOK = true;
+    setSyncStatus();
   }catch(e){
+    cloudOK = false;
     console.error('History prefetch failed (falling back to per-day reads):', e);
   }
 }
@@ -1281,14 +1519,31 @@ function statusLabel(s){
   return {ongoing:'Ongoing', active:'Active', passed:'Passed', failed:'Failed', planned:'Planned'}[s] || s || '—';
 }
 
-// ---------- Bottom nav (Checklist / Accounts / Rules / Profile) ----------
-document.querySelectorAll('.bn-item').forEach(item=>{
-  item.addEventListener('click', ()=>{
-    const view = item.dataset.view;
-    document.querySelectorAll('.bn-item').forEach(i=>i.classList.toggle('active', i===item));
-    document.querySelectorAll('.view-panel').forEach(p=>p.classList.toggle('active', p.dataset.view===view));
-    window.scrollTo({top:0, behavior:'instant'});
-  });
+// ---------- Drawer nav (Checklist / Accounts / Rules / Profile) ----------
+function setDrawer(open){
+  document.getElementById('drawer').classList.toggle('open', open);
+  document.getElementById('drawerScrim').classList.toggle('open', open);
+  document.getElementById('menuBtn').classList.toggle('open', open);
+  if(open) setSyncStatus();
+}
+document.getElementById('menuBtn').addEventListener('click', ()=>{
+  setDrawer(!document.getElementById('drawer').classList.contains('open'));
+});
+document.getElementById('drawerScrim').addEventListener('click', ()=> setDrawer(false));
+document.getElementById('drawerSyncBtn').addEventListener('click', async ()=>{
+  if(!cloudReady()){ showToast('Offline — nothing to sync yet'); return; }
+  showToast('Syncing…');
+  await flushPending();
+});
+function goToView(view){
+  document.querySelectorAll('.drawer-item').forEach(i=>i.classList.toggle('active', i.dataset.view===view));
+  document.querySelectorAll('.view-panel').forEach(p=>p.classList.toggle('active', p.dataset.view===view));
+  setDrawer(false);
+  window.scrollTo({top:0, behavior:'instant'});
+}
+window.goToView = goToView;
+document.querySelectorAll('.drawer-item').forEach(item=>{
+  item.addEventListener('click', ()=> goToView(item.dataset.view));
 });
 
 // ---------- Profile ----------
@@ -1312,6 +1567,144 @@ document.getElementById('profileNameInput').addEventListener('input', (e)=>{
   updateProfileAvatar();
 });
 
+// ---------- Account setups (templates) ----------
+// The $5,000 single-phase account already in use is seeded as the first
+// reusable setup, so every new account can start from that exact rulebook.
+const BASELINE_TEMPLATE = {
+  id: 'tpl_baseline_5k',
+  name: '$5,000 single-phase (my baseline)',
+  firmName: '',
+  balance: 5000,
+  profitTarget: 5500,
+  dailyDDPct: 5,
+  totalDDPct: 12,
+  phase: 'single',
+  instructions: [
+    'ACCOUNT: $5,000 — single phase.',
+    '',
+    'TARGETS',
+    '• Phase target: $5,500 (+$500).',
+    '• Second challenge target (if the firm runs one): $5,250 (+$250).',
+    '• Withdrawal target: keep it modest ($500 profit) — small numbers draw less scrutiny at payout review.',
+    '',
+    'DRAWDOWNS',
+    '• Daily drawdown: 5% of the balance the day STARTED with. Resets at broker 00:00. Floor = day-start balance − 5%.',
+    '• Open-position drawdown: 3% of the live balance at the exact moment the trade is opened — recalculate every single trade.',
+    '• Total / overall drawdown: 12% of the starting account size.',
+    '',
+    'HARD RULES',
+    '• Only ONE trade open at a time, either direction.',
+    '• Same IP always — no VPN, no VPS, no DNS change, no new location. Check the taskbar for a VPN running in the background.',
+    '• No SL / TP / pending order that can touch Saturday or Sunday. MetaTrader fully closed from late Friday to early Monday.',
+    '• Account never linked to another device or another person (copy-trading flag).',
+    '• Trades held under 30 seconds must stay under 20% of the stage target / withdrawal amount.',
+    '• Trade at least once every 30 days (a 0.01 lot open+close counts).',
+    '',
+    'AFTER PASSING',
+    '• Send ID + selfie for verification once both challenges are passed.',
+    '• Request the 20% refund within 45 days of receiving the real account — after that it is denied.',
+    '• 3 months after the real account, with total profit ≥ 8%, request the 40% fund raise.',
+    '• The instant the target is hit: stop, close everything, submit the withdrawal, then place zero trades until payment lands.'
+  ].join('\n')
+};
+
+let templatesList = [];
+const SETUP_CLIPBOARD_KEY = 'gate:setup-clipboard';
+
+async function loadTemplates(){
+  templatesList = await sGet('account-templates') || null;
+  if(!templatesList){
+    templatesList = [ { ...BASELINE_TEMPLATE } ];
+    await sSet('account-templates', templatesList);
+  }
+  renderTemplates();
+}
+async function saveTemplates(){ await sSet('account-templates', templatesList); renderTemplates(); }
+
+function setupSummary(t){
+  const bits = [];
+  if(t.balance) bits.push('$'+Number(t.balance).toLocaleString());
+  if(t.profitTarget) bits.push('target $'+Number(t.profitTarget).toLocaleString());
+  if(t.dailyDDPct) bits.push(t.dailyDDPct+'% daily');
+  if(t.totalDDPct) bits.push(t.totalDDPct+'% total');
+  bits.push({single:'single phase', two:'two phase', funded:'funded'}[t.phase] || 'single phase');
+  return bits.join(' · ');
+}
+function setupAsText(t){
+  return [
+    (t.name || 'Account setup'),
+    'Balance: ' + (t.balance ? '$'+Number(t.balance).toLocaleString() : '—'),
+    'Profit target: ' + (t.profitTarget ? '$'+Number(t.profitTarget).toLocaleString() : '—'),
+    'Daily drawdown: ' + (t.dailyDDPct || '—') + '%',
+    'Total drawdown: ' + (t.totalDDPct || '—') + '%',
+    'Phase: ' + ({single:'single phase', two:'two phase', funded:'funded'}[t.phase] || 'single phase'),
+    '',
+    (t.instructions || '')
+  ].join('\n');
+}
+function copyText(text, label){
+  const done = ()=> showToast(label || 'Copied');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>{ fallbackCopy(text); done(); });
+  } else { fallbackCopy(text); done(); }
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  ta.remove();
+}
+function stashSetup(t){
+  try{ localStorage.setItem(SETUP_CLIPBOARD_KEY, JSON.stringify(t)); }catch(e){}
+}
+function readStashedSetup(){
+  try{ const raw = localStorage.getItem(SETUP_CLIPBOARD_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+
+function renderTemplates(){
+  const wrap = document.getElementById('templatesList');
+  if(!wrap) return;
+  if(!templatesList.length){
+    wrap.innerHTML = '<div class="hint" style="padding:4px 4px 10px;">No saved setups yet — open any account and tap "Save as reusable setup".</div>';
+    return;
+  }
+  wrap.innerHTML = templatesList.map(t=>`
+    <div class="tpl-card" data-id="${t.id}">
+      <div class="tpl-head">
+        <div>
+          <div class="tpl-name">${escapeHtml(t.name || 'Untitled setup')}</div>
+          <div class="tpl-meta">${escapeHtml(setupSummary(t))}</div>
+        </div>
+      </div>
+      <div class="tpl-actions">
+        <button class="mini-btn" data-tpl-act="use" data-id="${t.id}">New account from this</button>
+        <button class="mini-btn" data-tpl-act="copy" data-id="${t.id}">Copy instructions</button>
+        <button class="mini-btn" data-tpl-act="rename" data-id="${t.id}">Rename</button>
+        <button class="mini-btn danger" data-tpl-act="del" data-id="${t.id}">Delete</button>
+      </div>
+    </div>`).join('');
+}
+document.getElementById('templatesList').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('[data-tpl-act]');
+  if(!btn) return;
+  const t = templatesList.find(x=>x.id===btn.dataset.id);
+  if(!t) return;
+  const act = btn.dataset.tplAct;
+  if(act === 'use'){ openAccountForm(null, t); }
+  else if(act === 'copy'){ stashSetup(t); copyText(setupAsText(t), 'Setup copied'); }
+  else if(act === 'rename'){
+    const name = prompt('Setup name:', t.name || '');
+    if(!name || !name.trim()) return;
+    t.name = name.trim(); await saveTemplates();
+  }
+  else if(act === 'del'){
+    if(!confirm('Delete this saved setup? Accounts already created from it are untouched.')) return;
+    templatesList = templatesList.filter(x=>x.id!==t.id);
+    await saveTemplates();
+  }
+});
+
 // ---------- Accounts ----------
 let accountsList = [];
 let accountsFilter = 'all';
@@ -1327,6 +1720,7 @@ const ACCOUNT_STATUSES = [
 async function loadAccounts(){
   accountsList = await sGet('accounts-list') || [];
   renderAccountsView();
+  renderTemplates();
 }
 function renderAccountsView(){
   const counts = { all:0, ongoing:0, active:0, passed:0, failed:0, planned:0 };
@@ -1362,9 +1756,42 @@ function renderAccountsView(){
         <span>${a.balance ? '$'+Number(a.balance).toLocaleString() : '—'}</span>
         <span>${a.purchaseDate ? fmtShortDate(a.purchaseDate) : (a.status==='planned' ? 'not bought yet' : '—')}</span>
       </div>
+      <div class="tpl-meta">${escapeHtml(setupSummary(a))}</div>
+      <div class="acc-mini-actions">
+        <button class="mini-btn" data-acc-act="duplicate" data-id="${a.id}">Duplicate</button>
+        <button class="mini-btn" data-acc-act="template" data-id="${a.id}">Save as setup</button>
+        <button class="mini-btn" data-acc-act="copy" data-id="${a.id}">Copy instructions</button>
+      </div>
     </div>`).join('');
   listEl.querySelectorAll('.acc-card').forEach(card=>{
-    card.onclick = ()=> openAccountForm(card.dataset.id);
+    card.onclick = (e)=>{
+      if(e.target.closest('[data-acc-act]')) return;
+      openAccountForm(card.dataset.id);
+    };
+  });
+  listEl.querySelectorAll('[data-acc-act]').forEach(btn=>{
+    btn.onclick = async (e)=>{
+      e.stopPropagation();
+      const acc = accountsList.find(a=>a.id===btn.dataset.id);
+      if(!acc) return;
+      const act = btn.dataset.accAct;
+      if(act === 'duplicate'){
+        openAccountForm(null, { ...acc, name: acc.name + ' (copy)' });
+      } else if(act === 'template'){
+        const name = prompt('Name this reusable setup:', acc.name || 'New setup');
+        if(!name || !name.trim()) return;
+        templatesList.push({
+          id: uid(), name: name.trim(), firmName: acc.firmName || '', balance: acc.balance,
+          profitTarget: acc.profitTarget, dailyDDPct: acc.dailyDDPct, totalDDPct: acc.totalDDPct,
+          phase: acc.phase || 'single', instructions: acc.instructions || ''
+        });
+        await saveTemplates();
+        showToast('Saved as reusable setup');
+      } else if(act === 'copy'){
+        stashSetup(acc);
+        copyText(setupAsText(acc), 'Setup copied');
+      }
+    };
   });
 }
 function refreshAccFormPlans(){
@@ -1373,30 +1800,58 @@ function refreshAccFormPlans(){
   const firm = propFirmsList.find(f=>f.id===firmSelect.value);
   planSelect.innerHTML = '<option value="">— none —</option>' + ((firm && firm.plans) || []).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
 }
-function openAccountForm(id){
+function fillAccountForm(src){
+  document.getElementById('accForm_balance').value = src.balance != null ? src.balance : '';
+  document.getElementById('accForm_target').value = src.profitTarget != null ? src.profitTarget : '';
+  document.getElementById('accForm_dailyDD').value = src.dailyDDPct != null ? src.dailyDDPct : '';
+  document.getElementById('accForm_totalDD').value = src.totalDDPct != null ? src.totalDDPct : '';
+  document.getElementById('accForm_phase').value = src.phase || 'single';
+  document.getElementById('accForm_instructions').value = src.instructions || '';
+}
+function refreshTemplateSelect(){
+  const sel = document.getElementById('accForm_template');
+  sel.innerHTML = '<option value="">— blank —</option>'
+    + templatesList.map(t=>`<option value="tpl:${t.id}">${escapeHtml(t.name)}</option>`).join('')
+    + (accountsList.length ? '<optgroup label="Existing accounts">' + accountsList.map(a=>`<option value="acc:${a.id}">${escapeHtml(a.name||'Unnamed')}</option>`).join('') + '</optgroup>' : '');
+  sel.value = '';
+  sel.onchange = ()=>{
+    const v = sel.value;
+    if(!v) return;
+    const [kind, refId] = v.split(':');
+    const src = kind === 'tpl' ? templatesList.find(t=>t.id===refId) : accountsList.find(a=>a.id===refId);
+    if(src) fillAccountForm(src);
+  };
+}
+function openAccountForm(id, prefill){
   editingAccountId = id || null;
   const firmSelect = document.getElementById('accForm_firm');
   firmSelect.innerHTML = '<option value="">— none —</option>' + propFirmsList.map(f=>`<option value="${f.id}">${escapeHtml(f.name)}</option>`).join('');
   firmSelect.onchange = refreshAccFormPlans;
 
+  refreshTemplateSelect();
+  document.getElementById('accForm_templateWrap').style.display = id ? 'none' : '';
+
   if(id){
     const acc = accountsList.find(a=>a.id===id);
     document.getElementById('accountModalTitle').textContent = 'Edit account';
     document.getElementById('accForm_name').value = acc.name || '';
+    fillAccountForm(acc);
     firmSelect.value = acc.firmId || '';
     refreshAccFormPlans();
     document.getElementById('accForm_plan').value = acc.planId || '';
-    document.getElementById('accForm_balance').value = acc.balance || '';
     document.getElementById('accForm_status').value = acc.status || 'ongoing';
     document.getElementById('accForm_date').value = acc.purchaseDate || '';
     document.getElementById('accForm_notes').value = acc.notes || '';
     document.getElementById('accForm_delete').style.display = '';
   } else {
     document.getElementById('accountModalTitle').textContent = 'Add account';
-    document.getElementById('accForm_name').value = '';
+    document.getElementById('accountModalTitle').textContent = prefill ? 'New account from setup' : 'Add account';
+    document.getElementById('accForm_name').value = (prefill && prefill.name) || '';
+    if(prefill && prefill.firmId){ firmSelect.value = prefill.firmId; }
     refreshAccFormPlans();
-    document.getElementById('accForm_balance').value = '';
-    document.getElementById('accForm_status').value = 'ongoing';
+    if(prefill && prefill.planId){ document.getElementById('accForm_plan').value = prefill.planId; }
+    fillAccountForm(prefill || { phase:'single' });
+    document.getElementById('accForm_status').value = (prefill && prefill.status) || 'ongoing';
     document.getElementById('accForm_date').value = todayISO();
     document.getElementById('accForm_notes').value = '';
     document.getElementById('accForm_delete').style.display = 'none';
@@ -1426,6 +1881,11 @@ document.getElementById('accForm_save').addEventListener('click', async ()=>{
     planId: planSelect.value || '',
     planName: plan ? plan.name : '',
     balance: document.getElementById('accForm_balance').value,
+    profitTarget: document.getElementById('accForm_target').value,
+    dailyDDPct: document.getElementById('accForm_dailyDD').value,
+    totalDDPct: document.getElementById('accForm_totalDD').value,
+    phase: document.getElementById('accForm_phase').value,
+    instructions: document.getElementById('accForm_instructions').value,
     status: document.getElementById('accForm_status').value,
     purchaseDate: document.getElementById('accForm_date').value,
     notes: document.getElementById('accForm_notes').value,
@@ -1440,6 +1900,36 @@ document.getElementById('accForm_save').addEventListener('click', async ()=>{
   renderAccountsView();
   closeAccountForm();
 });
+function currentFormSetup(){
+  return {
+    name: document.getElementById('accForm_name').value.trim() || 'Account setup',
+    balance: document.getElementById('accForm_balance').value,
+    profitTarget: document.getElementById('accForm_target').value,
+    dailyDDPct: document.getElementById('accForm_dailyDD').value,
+    totalDDPct: document.getElementById('accForm_totalDD').value,
+    phase: document.getElementById('accForm_phase').value,
+    instructions: document.getElementById('accForm_instructions').value,
+  };
+}
+document.getElementById('accForm_copySetup').addEventListener('click', ()=>{
+  const setup = currentFormSetup();
+  stashSetup(setup);
+  copyText(setupAsText(setup), 'Setup copied');
+});
+document.getElementById('accForm_pasteSetup').addEventListener('click', ()=>{
+  const stashed = readStashedSetup();
+  if(!stashed){ showToast('Copy a setup first'); return; }
+  fillAccountForm(stashed);
+  showToast('Setup pasted');
+});
+document.getElementById('accForm_saveTemplate').addEventListener('click', async ()=>{
+  const setup = currentFormSetup();
+  const name = prompt('Name this reusable setup:', setup.name);
+  if(!name || !name.trim()) return;
+  templatesList.push({ id: uid(), ...setup, name: name.trim() });
+  await saveTemplates();
+  showToast('Saved as reusable setup');
+});
 document.getElementById('accForm_delete').addEventListener('click', async ()=>{
   if(!editingAccountId) return;
   if(!confirm('Delete this account? This cannot be undone.')) return;
@@ -1450,6 +1940,29 @@ document.getElementById('accForm_delete').addEventListener('click', async ()=>{
 });
 
 // ---------- Prop firms & rules library ----------
+// Plans are copy/paste-able so a rulebook written once can seed every other
+// firm or plan instead of being retyped.
+const PLAN_CLIPBOARD_KEY = 'gate:plan-clipboard';
+function clonePlan(plan, name){
+  return {
+    id: uid(),
+    name: name || plan.name,
+    rulesText: plan.rulesText || '',
+    notices: (plan.notices||[]).map(n => ({ id: uid(), text: n.text }))
+  };
+}
+function stashPlan(plan){ try{ localStorage.setItem(PLAN_CLIPBOARD_KEY, JSON.stringify(plan)); }catch(e){} }
+function readStashedPlan(){ try{ const raw = localStorage.getItem(PLAN_CLIPBOARD_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
+function planAsText(firm, plan){
+  return [
+    (firm.name || 'Prop firm') + ' — ' + (plan.name || 'Plan'),
+    '',
+    (plan.rulesText || ''),
+    '',
+    ...((plan.notices||[]).map(n => '⚠ ' + n.text))
+  ].join('\n');
+}
+
 let propFirmsList = [];
 async function loadPropFirms(){
   propFirmsList = await sGet('propfirms-list') || [];
@@ -1468,6 +1981,8 @@ function renderRulesView(){
         <div class="firm-name">${escapeHtml(firm.name)}</div>
         <div class="firm-actions">
           <button class="mini-btn" data-act="addplan" data-firm="${firm.id}">+ Plan</button>
+          <button class="mini-btn" data-act="pasteplan" data-firm="${firm.id}">Paste plan</button>
+          <button class="mini-btn" data-act="dupfirm" data-firm="${firm.id}">Duplicate firm</button>
           <button class="mini-btn danger" data-act="delfirm" data-firm="${firm.id}">Delete firm</button>
         </div>
       </div>
@@ -1475,7 +1990,11 @@ function renderRulesView(){
         <div class="plan-card">
           <div class="plan-head">
             <div class="plan-name">${escapeHtml(plan.name)}</div>
-            <button class="mini-btn danger" data-act="delplan" data-firm="${firm.id}" data-plan="${plan.id}">Delete plan</button>
+            <div class="firm-actions">
+              <button class="mini-btn" data-act="copyplan" data-firm="${firm.id}" data-plan="${plan.id}">Copy plan</button>
+              <button class="mini-btn" data-act="dupplan" data-firm="${firm.id}" data-plan="${plan.id}">Duplicate</button>
+              <button class="mini-btn danger" data-act="delplan" data-firm="${firm.id}" data-plan="${plan.id}">Delete</button>
+            </div>
           </div>
           <textarea class="plan-rules" placeholder="Paste this plan's rules &amp; regulations here…" data-act="rulestext" data-firm="${firm.id}" data-plan="${plan.id}">${escapeHtml(plan.rulesText||'')}</textarea>
           <div class="notices-wrap">
@@ -1508,6 +2027,35 @@ document.getElementById('firmsList').addEventListener('click', async (e)=>{
     if(!name || !name.trim()) return;
     firm.plans = firm.plans || [];
     firm.plans.push({ id: uid(), name: name.trim(), rulesText:'', notices:[] });
+    await savePropFirms(); renderRulesView();
+  } else if(act === 'copyplan'){
+    const plan = (firm.plans||[]).find(p=>p.id===btn.dataset.plan);
+    if(!plan) return;
+    stashPlan(plan);
+    copyText(planAsText(firm, plan), 'Plan rules copied');
+  } else if(act === 'dupplan'){
+    const plan = (firm.plans||[]).find(p=>p.id===btn.dataset.plan);
+    if(!plan) return;
+    const name = prompt('Name for the duplicate plan:', plan.name + ' (copy)');
+    if(!name || !name.trim()) return;
+    firm.plans.push(clonePlan(plan, name.trim()));
+    await savePropFirms(); renderRulesView();
+  } else if(act === 'pasteplan'){
+    const stashed = readStashedPlan();
+    if(!stashed){ showToast('Copy a plan first'); return; }
+    const name = prompt('Name for the pasted plan:', stashed.name || 'Pasted plan');
+    if(!name || !name.trim()) return;
+    firm.plans = firm.plans || [];
+    firm.plans.push(clonePlan(stashed, name.trim()));
+    await savePropFirms(); renderRulesView();
+    showToast('Plan pasted into ' + firm.name);
+  } else if(act === 'dupfirm'){
+    const name = prompt('Name for the duplicated firm:', firm.name + ' (copy)');
+    if(!name || !name.trim()) return;
+    propFirmsList.push({
+      id: uid(), name: name.trim(),
+      plans: (firm.plans||[]).map(p => clonePlan(p, p.name))
+    });
     await savePropFirms(); renderRulesView();
   } else if(act === 'delfirm'){
     if(!confirm('Delete this prop firm and all its plans and rules?')) return;
@@ -1556,6 +2104,72 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
+// ---------- Offline mode (for networks where the cloud is blocked) ----------
+const PREFER_OFFLINE_KEY = 'gate:prefer-offline';
+function startOfflineMode(remember){
+  if(remember) { try{ localStorage.setItem(PREFER_OFFLINE_KEY, '1'); }catch(e){} }
+  offlineMode = true;
+  window.__offlineMode = true;
+  if(!window.currentUser) window.currentUser = { uid:'local', email:'this device' };
+  document.getElementById('authOverlay').style.display = 'none';
+  const emailEl = document.getElementById('profileEmailText');
+  if(emailEl && !emailEl.textContent) emailEl.textContent = 'offline — this device only';
+  setSyncStatus();
+  if(!window._appStarted){ window._appStarted = true; initApp(); }
+}
+window.startOfflineMode = startOfflineMode;
+document.getElementById('authOfflineBtn').addEventListener('click', ()=> startOfflineMode(true));
+
+// Remembered choice: don't sit on a sign-in screen that can never resolve.
+if(localStorage.getItem(PREFER_OFFLINE_KEY) === '1'){
+  setTimeout(()=>{ if(!window._appStarted) startOfflineMode(false); }, 1200);
+}
+// Nothing answered at all (blocked CDN / blocked auth) — offer the way out.
+setTimeout(()=>{
+  if(window._appStarted) return;
+  const st = document.getElementById('authStatus');
+  if(st && !st.textContent) st.textContent = 'Still connecting… if this network blocks the cloud, use "Work offline on this device".';
+}, 7000);
+
+document.getElementById('profileSyncNow').addEventListener('click', async ()=>{
+  if(!cloudReady()){
+    try{ localStorage.removeItem(PREFER_OFFLINE_KEY); }catch(e){}
+    if(confirm('Reconnect to the cloud? The app will reload and ask you to sign in.')) location.reload();
+    return;
+  }
+  showToast('Syncing…');
+  await flushPending();
+});
+document.getElementById('profileOfflineToggle').addEventListener('click', ()=>{
+  if(offlineMode){
+    try{ localStorage.removeItem(PREFER_OFFLINE_KEY); }catch(e){}
+    if(confirm('Try the cloud again? The app will reload.')) location.reload();
+  } else {
+    startOfflineMode(true);
+    showToast('Offline mode on');
+  }
+});
+function renderProfileSync(){
+  const badge = document.getElementById('profileSyncBadge');
+  const text = document.getElementById('profileSyncText');
+  const toggle = document.getElementById('profileOfflineToggle');
+  if(!badge) return;
+  const pend = pendingKeys().length;
+  if(!cloudReady()){
+    badge.className = 'val warn'; badge.textContent = 'OFFLINE';
+    text.textContent = 'Saving to this device' + (pend ? ' · '+pend+' change'+(pend===1?'':'s')+' queued' : '');
+  } else if(cloudOK === false){
+    badge.className = 'val bad'; badge.textContent = 'BLOCKED';
+    text.textContent = 'Cloud unreachable' + (pend ? ' · '+pend+' queued' : '');
+  } else {
+    badge.className = 'val ok'; badge.textContent = pend ? 'SYNCING' : 'SYNCED';
+    text.textContent = pend ? pend+' change'+(pend===1?'':'s')+' uploading' : 'All changes are on your account';
+  }
+  if(toggle) toggle.textContent = offlineMode ? 'Try cloud again' : 'Work offline';
+}
+const _origSetSyncStatus = setSyncStatus;
+setSyncStatus = function(){ _origSetSyncStatus(); try{ renderProfileSync(); }catch(e){} };
+
 // ---------- Init (called by the Firebase auth listener once logged in) ----------
 async function initApp(){
   const steps = [
@@ -1566,6 +2180,7 @@ async function initApp(){
     ['renderMilestones', renderMilestones],
     ['loadRealBalanceMeta', loadRealBalanceMeta],
     ['renderWeekly', renderWeekly],
+    ['loadTemplates', loadTemplates],
     ['loadAccounts', loadAccounts],
     ['loadPropFirms', loadPropFirms],
     ['loadProfile', loadProfile],
@@ -1625,6 +2240,7 @@ window.initApp = initApp;
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+  window._fbReady = true;
 
   // Offline caching so the app still opens (read-only for unsynced data)
   // with no connection, and queues writes until back online.
@@ -1751,17 +2367,20 @@ window.initApp = initApp;
     location.reload(); // simplest way to fully reset in-memory state/caches
   });
 
-  let appStarted = false;
   onAuthStateChanged(auth, (user) => {
     if(user){
+      if(window.adoptLocalData) window.adoptLocalData(user.uid);
       window.currentUser = user;
       overlay.style.display = 'none';
       accountEmailEl.textContent = user.email;
-      if(!appStarted && window.initApp){
-        appStarted = true;
+      if(!window._appStarted && window.initApp){
+        window._appStarted = true;
         window.initApp();
+      } else if(window.flushPending){
+        window.flushPending();
       }
     } else {
+      if(window.__offlineMode) return;   // deliberately working without the cloud
       window.currentUser = null;
       overlay.style.display = 'flex';
     }

@@ -57,6 +57,44 @@
   .sync-pill.ok{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.10);}
   .sync-pill.syncing{color:var(--amber);border-color:rgba(232,163,61,.35);background:rgba(232,163,61,.10);}
   .sync-pill.local{color:var(--muted);border-color:var(--line);background:var(--panel);}
+  .acct-switch{
+    display:flex;align-items:center;gap:7px;max-width:46vw;padding:6px 10px;border-radius:999px;
+    border:1px solid var(--line);background:var(--panel);color:var(--text);font-family:var(--display);
+    font-size:12px;font-weight:600;cursor:pointer;overflow:hidden;
+  }
+  .acct-switch .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .acct-switch .cv{color:var(--muted);font-size:10px;}
+  .acct-switch .dotm{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none;}
+  .sheet-scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1400;display:none;}
+  .sheet-scrim.open{display:block;}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:1401;max-height:78vh;overflow:auto;
+    background:var(--bg);border-top:1px solid var(--line);border-radius:18px 18px 0 0;
+    padding:14px 14px calc(20px + env(safe-area-inset-bottom));transform:translateY(102%);
+    transition:transform .22s ease;
+  }
+  .sheet.open{transform:translateY(0);}
+  .sheet-title{font-family:var(--display);font-weight:700;font-size:14px;margin-bottom:2px;}
+  .sheet-sub{font-size:11px;color:var(--muted);margin-bottom:12px;}
+  .sw-firm{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:14px 2px 6px;}
+  .sw-acc{
+    display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);
+    border-radius:12px;background:var(--panel);margin-bottom:8px;cursor:pointer;
+  }
+  .sw-acc.active{border-color:rgba(62,207,142,.5);background:rgba(62,207,142,.08);}
+  .sw-acc .nm{font-weight:600;font-size:13px;}
+  .sw-acc .mt{font-size:11px;color:var(--muted);margin-top:2px;}
+  .sw-acc .tick{margin-left:auto;color:var(--green);font-size:13px;}
+  .item-group{
+    font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    padding:14px 2px 6px;border-top:1px solid var(--line);margin-top:6px;
+  }
+  .item-group:first-child{border-top:none;margin-top:0;padding-top:4px;}
+  .acc-active-tag{
+    display:inline-block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);
+    border:1px solid rgba(62,207,142,.4);border-radius:999px;padding:2px 7px;margin-left:6px;
+  }
+  .acc-card.is-active{border-color:rgba(62,207,142,.45);}
   .menu-btn{
     width:38px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3.5px;cursor:pointer;flex:none;
@@ -515,8 +553,8 @@
     <div class="section-head"><span class="section-num">00</span><span class="section-title">Account</span></div>
     <div class="card">
       <div class="stage-select" id="stageSelect">
-        <div class="stage-btn" data-stage="challenge1">Challenge 1<br>Target $5,500</div>
-        <div class="stage-btn" data-stage="challenge2">Challenge 2<br>Target $5,250</div>
+        <div class="stage-btn" data-stage="challenge1">Challenge 1<br><span id="stageT1">Target —</span></div>
+        <div class="stage-btn" data-stage="challenge2">Challenge 2<br><span id="stageT2">Target —</span></div>
         <div class="stage-btn" data-stage="real">Real Account</div>
       </div>
       <div class="inputs-row">
@@ -552,7 +590,7 @@
       </div>
       <div class="calc-row">
         <div class="calc-pill">
-          <div class="k">Daily drawdown limit (5%)</div>
+          <div class="k" id="dailyDDLabel">Daily drawdown limit (5%)</div>
           <div class="v" id="dailyDDVal">—</div>
         </div>
         <div class="calc-pill">
@@ -574,7 +612,7 @@
       </div>
       <div class="calc-row">
         <div class="calc-pill">
-          <div class="k">Max open-position DD (3%)</div>
+          <div class="k" id="openDDLabel">Max open-position DD (3%)</div>
           <div class="v" id="openDDVal">—</div>
         </div>
       </div>
@@ -745,6 +783,9 @@
 <div class="topbar">
   <div class="topbar-inner">
     <div class="topbar-brand">Gate <span class="sync-pill" id="syncPill">…</span></div>
+    <button class="acct-switch" id="acctSwitchBtn" aria-label="Switch account">
+      <span class="dotm"></span><span class="nm" id="acctSwitchName">No account</span><span class="cv">▾</span>
+    </button>
     <button class="menu-btn" id="menuBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
 </div>
@@ -835,6 +876,16 @@
         <input type="number" id="accForm_totalDD" placeholder="12">
       </div>
     </div>
+    <div class="inputs-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Phase 2 target ($, optional)</label>
+        <input type="number" id="accForm_target2" placeholder="5250">
+      </div>
+      <div class="field">
+        <label>Max open-trade DD (%)</label>
+        <input type="number" id="accForm_openDD" placeholder="3">
+      </div>
+    </div>
     <div class="field" style="margin-top:10px;">
       <label>Instructions &amp; rules for this account</label>
       <textarea class="plan-rules" id="accForm_instructions" placeholder="Targets, drawdowns, payout rules — everything this account must obey."></textarea>
@@ -856,19 +907,27 @@
   </div>
 </div>
 
+<div class="sheet-scrim" id="switchScrim"></div>
+<aside class="sheet" id="switchSheet">
+  <div class="sheet-title">Switch account</div>
+  <div class="sheet-sub">Each account keeps its own checklist, drawdowns, calendar and trackers.</div>
+  <div id="switchList"></div>
+  <button class="add-btn" id="switchAddBtn" style="margin-top:12px;">+ Add another account</button>
+</aside>
+
 <div class="save-toast" id="toast">Saved</div>
 
 <script>
 const DAILY_ITEMS = [
-  {id:'dd_daily', text:"Recalculated <b>today's daily drawdown limit</b> (5% of today's starting balance) — checked in the actual dashboard, not assumed."},
-  {id:'dd_open', text:"Recalculated the <b>open-position drawdown limit</b> (3% of live balance right now) — not yesterday's number, not this morning's, the one from this exact moment."},
+  {id:'dd_daily', text:"Recalculated <b>today's daily drawdown limit</b> ({{daily}}% of today's starting balance) — checked in the actual dashboard, not assumed."},
+  {id:'dd_open', text:"Recalculated the <b>open-position drawdown limit</b> ({{open}}% of live balance right now) — not yesterday's number, not this morning's, the one from this exact moment."},
   {id:'one_trade', text:"<b>Only one trade open</b> at any time — no second position at all, regardless of direction."},
   {id:'ip_stable', text:"<b>Same IP</b> as always — no VPN, no DNS change, no VPS, no new location."},
   {id:'taskbar_vpn', text:"Checked the <b>taskbar / app switcher</b> — no VPN app open or running in the background, even minimized."},
   {id:'weekend_orders', text:"No SL / TP / pending / sell order sitting anywhere that could touch <b>Saturday or Sunday</b>, even unactivated."},
   {id:'mt5_closed', text:"<b>MetaTrader 5 fully closed</b> — from late Friday through early Monday, no app open, no chance of a weekend order."},
   {id:'no_devices', text:"Account not linked to <b>any other device</b> or anyone else's account — zero copy-trading risk."},
-  {id:'target_check', text:"Checked current equity against <b>this stage's target</b> — if hit, I stop now, not after one more trade."},
+  {id:'target_check', text:"Checked current equity against <b>this stage's target ({{target}})</b> — if hit, I stop now, not after one more trade."},
   {id:'scalp_check', text:"Running total of trades held <b>under 30 seconds</b> is still below <b>20%</b> of this stage's target / withdrawal amount."},
 ];
 
@@ -907,6 +966,20 @@ function withTimeout(promise, ms, label){
 
 let offlineMode = false;          // true = deliberately working without the cloud
 let cloudOK = null;               // null unknown, true reachable, false blocked/unreachable
+
+// ---------- Multi-account scoping ----------
+// One trader, many funded/challenge accounts across many firms. Everything that
+// belongs to a single account (checklist days, drawdown numbers, trackers, risk
+// ladder, calendar) is stored under that account's own scope. The keys below are
+// shared by every account.
+const GLOBAL_KEYS = new Set(['accounts-list','propfirms-list','account-templates','profile-meta']);
+let activeAccountId = null;
+let activeAccount = null;
+let activeScope = 'legacy';       // 'legacy' = the original single-account data, kept as-is
+function scopeKey(key){
+  if(GLOBAL_KEYS.has(key) || !activeScope || activeScope === 'legacy') return key;
+  return 'acc@' + activeScope + '@' + key;
+}
 
 function lsKey(key){
   const uid = (window.currentUser && window.currentUser.uid) || 'local';
@@ -957,6 +1030,7 @@ function setSyncStatus(){
 }
 
 async function sGet(key){
+  key = scopeKey(key);
   const local = lsGet(key);
   if(!cloudReady()) return local;
   try{
@@ -978,7 +1052,8 @@ async function sGet(key){
   }
 }
 
-async function sSet(key, val){
+async function sSet(key, val){ return sSetRaw(scopeKey(key), val); }
+async function sSetRaw(key, val){
   lsSet(key, val);                       // device first — never lose a keystroke to a blocked network
   if(!cloudReady()){ markPending(key); showToast('Saved on this device'); return; }
   try{
@@ -1048,8 +1123,10 @@ function showToast(msg){ const t=document.getElementById('toast'); if(msg) t.tex
 // Debounced writer — avoids hammering storage on every keystroke (rate limit protection)
 const _debounceTimers = {};
 function sSetDebounced(key, val, delay=700){
+  key = scopeKey(key);
+  lsSet(key, val);                       // device first, immediately — never wait on the debounce
   clearTimeout(_debounceTimers[key]);
-  _debounceTimers[key] = setTimeout(()=>{ sSet(key, val); }, delay);
+  _debounceTimers[key] = setTimeout(()=>{ sSetRaw(key, val); }, delay);
 }
 
 function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
@@ -1070,12 +1147,51 @@ let selectedDate = todayISO();
 let accountMeta = { stage:'challenge1', accountStart: todayISO(), lastTradeDate: todayISO(), withdrawTarget: '', realAccountDate: '' };
 let calViewDate = new Date();
 
+// ---------- Active account helpers ----------
+// Every number on the checklist screen comes from the account currently being
+// traded, so switching accounts re-points the whole app at that rulebook.
+function accNum(field, dflt){
+  const n = parseFloat(activeAccount && activeAccount[field]);
+  return isFinite(n) && n > 0 ? n : dflt;
+}
+function dailyPct(){ return accNum('dailyDDPct', 5); }
+function openPct(){ return accNum('openDDPct', 3); }
+function totalPct(){ return accNum('totalDDPct', 12); }
+function accSize(){ return accNum('balance', 5000); }
+function stageTarget(stage){
+  const st = stage || accountMeta.stage;
+  if(st === 'real') return parseFloat(accountMeta.withdrawTarget || 0) || 0;
+  if(st === 'challenge2') return accNum('profitTarget2', 0) || accNum('profitTarget', 0);
+  return accNum('profitTarget', 0);
+}
+function money(n){ return '$' + Number(n).toLocaleString(undefined,{maximumFractionDigits:2}); }
+function fillTokens(text){
+  const t = stageTarget();
+  return text
+    .replace('{{daily}}', dailyPct())
+    .replace('{{open}}', openPct())
+    .replace('{{target}}', t ? money(t) : 'set it in this account');
+}
+function applyAccountLabels(){
+  const dl = document.getElementById('dailyDDLabel');
+  if(dl) dl.textContent = 'Daily drawdown limit (' + dailyPct() + '%)';
+  const ol = document.getElementById('openDDLabel');
+  if(ol) ol.textContent = 'Max open-position DD (' + openPct() + '%)';
+  const t1 = document.getElementById('stageT1');
+  if(t1) t1.textContent = accNum('profitTarget',0) ? 'Target ' + money(accNum('profitTarget',0)) : 'Target —';
+  const t2 = document.getElementById('stageT2');
+  if(t2) t2.textContent = accNum('profitTarget2',0) ? 'Target ' + money(accNum('profitTarget2',0)) : (accNum('profitTarget',0) ? 'Target ' + money(accNum('profitTarget',0)) : 'Target —');
+  const nm = document.getElementById('acctSwitchName');
+  if(nm) nm.textContent = activeAccount ? (activeAccount.name || 'Unnamed account') : 'No account';
+}
+
 // ---------- Render: hero ----------
 function renderHero(dayItems){
   document.getElementById('heroDate').textContent = fmtDate(selectedDate);
   document.getElementById('dowLabel').textContent = selectedDate === todayISO() ? 'Today' : (selectedDate > todayISO() ? 'Upcoming' : 'Past day');
-  const total = DAILY_ITEMS.length;
-  const checked = DAILY_ITEMS.filter(i => dayItems[i.id]).length;
+  const all = checklistGroups().reduce((acc,g)=> acc.concat(g.items), []);
+  const total = all.length || 1;
+  const checked = all.filter(i => dayItems[i.id]).length;
   document.getElementById('heroFill').style.width = (checked/total*100)+'%';
   document.getElementById('heroSub').textContent = `${checked} of ${total} checked`;
   const badge = document.getElementById('gateBadge');
@@ -1085,34 +1201,82 @@ function renderHero(dayItems){
 }
 
 // ---------- Render: checklist ----------
+function ruleLinesFrom(text){
+  return String(text||'').split('\n')
+    .map(l => l.replace(/^\s*[•\-\*\u2022\d.)]+\s*/,'').trim())
+    .filter(l => l.length > 3 && /[a-z]/.test(l));   // skips ALL-CAPS headings and blank lines
+}
+// The checklist is: the universal pre-flight rules, plus this account's firm
+// plan rules, plus its notices, plus anything written in its own instructions.
+function checklistGroups(){
+  const groups = [{ title:'Universal pre-flight', items: DAILY_ITEMS.map(i => ({ id:i.id, text: fillTokens(i.text) })) }];
+  const acc = activeAccount;
+  if(acc){
+    const firm = propFirmsList.find(f => f.id === acc.firmId);
+    const plan = firm ? (firm.plans||[]).find(pl => pl.id === acc.planId) : null;
+    if(plan){
+      const lines = ruleLinesFrom(plan.rulesText);
+      if(lines.length){
+        groups.push({
+          title: (firm.name||'Firm') + ' — ' + (plan.name||'plan') + ' rules',
+          items: lines.map((t,i) => ({ id:'plan_'+plan.id+'_'+i, text: escapeHtml(t) }))
+        });
+      }
+      const notices = plan.notices || [];
+      if(notices.length){
+        groups.push({
+          title: 'Easy to forget — ' + (firm.name||'firm'),
+          items: notices.map(n => ({ id:'note_'+n.id, text: '⚠ ' + escapeHtml(n.text) }))
+        });
+      }
+    }
+    const own = ruleLinesFrom(acc.instructions);
+    if(own.length){
+      groups.push({
+        title: (acc.name || 'This account') + ' — own rules',
+        items: own.map((t,i) => ({ id:'ins_'+acc.id+'_'+i, text: escapeHtml(t) }))
+      });
+    }
+  }
+  return groups;
+}
 function renderChecklist(dayData){
   const card = document.getElementById('checklistCard');
   card.innerHTML = '';
   const dow = new Date(selectedDate+'T12:00:00').getDay(); // 0 Sun,1 Mon,5 Fri,6 Sat
   const isWeekendWindow = dow===5 || dow===6 || dow===0 || dow===1; // Fri, Sat, Sun, Mon
-  DAILY_ITEMS.forEach((item, idx) => {
-    const checked = !!dayData.items[item.id];
-    const isUrgent = item.id==='mt5_closed' && isWeekendWindow && !checked;
-    const row = document.createElement('div');
-    row.className = 'item' + (checked?' checked':'') + (isUrgent?' urgent':'');
-    const tag = isUrgent ? '<span class="urgent-tag">DO NOW</span>' : '';
-    row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text"><b>${idx+1}.</b> ${item.text}${tag}</div>`;
-    row.onclick = async () => {
-      dayData.items[item.id] = !dayData.items[item.id];
-      setDayCache(selectedDate, dayData);
-      renderChecklist(dayData);
-      renderHero(dayData.items);
-      renderCalendar();
-      sSet('day:'+selectedDate, dayData); // saves in the background, doesn't block the screen update above
-    };
-    card.appendChild(row);
+  let n = 0;
+  checklistGroups().forEach(group => {
+    const head = document.createElement('div');
+    head.className = 'item-group';
+    head.textContent = group.title;
+    card.appendChild(head);
+    group.items.forEach(item => {
+      n++;
+      const idx = n;
+      const checked = !!dayData.items[item.id];
+      const isUrgent = item.id==='mt5_closed' && isWeekendWindow && !checked;
+      const row = document.createElement('div');
+      row.className = 'item' + (checked?' checked':'') + (isUrgent?' urgent':'');
+      const tag = isUrgent ? '<span class="urgent-tag">DO NOW</span>' : '';
+      row.innerHTML = `<div class="box ${checked?'checked':''}"></div><div class="item-text"><b>${idx}.</b> ${item.text}${tag}</div>`;
+      row.onclick = async () => {
+        dayData.items[item.id] = !dayData.items[item.id];
+        setDayCache(selectedDate, dayData);
+        renderChecklist(dayData);
+        renderHero(dayData.items);
+        renderCalendar();
+        sSet('day:'+selectedDate, dayData); // saves in the background, doesn't block the screen update above
+      };
+      card.appendChild(row);
+    });
   });
 }
 
 // ---------- Render: today's DD numbers ----------
 function renderCalc(dayData){
   const bal = parseFloat(dayData.balance || 0);
-  const ddAmt = bal ? bal*0.05 : 0;
+  const ddAmt = bal ? bal*dailyPct()/100 : 0;
   const dd5 = document.getElementById('dailyDDVal');
   dd5.textContent = bal ? '$' + ddAmt.toFixed(2) : '—';
   const floorEl = document.getElementById('dailyDDFloor');
@@ -1121,7 +1285,7 @@ function renderCalc(dayData){
 function renderLiveCalc(dayData){
   const live = parseFloat(dayData.liveBalance || 0);
   const dd3 = document.getElementById('openDDVal');
-  dd3.textContent = live ? '$' + (live*0.03).toFixed(2) : '—';
+  dd3.textContent = live ? '$' + (live*openPct()/100).toFixed(2) : '—';
 }
 
 // ---------- Load a given day ----------
@@ -1138,7 +1302,7 @@ async function prefetchHistory(){
   // Seed every day from this device first, so the calendar is fully populated
   // even when the cloud can't be reached at all.
   try{
-    const prefix = lsKey('day:');
+    const prefix = lsKey(scopeKey('day:'));
     for(let i=0;i<localStorage.length;i++){
       const k = localStorage.key(i);
       if(!k || !k.startsWith(prefix)) continue;
@@ -1150,10 +1314,11 @@ async function prefetchHistory(){
     const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
     const snap = await withTimeout(window._fb.getDocs(colRef), 8000, 'prefetchHistory');
     if(!snap){ cloudOK = false; setSyncStatus(); return; } // timed out — device copy stands
+    const dayPrefix = scopeKey('day:');
     snap.forEach((docSnap) => {
       const key = docSnap.id;
-      if(key.startsWith('day:')){
-        const iso = key.slice(4);
+      if(key.startsWith(dayPrefix)){
+        const iso = key.slice(dayPrefix.length);
         try{ dayCache[iso] = JSON.parse(docSnap.data().value); }catch(e){ dayCache[iso] = null; }
       }
     });
@@ -1237,14 +1402,20 @@ document.getElementById('dayPnl').addEventListener('input', async (e)=>{
 });
 
 // ---------- Account meta ----------
+function defaultAccountMeta(){
+  const start = (activeAccount && activeAccount.purchaseDate) || todayISO();
+  const stage = (activeAccount && activeAccount.phase === 'funded') ? 'real' : 'challenge1';
+  return { stage, accountStart:start, lastTradeDate:start, withdrawTarget:'', realAccountDate:'' };
+}
 async function loadAccountMeta(){
   const saved = await sGet('account-meta');
-  if(saved) accountMeta = saved;
+  accountMeta = saved || defaultAccountMeta();
   document.getElementById('accountStart').value = accountMeta.accountStart;
   document.getElementById('lastTradeDate').value = accountMeta.lastTradeDate;
   document.getElementById('withdrawTarget').value = accountMeta.withdrawTarget || '';
   document.getElementById('realAccountDate').value = accountMeta.realAccountDate || '';
   setStageUI(accountMeta.stage);
+  applyAccountLabels();
 }
 function setStageUI(stage){
   accountMeta.stage = stage;
@@ -1289,10 +1460,10 @@ function renderTrackers(){
   });
 
   // stage target
-  const stageTarget = accountMeta.stage==='challenge1' ? 5500 : accountMeta.stage==='challenge2' ? 5250 : (accountMeta.withdrawTarget || null);
+  const tgt = stageTarget() || null;
   rows.push({
     label: accountMeta.stage==='real' ? 'My next withdrawal target' : 'Current stage target',
-    val: stageTarget ? '$'+Number(stageTarget).toLocaleString() : 'set a target above',
+    val: tgt ? money(tgt) : 'set a target on this account',
     cls: 'ok'
   });
 
@@ -1324,7 +1495,7 @@ function renderTrackers(){
 
 // ---------- Real Balance / Risk Ladder ----------
 async function loadRealBalanceMeta(){
-  const saved = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
+  const saved = await sGet('real-balance-meta') || { accountSize: accSize(), ddPercent: totalPct() };
   document.getElementById('rbAccountSize').value = saved.accountSize;
   document.getElementById('rbDDPercent').value = saved.ddPercent;
   renderRealBalance(saved);
@@ -1364,13 +1535,13 @@ document.getElementById('riskWinBtn').onclick = async ()=>{
   const ladder = await sGet('risk-ladder') || { stepIndex: 1 };
   ladder.stepIndex = Math.min(ladder.stepIndex+1, RISK_TIERS.length-1);
   await sSet('risk-ladder', ladder);
-  const meta = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
+  const meta = await sGet('real-balance-meta') || { accountSize: accSize(), ddPercent: totalPct() };
   renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100, parseFloat(meta.accountSize||0));
 };
 document.getElementById('riskLossBtn').onclick = async ()=>{
   const ladder = { stepIndex: 0 };
   await sSet('risk-ladder', ladder);
-  const meta = await sGet('real-balance-meta') || { accountSize:5000, ddPercent:12 };
+  const meta = await sGet('real-balance-meta') || { accountSize: accSize(), ddPercent: totalPct() };
   renderRiskTiers(parseFloat(meta.accountSize||0)*parseFloat(meta.ddPercent||0)/100, parseFloat(meta.accountSize||0));
 };
 
@@ -1399,9 +1570,9 @@ async function renderWeekly(){
 // ---------- Target-hit alarm banner ----------
 function renderAlarmBanner(dayData){
   const slot = document.getElementById('alarmSlot');
-  const stageTarget = accountMeta.stage==='challenge1' ? 5500 : accountMeta.stage==='challenge2' ? 5250 : parseFloat(accountMeta.withdrawTarget||0);
+  const tgt = stageTarget();
   const bal = Math.max(parseFloat(dayData.balance||0), parseFloat(dayData.liveBalance||0));
-  if(stageTarget && bal >= stageTarget){
+  if(tgt && bal >= tgt){
     const label = accountMeta.stage==='real' ? 'WITHDRAWAL TARGET HIT' : 'CHALLENGE TARGET HIT';
     slot.innerHTML = `
       <div class="alarm">
@@ -1705,10 +1876,110 @@ document.getElementById('templatesList').addEventListener('click', async (e)=>{
   }
 });
 
+// ---------- Active account switching ----------
+// An account's data scope is fixed for its whole life. The very first account
+// keeps the 'legacy' scope so all history from the single-account version of
+// Gate stays exactly where it is.
+const ACTIVE_KEY = 'active-account';
+function scopeOf(a){ return (a && a.scope) || 'legacy'; }
+async function ensureAccountScopes(){
+  let changed = false;
+  if(!accountsList.length){
+    accountsList = [{
+      id: uid(), scope: 'legacy', name: 'My first account',
+      firmId:'', firmName:'', planId:'', planName:'',
+      balance: BASELINE_TEMPLATE.balance, profitTarget: BASELINE_TEMPLATE.profitTarget,
+      profitTarget2: 5250, dailyDDPct: BASELINE_TEMPLATE.dailyDDPct, openDDPct: 3,
+      totalDDPct: BASELINE_TEMPLATE.totalDDPct, phase: 'single',
+      instructions: BASELINE_TEMPLATE.instructions, status: 'ongoing',
+      purchaseDate: todayISO(), notes: ''
+    }];
+    changed = true;
+  }
+  if(!accountsList.some(a => a.scope === 'legacy')){
+    accountsList[0].scope = 'legacy';
+    changed = true;
+  }
+  accountsList.forEach(a => { if(!a.scope){ a.scope = a.id; changed = true; } });
+  if(changed) await sSet('accounts-list', accountsList);
+}
+function setActiveAccountRef(id){
+  activeAccount = accountsList.find(a => a.id === id) || accountsList[0] || null;
+  activeAccountId = activeAccount ? activeAccount.id : null;
+  activeScope = scopeOf(activeAccount);
+}
+async function resolveActiveAccount(){
+  await ensureAccountScopes();
+  setActiveAccountRef(lsGet(ACTIVE_KEY));
+  lsSet(ACTIVE_KEY, activeAccountId);
+  applyAccountLabels();
+}
+async function reloadAccountData(){
+  Object.keys(dayCache).forEach(k => delete dayCache[k]);
+  historyPrefetched = false;
+  applyAccountLabels();
+  await prefetchHistory();
+  await loadAccountMeta();
+  await loadDay(todayISO());
+  renderTrackers();
+  renderMilestones();
+  await loadRealBalanceMeta();
+  await renderWeekly();
+  renderAccountsView();
+  renderSwitcher();
+}
+async function switchAccount(id){
+  if(id === activeAccountId){ setSwitchSheet(false); return; }
+  setActiveAccountRef(id);
+  lsSet(ACTIVE_KEY, activeAccountId);
+  setSwitchSheet(false);
+  goToView('checklist');
+  showToast('Now trading: ' + (activeAccount ? activeAccount.name : ''));
+  await reloadAccountData();
+}
+window.switchAccount = switchAccount;
+function setSwitchSheet(open){
+  document.getElementById('switchSheet').classList.toggle('open', open);
+  document.getElementById('switchScrim').classList.toggle('open', open);
+  if(open) renderSwitcher();
+}
+function renderSwitcher(){
+  const wrap = document.getElementById('switchList');
+  if(!wrap) return;
+  const live = accountsList.filter(a => a.status !== 'planned');
+  if(!live.length){ wrap.innerHTML = '<div class="hint">No accounts yet — add one below.</div>'; return; }
+  const groups = {};
+  live.forEach(a => {
+    const k = a.firmName || 'No firm';
+    (groups[k] = groups[k] || []).push(a);
+  });
+  wrap.innerHTML = Object.keys(groups).sort().map(firm => `
+    <div class="sw-firm">${escapeHtml(firm)}</div>
+    ${groups[firm].map(a => `
+      <div class="sw-acc ${a.id===activeAccountId?'active':''}" data-switch="${a.id}">
+        <div>
+          <div class="nm">${escapeHtml(a.name||'Unnamed account')}</div>
+          <div class="mt">${a.balance ? '$'+Number(a.balance).toLocaleString() : '—'} · ${escapeHtml(a.planName||statusLabel(a.status))} · ${a.dailyDDPct||5}% daily / ${a.totalDDPct||12}% total</div>
+        </div>
+        ${a.id===activeAccountId ? '<div class="tick">● trading</div>' : ''}
+      </div>`).join('')}`).join('');
+  wrap.querySelectorAll('[data-switch]').forEach(el => {
+    el.onclick = () => switchAccount(el.dataset.switch);
+  });
+}
+document.getElementById('acctSwitchBtn').addEventListener('click', ()=> setSwitchSheet(true));
+document.getElementById('switchScrim').addEventListener('click', ()=> setSwitchSheet(false));
+document.getElementById('switchAddBtn').addEventListener('click', ()=>{
+  setSwitchSheet(false);
+  goToView('accounts');
+  openAccountForm(null);
+});
+
 // ---------- Accounts ----------
 let accountsList = [];
 let accountsFilter = 'all';
 let editingAccountId = null;
+let justCreatedId = null;
 const ACCOUNT_STATUSES = [
   {key:'all', label:'All'},
   {key:'ongoing', label:'Ongoing'},
@@ -1723,6 +1994,7 @@ async function loadAccounts(){
   renderTemplates();
 }
 function renderAccountsView(){
+  renderSwitcher();
   const counts = { all:0, ongoing:0, active:0, passed:0, failed:0, planned:0 };
   accountsList.forEach(a=>{
     if(a.status === 'planned') counts.planned++;
@@ -1744,10 +2016,10 @@ function renderAccountsView(){
     return;
   }
   listEl.innerHTML = list.map(a=>`
-    <div class="acc-card" data-id="${a.id}">
+    <div class="acc-card ${a.id===activeAccountId?'is-active':''}" data-id="${a.id}">
       <div class="acc-card-top">
         <div>
-          <div class="acc-name">${escapeHtml(a.name||'Unnamed account')}</div>
+          <div class="acc-name">${escapeHtml(a.name||'Unnamed account')}${a.id===activeAccountId?'<span class="acc-active-tag">trading</span>':''}</div>
           <div class="acc-firm">${escapeHtml(a.firmName||'No firm set')}${a.planName ? ' · '+escapeHtml(a.planName) : ''}</div>
         </div>
         <div class="acc-status-badge status-${a.status}">${statusLabel(a.status)}</div>
@@ -1758,6 +2030,7 @@ function renderAccountsView(){
       </div>
       <div class="tpl-meta">${escapeHtml(setupSummary(a))}</div>
       <div class="acc-mini-actions">
+        ${a.id===activeAccountId ? '' : `<button class="mini-btn" data-acc-act="use" data-id="${a.id}">Trade this account</button>`}
         <button class="mini-btn" data-acc-act="duplicate" data-id="${a.id}">Duplicate</button>
         <button class="mini-btn" data-acc-act="template" data-id="${a.id}">Save as setup</button>
         <button class="mini-btn" data-acc-act="copy" data-id="${a.id}">Copy instructions</button>
@@ -1775,7 +2048,9 @@ function renderAccountsView(){
       const acc = accountsList.find(a=>a.id===btn.dataset.id);
       if(!acc) return;
       const act = btn.dataset.accAct;
-      if(act === 'duplicate'){
+      if(act === 'use'){
+        await switchAccount(acc.id);
+      } else if(act === 'duplicate'){
         openAccountForm(null, { ...acc, name: acc.name + ' (copy)' });
       } else if(act === 'template'){
         const name = prompt('Name this reusable setup:', acc.name || 'New setup');
@@ -1805,6 +2080,8 @@ function fillAccountForm(src){
   document.getElementById('accForm_target').value = src.profitTarget != null ? src.profitTarget : '';
   document.getElementById('accForm_dailyDD').value = src.dailyDDPct != null ? src.dailyDDPct : '';
   document.getElementById('accForm_totalDD').value = src.totalDDPct != null ? src.totalDDPct : '';
+  document.getElementById('accForm_target2').value = src.profitTarget2 != null ? src.profitTarget2 : '';
+  document.getElementById('accForm_openDD').value = src.openDDPct != null ? src.openDDPct : '';
   document.getElementById('accForm_phase').value = src.phase || 'single';
   document.getElementById('accForm_instructions').value = src.instructions || '';
 }
@@ -1848,6 +2125,7 @@ function openAccountForm(id, prefill){
     document.getElementById('accountModalTitle').textContent = prefill ? 'New account from setup' : 'Add account';
     document.getElementById('accForm_name').value = (prefill && prefill.name) || '';
     if(prefill && prefill.firmId){ firmSelect.value = prefill.firmId; }
+    else if(activeAccount && activeAccount.firmId && !prefill){ firmSelect.value = activeAccount.firmId; }
     refreshAccFormPlans();
     if(prefill && prefill.planId){ document.getElementById('accForm_plan').value = prefill.planId; }
     fillAccountForm(prefill || { phase:'single' });
@@ -1884,6 +2162,8 @@ document.getElementById('accForm_save').addEventListener('click', async ()=>{
     profitTarget: document.getElementById('accForm_target').value,
     dailyDDPct: document.getElementById('accForm_dailyDD').value,
     totalDDPct: document.getElementById('accForm_totalDD').value,
+    profitTarget2: document.getElementById('accForm_target2').value,
+    openDDPct: document.getElementById('accForm_openDD').value,
     phase: document.getElementById('accForm_phase').value,
     instructions: document.getElementById('accForm_instructions').value,
     status: document.getElementById('accForm_status').value,
@@ -1894,11 +2174,23 @@ document.getElementById('accForm_save').addEventListener('click', async ()=>{
     const idx = accountsList.findIndex(a=>a.id===editingAccountId);
     if(idx > -1) accountsList[idx] = { ...accountsList[idx], ...data };
   } else {
-    accountsList.push({ id: uid(), ...data });
+    const newId = uid();
+    accountsList.push({ id: newId, scope: accountsList.length ? newId : 'legacy', ...data });
+    justCreatedId = newId;
   }
   await sSet('accounts-list', accountsList);
+  if(editingAccountId === activeAccountId) setActiveAccountRef(activeAccountId);
   renderAccountsView();
+  applyAccountLabels();
+  const wasEditingActive = editingAccountId === activeAccountId;
   closeAccountForm();
+  if(justCreatedId){
+    const created = justCreatedId; justCreatedId = null;
+    if(confirm('Account saved. Switch to it now?')) await switchAccount(created);
+  } else if(wasEditingActive){
+    await loadDay(selectedDate);
+    renderTrackers();
+  }
 });
 function currentFormSetup(){
   return {
@@ -1907,6 +2199,8 @@ function currentFormSetup(){
     profitTarget: document.getElementById('accForm_target').value,
     dailyDDPct: document.getElementById('accForm_dailyDD').value,
     totalDDPct: document.getElementById('accForm_totalDD').value,
+    profitTarget2: document.getElementById('accForm_target2').value,
+    openDDPct: document.getElementById('accForm_openDD').value,
     phase: document.getElementById('accForm_phase').value,
     instructions: document.getElementById('accForm_instructions').value,
   };
@@ -1933,10 +2227,18 @@ document.getElementById('accForm_saveTemplate').addEventListener('click', async 
 document.getElementById('accForm_delete').addEventListener('click', async ()=>{
   if(!editingAccountId) return;
   if(!confirm('Delete this account? This cannot be undone.')) return;
+  const wasActive = editingAccountId === activeAccountId;
   accountsList = accountsList.filter(a=>a.id!==editingAccountId);
   await sSet('accounts-list', accountsList);
-  renderAccountsView();
   closeAccountForm();
+  await ensureAccountScopes();
+  if(wasActive){
+    setActiveAccountRef(accountsList[0] && accountsList[0].id);
+    lsSet(ACTIVE_KEY, activeAccountId);
+    await reloadAccountData();
+  } else {
+    renderAccountsView();
+  }
 });
 
 // ---------- Prop firms & rules library ----------
@@ -1980,6 +2282,7 @@ function renderRulesView(){
       <div class="firm-head">
         <div class="firm-name">${escapeHtml(firm.name)}</div>
         <div class="firm-actions">
+          <button class="mini-btn" data-act="addacct" data-firm="${firm.id}">+ Account</button>
           <button class="mini-btn" data-act="addplan" data-firm="${firm.id}">+ Plan</button>
           <button class="mini-btn" data-act="pasteplan" data-firm="${firm.id}">Paste plan</button>
           <button class="mini-btn" data-act="dupfirm" data-firm="${firm.id}">Duplicate firm</button>
@@ -1991,11 +2294,13 @@ function renderRulesView(){
           <div class="plan-head">
             <div class="plan-name">${escapeHtml(plan.name)}</div>
             <div class="firm-actions">
+              <button class="mini-btn" data-act="addacct" data-firm="${firm.id}" data-plan="${plan.id}">+ Account</button>
               <button class="mini-btn" data-act="copyplan" data-firm="${firm.id}" data-plan="${plan.id}">Copy plan</button>
               <button class="mini-btn" data-act="dupplan" data-firm="${firm.id}" data-plan="${plan.id}">Duplicate</button>
               <button class="mini-btn danger" data-act="delplan" data-firm="${firm.id}" data-plan="${plan.id}">Delete</button>
             </div>
           </div>
+          <div class="tpl-meta" style="margin:2px 0 8px;">${accountsList.filter(a=>a.firmId===firm.id && a.planId===plan.id).length ? 'Accounts on this plan: ' + escapeHtml(accountsList.filter(a=>a.firmId===firm.id && a.planId===plan.id).map(a=>a.name).join(', ')) : 'No accounts on this plan yet.'}</div>
           <textarea class="plan-rules" placeholder="Paste this plan's rules &amp; regulations here…" data-act="rulestext" data-firm="${firm.id}" data-plan="${plan.id}">${escapeHtml(plan.rulesText||'')}</textarea>
           <div class="notices-wrap">
             ${(plan.notices||[]).map(n => `
@@ -2022,6 +2327,16 @@ document.getElementById('firmsList').addEventListener('click', async (e)=>{
   const firmId = btn.dataset.firm;
   const firm = propFirmsList.find(f=>f.id===firmId);
   if(!firm) return;
+  if(act === 'addacct'){
+    const planId = btn.dataset.plan || '';
+    const plan = (firm.plans||[]).find(pl=>pl.id===planId);
+    goToView('accounts');
+    openAccountForm(null, {
+      name: firm.name + ' ' + (plan ? plan.name + ' ' : '') + '#' + (accountsList.filter(a=>a.firmId===firm.id).length + 1),
+      firmId: firm.id, planId: planId, phase:'single'
+    });
+    return;
+  }
   if(act === 'addplan'){
     const name = prompt('Plan / stage name (e.g. "Phase 1", "Funded"):');
     if(!name || !name.trim()) return;
@@ -2173,6 +2488,10 @@ setSyncStatus = function(){ _origSetSyncStatus(); try{ renderProfileSync(); }cat
 // ---------- Init (called by the Firebase auth listener once logged in) ----------
 async function initApp(){
   const steps = [
+    ['loadTemplates', loadTemplates],
+    ['loadAccounts', loadAccounts],
+    ['loadPropFirms', loadPropFirms],
+    ['resolveActiveAccount', resolveActiveAccount],
     ['prefetchHistory', prefetchHistory],
     ['loadAccountMeta', loadAccountMeta],
     ['loadDay', () => loadDay(todayISO())],
@@ -2180,9 +2499,8 @@ async function initApp(){
     ['renderMilestones', renderMilestones],
     ['loadRealBalanceMeta', loadRealBalanceMeta],
     ['renderWeekly', renderWeekly],
-    ['loadTemplates', loadTemplates],
-    ['loadAccounts', loadAccounts],
-    ['loadPropFirms', loadPropFirms],
+    ['renderRulesView', () => renderRulesView()],
+    ['renderAccountsView', () => renderAccountsView()],
     ['loadProfile', loadProfile],
   ];
   let hadFailure = false;

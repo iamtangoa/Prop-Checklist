@@ -38,7 +38,7 @@
     margin:0; background:var(--bg); color:var(--text);
     font-family:var(--mono); font-size:14px;
     -webkit-font-smoothing:antialiased;
-    padding-bottom:60px;
+    padding-bottom:92px;
   }
   .wrap{max-width:720px;margin:0 auto;padding:20px 16px 40px;}
 
@@ -183,6 +183,7 @@
     background:var(--panel2);border:1px solid var(--green);color:var(--green);
     padding:8px 16px;border-radius:99px;font-size:12px;opacity:0;transition:.25s;pointer-events:none;
   }
+  .save-toast{bottom:78px;}
   .save-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* ALARM BANNER */
@@ -199,7 +200,7 @@
   .tracker.urgent{background:rgba(232,84,77,.10);border-radius:8px;padding:10px 8px;margin:2px 0;animation:pulse 1.6s ease-in-out infinite;}
 
   /* RISK LADDER */
-  .risk-tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+  .risk-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
   .risk-tier{
     background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;
   }
@@ -296,6 +297,118 @@
     background:none;border:none;color:var(--muted);font-family:var(--mono);
     font-size:11px;cursor:pointer;text-decoration:underline;
   }
+
+  /* BOTTOM NAV */
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0; z-index:900;
+    display:flex; background:var(--panel2); border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom,0);
+  }
+  .bn-item{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; padding:9px 4px 7px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .bn-item svg{width:20px;height:20px;display:block;margin:0 auto;stroke:var(--dim);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:.15s;}
+  .bn-item .bn-label{font-family:var(--display);font-weight:600;font-size:9.5px;color:var(--dim);transition:.15s;margin-top:1px;}
+  .bn-item.active svg{stroke:var(--green);}
+  .bn-item.active .bn-label{color:var(--green);}
+
+  .view-panel{display:none;}
+  .view-panel.active{display:block;}
+
+  /* PROFILE */
+  .profile-card{display:flex;align-items:center;gap:14px;}
+  .profile-avatar{
+    width:52px;height:52px;border-radius:50%;background:rgba(62,207,142,.14);
+    border:1px solid rgba(62,207,142,.35);color:var(--green);
+    display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:19px;flex:none;
+  }
+  .profile-name-input{font-family:var(--display);font-weight:700;font-size:16px;background:none;border:none;color:var(--text);padding:2px 0;width:100%;border-bottom:1px solid transparent;}
+  .profile-name-input:focus{outline:none;border-bottom-color:var(--green);}
+  .profile-email{font-size:12px;color:var(--muted);margin-top:2px;}
+  .signout-btn{
+    width:100%;margin-top:16px;padding:11px;border-radius:9px;border:1px solid rgba(232,84,77,.35);
+    background:rgba(232,84,77,.1);color:var(--red);font-family:var(--display);font-weight:600;font-size:13.5px;cursor:pointer;
+  }
+
+  /* ADD BUTTON / SELECT / CHIPS */
+  .add-btn{
+    width:100%;padding:11px;border-radius:10px;border:1px dashed var(--line);
+    background:none;color:var(--muted);font-family:var(--display);font-weight:600;font-size:13px;cursor:pointer;margin-bottom:14px;
+  }
+  .add-btn:active{border-color:var(--green);color:var(--green);}
+  .select-input{
+    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:13px;
+  }
+  .select-input:focus{outline:none;border-color:var(--green);}
+  .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .acc-chip{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:7px;
+  }
+  .acc-chip.active{border-color:var(--green);background:rgba(62,207,142,.08);}
+  .acc-chip-label{font-family:var(--display);font-weight:600;font-size:11.5px;color:var(--muted);}
+  .acc-chip.active .acc-chip-label{color:var(--green);}
+  .acc-chip-count{font-family:var(--display);font-weight:700;font-size:12.5px;color:var(--text);background:var(--bg);border-radius:99px;padding:1px 7px;min-width:18px;text-align:center;}
+
+  /* ACCOUNT CARDS */
+  .acc-card{
+    border:1px solid var(--line);border-radius:12px;background:var(--panel);
+    padding:12px 14px;margin-bottom:10px;cursor:pointer;
+  }
+  .acc-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .acc-name{font-family:var(--display);font-weight:600;font-size:14px;}
+  .acc-firm{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .acc-status-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em;}
+  .status-ongoing{background:rgba(232,163,61,.14);color:var(--amber);border:1px solid rgba(232,163,61,.35);}
+  .status-active{background:rgba(62,207,142,.14);color:var(--green);border:1px solid rgba(62,207,142,.35);}
+  .status-passed{background:rgba(62,207,142,.14);color:var(--green);border:1px solid rgba(62,207,142,.35);}
+  .status-failed{background:rgba(232,84,77,.14);color:var(--red);border:1px solid rgba(232,84,77,.35);}
+  .status-planned{background:rgba(122,136,148,.14);color:var(--muted);border:1px solid var(--line);}
+  .acc-card-bottom{display:flex;justify-content:space-between;margin-top:9px;font-size:11.5px;color:var(--muted);font-family:var(--mono);}
+
+  /* PROP FIRM RULES */
+  .firm-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 14px;margin-bottom:12px;}
+  .firm-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .firm-name{font-family:var(--display);font-weight:700;font-size:15px;}
+  .firm-actions{display:flex;gap:6px;}
+  .mini-btn{
+    background:var(--bg);border:1px solid var(--line);color:var(--muted);
+    font-family:var(--display);font-weight:600;font-size:10.5px;padding:5px 9px;border-radius:7px;cursor:pointer;white-space:nowrap;
+  }
+  .mini-btn:active{border-color:var(--green);color:var(--green);}
+  .mini-btn.danger:active{border-color:var(--red);color:var(--red);}
+  .plan-card{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:11px 12px;margin-top:9px;}
+  .plan-head{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .plan-name{font-family:var(--display);font-weight:600;font-size:13px;}
+  .plan-rules{
+    width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--text);
+    padding:9px 10px;font-family:var(--mono);font-size:12px;margin-top:8px;min-height:70px;resize:vertical;line-height:1.5;
+    box-sizing:border-box;
+  }
+  .plan-rules:focus{outline:none;border-color:var(--green);}
+  .notices-wrap{margin-top:9px;}
+  .notice-item{
+    background:rgba(232,84,77,.1);border:1px solid rgba(232,84,77,.35);border-radius:8px;
+    padding:8px 10px;margin-top:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;
+  }
+  .notice-text{font-size:12.5px;font-weight:700;color:var(--red);line-height:1.4;}
+  .notice-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;flex:none;padding:0 2px;}
+
+  /* MODAL (account add/edit) */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:950;
+    display:flex;align-items:flex-end;justify-content:center;padding:0;
+  }
+  .modal-card{
+    width:100%;max-width:480px;max-height:88vh;overflow-y:auto;
+    background:var(--panel2);border:1px solid var(--line);border-top-left-radius:18px;border-top-right-radius:18px;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom,0));
+  }
+  .modal-title{font-family:var(--display);font-weight:700;font-size:16px;}
+  .btn-row{display:flex;gap:10px;margin-top:14px;}
+  .btn-row .auth-btn{margin-top:0;}
 </style>
 </head>
 <body>
@@ -328,10 +441,7 @@
 
 <div class="wrap">
 
-  <div class="account-bar">
-    <span id="accountEmail"></span>
-    <button id="signOutBtn">Sign out</button>
-  </div>
+<div class="view-panel active" data-view="checklist">
 
   <div id="alarmSlot"></div>
 
@@ -402,8 +512,12 @@
           <div class="k">Daily drawdown limit (5%)</div>
           <div class="v" id="dailyDDVal">—</div>
         </div>
+        <div class="calc-pill">
+          <div class="k">Account floor — max it can drop to today</div>
+          <div class="v" id="dailyDDFloor" style="color:var(--red);">—</div>
+        </div>
       </div>
-      <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's.</div>
+      <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's. The floor is today's starting balance minus the 5% limit — if equity touches that number (or a dollar below it), that's max daily drawdown hit.</div>
     </div>
   </div>
 
@@ -484,7 +598,7 @@
         <div class="risk-btn win" id="riskWinBtn">Won last trade — step up</div>
         <div class="risk-btn loss" id="riskLossBtn">Lost last trade — reset to 0.5%</div>
       </div>
-      <div class="hint">First trade risks 1% of Real Balance. Win → step up (1%→2%→3%, capped at 3%). Lose → reset straight to 0.5% and build back up.</div>
+      <div class="hint">First trade risks 1% of Real Balance. Win → step up (1%→2%→3%→4%→5%, capped at 5%). Lose → reset straight to 0.5% and build back up.</div>
     </div>
   </div>
   </div><!-- /panel: realbalance -->
@@ -534,6 +648,108 @@
   </div>
   </div><!-- /panel: calendar -->
 
+</div><!-- /view: checklist -->
+
+<div class="view-panel" data-view="accounts">
+  <div class="section">
+    <div class="section-head"><span class="section-num">A1</span><span class="section-title">Your prop accounts</span></div>
+    <div class="chip-row" id="accStatusChips"></div>
+    <button class="add-btn" id="addAccountBtn">+ Add account</button>
+    <div id="accountsList"></div>
+  </div>
+</div><!-- /view: accounts -->
+
+<div class="view-panel" data-view="rules">
+  <div class="section">
+    <div class="section-head"><span class="section-num">R1</span><span class="section-title">Prop firms &amp; rules library</span></div>
+    <button class="add-btn" id="addFirmBtn">+ Add prop firm</button>
+    <div id="firmsList"></div>
+    <div class="hint">Paste each plan's rules & regulations into its box — it autosaves as you type. Use "+ Add notice" for the rules you keep forgetting; they show boldly highlighted so they're hard to miss.</div>
+  </div>
+</div><!-- /view: rules -->
+
+<div class="view-panel" data-view="profile">
+  <div class="section">
+    <div class="section-head"><span class="section-num">P1</span><span class="section-title">Profile</span></div>
+    <div class="card profile-card">
+      <div class="profile-avatar" id="profileAvatarInitial">?</div>
+      <div style="flex:1;min-width:0;">
+        <input type="text" id="profileNameInput" class="profile-name-input" placeholder="Your name">
+        <div class="profile-email" id="profileEmailText"></div>
+      </div>
+    </div>
+    <button class="signout-btn" id="signOutBtn">Sign out</button>
+  </div>
+</div><!-- /view: profile -->
+
+</div><!-- /wrap -->
+
+<div class="bottom-nav" id="bottomNav">
+  <div class="bn-item active" data-view="checklist">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <div class="bn-label">Checklist</div>
+  </div>
+  <div class="bn-item" data-view="accounts">
+    <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    <div class="bn-label">Accounts</div>
+  </div>
+  <div class="bn-item" data-view="rules">
+    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    <div class="bn-label">Rules</div>
+  </div>
+  <div class="bn-item" data-view="profile">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    <div class="bn-label">Profile</div>
+  </div>
+</div>
+
+<div id="accountModalOverlay" class="modal-overlay" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-title" id="accountModalTitle">Add account</div>
+    <div class="field" style="margin-top:12px;">
+      <label>Account name</label>
+      <input type="text" id="accForm_name" placeholder="e.g. FTMO 100k #1">
+    </div>
+    <div class="inputs-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Prop firm</label>
+        <select class="select-input" id="accForm_firm"></select>
+      </div>
+      <div class="field">
+        <label>Plan / stage</label>
+        <select class="select-input" id="accForm_plan"></select>
+      </div>
+    </div>
+    <div class="inputs-row" style="margin-top:10px;">
+      <div class="field">
+        <label>Balance ($)</label>
+        <input type="number" id="accForm_balance" placeholder="e.g. 100000">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select class="select-input" id="accForm_status">
+          <option value="ongoing">Ongoing</option>
+          <option value="active">Active</option>
+          <option value="passed">Passed</option>
+          <option value="failed">Failed</option>
+          <option value="planned">Planned (future buy)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Purchase date</label>
+      <input type="date" id="accForm_date">
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Notes (optional)</label>
+      <input type="text" id="accForm_notes" placeholder="anything worth remembering">
+    </div>
+    <div class="btn-row">
+      <button class="auth-btn secondary" id="accForm_cancel">Cancel</button>
+      <button class="auth-btn primary" id="accForm_save">Save</button>
+    </div>
+    <button class="auth-btn secondary" id="accForm_delete" style="margin-top:8px;border-color:rgba(232,84,77,.35);color:var(--red);display:none;">Delete account</button>
+  </div>
 </div>
 
 <div class="save-toast" id="toast">Saved</div>
@@ -565,7 +781,7 @@ const MILESTONES = [
   {id:'m_withdraw', text:"The instant I hit my withdrawal target: <b>stop trading, close every open trade, submit the withdrawal request</b> — then place zero new trades until payment lands.", note:"One trade after the target, even by accident, fails the account. Keep the target modest ($5,500 → $500 profit) — smaller numbers draw less scrutiny on withdrawal review."},
 ];
 
-const RISK_TIERS = [0.5, 1, 2, 3];
+const RISK_TIERS = [0.5, 1, 2, 3, 4, 5];
 
 // ---------- Storage helpers ----------
 // ---------- Firebase-backed storage ----------
@@ -671,8 +887,11 @@ function renderChecklist(dayData){
 // ---------- Render: today's DD numbers ----------
 function renderCalc(dayData){
   const bal = parseFloat(dayData.balance || 0);
+  const ddAmt = bal ? bal*0.05 : 0;
   const dd5 = document.getElementById('dailyDDVal');
-  dd5.textContent = bal ? '$' + (bal*0.05).toFixed(2) : '—';
+  dd5.textContent = bal ? '$' + ddAmt.toFixed(2) : '—';
+  const floorEl = document.getElementById('dailyDDFloor');
+  floorEl.textContent = bal ? '$' + (bal - ddAmt).toFixed(2) : '—';
 }
 function renderLiveCalc(dayData){
   const live = parseFloat(dayData.liveBalance || 0);
@@ -751,11 +970,24 @@ document.getElementById('liveBalance').addEventListener('input', async (e)=>{
   renderAlarmBanner(dayData);
 });
 
+// Auto-updates the "Last trade date" field to whichever day the person is
+// logging trades/P&L for — so it never has to be set by hand.
+async function autoUpdateLastTradeDate(){
+  if(accountMeta.lastTradeDate === selectedDate) return;
+  accountMeta.lastTradeDate = selectedDate;
+  const input = document.getElementById('lastTradeDate');
+  if(input) input.value = selectedDate;
+  await sSet('account-meta', accountMeta);
+  renderTrackers();
+  renderMilestones();
+}
+
 document.getElementById('dayTradeCount').addEventListener('input', async (e)=>{
   let dayData = (await getDayCached(selectedDate)) || {items:{}, balance:'', liveBalance:'', tradeCount:'', pnl:''};
   dayData.tradeCount = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
+  if(e.target.value !== '') autoUpdateLastTradeDate();
 });
 
 document.getElementById('dayPnl').addEventListener('input', async (e)=>{
@@ -763,6 +995,7 @@ document.getElementById('dayPnl').addEventListener('input', async (e)=>{
   dayData.pnl = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
+  if(e.target.value !== '') autoUpdateLastTradeDate();
 });
 
 // ---------- Account meta ----------
@@ -1034,6 +1267,285 @@ async function renderCalendar(){
 document.getElementById('prevMonth').onclick = ()=>{ calViewDate.setMonth(calViewDate.getMonth()-1); renderCalendar(); };
 document.getElementById('nextMonth').onclick = ()=>{ calViewDate.setMonth(calViewDate.getMonth()+1); renderCalendar(); };
 
+// ---------- Small helpers ----------
+function uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function escapeHtml(str){
+  return String(str==null?'':str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmtShortDate(iso){
+  if(!iso) return '—';
+  try{ const d = new Date(iso+'T00:00:00'); return d.toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'}); }
+  catch(e){ return iso; }
+}
+function statusLabel(s){
+  return {ongoing:'Ongoing', active:'Active', passed:'Passed', failed:'Failed', planned:'Planned'}[s] || s || '—';
+}
+
+// ---------- Bottom nav (Checklist / Accounts / Rules / Profile) ----------
+document.querySelectorAll('.bn-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    const view = item.dataset.view;
+    document.querySelectorAll('.bn-item').forEach(i=>i.classList.toggle('active', i===item));
+    document.querySelectorAll('.view-panel').forEach(p=>p.classList.toggle('active', p.dataset.view===view));
+    window.scrollTo({top:0, behavior:'instant'});
+  });
+});
+
+// ---------- Profile ----------
+let profileMeta = { displayName:'' };
+function updateProfileAvatar(){
+  const nameInput = document.getElementById('profileNameInput');
+  const email = window.currentUser ? window.currentUser.email : '';
+  const source = (nameInput && nameInput.value) || email || '?';
+  document.getElementById('profileAvatarInitial').textContent = source.trim().charAt(0).toUpperCase() || '?';
+}
+async function loadProfile(){
+  profileMeta = await sGet('profile-meta') || { displayName:'' };
+  const nameInput = document.getElementById('profileNameInput');
+  nameInput.value = profileMeta.displayName || (window.currentUser && window.currentUser.displayName) || '';
+  if(window.currentUser) document.getElementById('profileEmailText').textContent = window.currentUser.email;
+  updateProfileAvatar();
+}
+document.getElementById('profileNameInput').addEventListener('input', (e)=>{
+  profileMeta.displayName = e.target.value;
+  sSetDebounced('profile-meta', profileMeta);
+  updateProfileAvatar();
+});
+
+// ---------- Accounts ----------
+let accountsList = [];
+let accountsFilter = 'all';
+let editingAccountId = null;
+const ACCOUNT_STATUSES = [
+  {key:'all', label:'All'},
+  {key:'ongoing', label:'Ongoing'},
+  {key:'active', label:'Active'},
+  {key:'passed', label:'Passed'},
+  {key:'failed', label:'Failed'},
+  {key:'planned', label:'Planned'},
+];
+async function loadAccounts(){
+  accountsList = await sGet('accounts-list') || [];
+  renderAccountsView();
+}
+function renderAccountsView(){
+  const counts = { all:0, ongoing:0, active:0, passed:0, failed:0, planned:0 };
+  accountsList.forEach(a=>{
+    if(a.status === 'planned') counts.planned++;
+    else { counts.all++; counts[a.status] = (counts[a.status]||0)+1; }
+  });
+  const chipsWrap = document.getElementById('accStatusChips');
+  chipsWrap.innerHTML = ACCOUNT_STATUSES.map(s=>`
+    <div class="acc-chip ${accountsFilter===s.key?'active':''}" data-status="${s.key}">
+      <span class="acc-chip-label">${s.label}</span><span class="acc-chip-count">${counts[s.key]||0}</span>
+    </div>`).join('');
+  chipsWrap.querySelectorAll('.acc-chip').forEach(chip=>{
+    chip.onclick = ()=>{ accountsFilter = chip.dataset.status; renderAccountsView(); };
+  });
+
+  const list = accountsList.filter(a => accountsFilter==='all' ? a.status!=='planned' : a.status===accountsFilter);
+  const listEl = document.getElementById('accountsList');
+  if(!list.length){
+    listEl.innerHTML = '<div class="hint" style="padding:10px 4px 4px;">Nothing here yet.</div>';
+    return;
+  }
+  listEl.innerHTML = list.map(a=>`
+    <div class="acc-card" data-id="${a.id}">
+      <div class="acc-card-top">
+        <div>
+          <div class="acc-name">${escapeHtml(a.name||'Unnamed account')}</div>
+          <div class="acc-firm">${escapeHtml(a.firmName||'No firm set')}${a.planName ? ' · '+escapeHtml(a.planName) : ''}</div>
+        </div>
+        <div class="acc-status-badge status-${a.status}">${statusLabel(a.status)}</div>
+      </div>
+      <div class="acc-card-bottom">
+        <span>${a.balance ? '$'+Number(a.balance).toLocaleString() : '—'}</span>
+        <span>${a.purchaseDate ? fmtShortDate(a.purchaseDate) : (a.status==='planned' ? 'not bought yet' : '—')}</span>
+      </div>
+    </div>`).join('');
+  listEl.querySelectorAll('.acc-card').forEach(card=>{
+    card.onclick = ()=> openAccountForm(card.dataset.id);
+  });
+}
+function refreshAccFormPlans(){
+  const firmSelect = document.getElementById('accForm_firm');
+  const planSelect = document.getElementById('accForm_plan');
+  const firm = propFirmsList.find(f=>f.id===firmSelect.value);
+  planSelect.innerHTML = '<option value="">— none —</option>' + ((firm && firm.plans) || []).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+}
+function openAccountForm(id){
+  editingAccountId = id || null;
+  const firmSelect = document.getElementById('accForm_firm');
+  firmSelect.innerHTML = '<option value="">— none —</option>' + propFirmsList.map(f=>`<option value="${f.id}">${escapeHtml(f.name)}</option>`).join('');
+  firmSelect.onchange = refreshAccFormPlans;
+
+  if(id){
+    const acc = accountsList.find(a=>a.id===id);
+    document.getElementById('accountModalTitle').textContent = 'Edit account';
+    document.getElementById('accForm_name').value = acc.name || '';
+    firmSelect.value = acc.firmId || '';
+    refreshAccFormPlans();
+    document.getElementById('accForm_plan').value = acc.planId || '';
+    document.getElementById('accForm_balance').value = acc.balance || '';
+    document.getElementById('accForm_status').value = acc.status || 'ongoing';
+    document.getElementById('accForm_date').value = acc.purchaseDate || '';
+    document.getElementById('accForm_notes').value = acc.notes || '';
+    document.getElementById('accForm_delete').style.display = '';
+  } else {
+    document.getElementById('accountModalTitle').textContent = 'Add account';
+    document.getElementById('accForm_name').value = '';
+    refreshAccFormPlans();
+    document.getElementById('accForm_balance').value = '';
+    document.getElementById('accForm_status').value = 'ongoing';
+    document.getElementById('accForm_date').value = todayISO();
+    document.getElementById('accForm_notes').value = '';
+    document.getElementById('accForm_delete').style.display = 'none';
+  }
+  document.getElementById('accountModalOverlay').style.display = 'flex';
+}
+function closeAccountForm(){
+  document.getElementById('accountModalOverlay').style.display = 'none';
+  editingAccountId = null;
+}
+document.getElementById('addAccountBtn').addEventListener('click', ()=>openAccountForm(null));
+document.getElementById('accForm_cancel').addEventListener('click', closeAccountForm);
+document.getElementById('accountModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'accountModalOverlay') closeAccountForm();
+});
+document.getElementById('accForm_save').addEventListener('click', async ()=>{
+  const firmSelect = document.getElementById('accForm_firm');
+  const planSelect = document.getElementById('accForm_plan');
+  const firm = propFirmsList.find(f=>f.id===firmSelect.value);
+  const plan = firm ? (firm.plans||[]).find(p=>p.id===planSelect.value) : null;
+  const name = document.getElementById('accForm_name').value.trim();
+  if(!name){ alert('Give the account a name first.'); return; }
+  const data = {
+    name,
+    firmId: firmSelect.value || '',
+    firmName: firm ? firm.name : '',
+    planId: planSelect.value || '',
+    planName: plan ? plan.name : '',
+    balance: document.getElementById('accForm_balance').value,
+    status: document.getElementById('accForm_status').value,
+    purchaseDate: document.getElementById('accForm_date').value,
+    notes: document.getElementById('accForm_notes').value,
+  };
+  if(editingAccountId){
+    const idx = accountsList.findIndex(a=>a.id===editingAccountId);
+    if(idx > -1) accountsList[idx] = { ...accountsList[idx], ...data };
+  } else {
+    accountsList.push({ id: uid(), ...data });
+  }
+  await sSet('accounts-list', accountsList);
+  renderAccountsView();
+  closeAccountForm();
+});
+document.getElementById('accForm_delete').addEventListener('click', async ()=>{
+  if(!editingAccountId) return;
+  if(!confirm('Delete this account? This cannot be undone.')) return;
+  accountsList = accountsList.filter(a=>a.id!==editingAccountId);
+  await sSet('accounts-list', accountsList);
+  renderAccountsView();
+  closeAccountForm();
+});
+
+// ---------- Prop firms & rules library ----------
+let propFirmsList = [];
+async function loadPropFirms(){
+  propFirmsList = await sGet('propfirms-list') || [];
+  renderRulesView();
+}
+async function savePropFirms(){ await sSet('propfirms-list', propFirmsList); }
+function renderRulesView(){
+  const wrap = document.getElementById('firmsList');
+  if(!propFirmsList.length){
+    wrap.innerHTML = '<div class="hint" style="padding:6px 4px 14px;">No prop firms yet — tap "+ Add prop firm" above to start your rules library.</div>';
+    return;
+  }
+  wrap.innerHTML = propFirmsList.map(firm => `
+    <div class="firm-card">
+      <div class="firm-head">
+        <div class="firm-name">${escapeHtml(firm.name)}</div>
+        <div class="firm-actions">
+          <button class="mini-btn" data-act="addplan" data-firm="${firm.id}">+ Plan</button>
+          <button class="mini-btn danger" data-act="delfirm" data-firm="${firm.id}">Delete firm</button>
+        </div>
+      </div>
+      ${(firm.plans||[]).map(plan => `
+        <div class="plan-card">
+          <div class="plan-head">
+            <div class="plan-name">${escapeHtml(plan.name)}</div>
+            <button class="mini-btn danger" data-act="delplan" data-firm="${firm.id}" data-plan="${plan.id}">Delete plan</button>
+          </div>
+          <textarea class="plan-rules" placeholder="Paste this plan's rules &amp; regulations here…" data-act="rulestext" data-firm="${firm.id}" data-plan="${plan.id}">${escapeHtml(plan.rulesText||'')}</textarea>
+          <div class="notices-wrap">
+            ${(plan.notices||[]).map(n => `
+              <div class="notice-item">
+                <div class="notice-text">⚠ ${escapeHtml(n.text)}</div>
+                <button class="notice-del" data-act="delnotice" data-firm="${firm.id}" data-plan="${plan.id}" data-notice="${n.id}">✕</button>
+              </div>`).join('')}
+            <button class="mini-btn" style="margin-top:8px;" data-act="addnotice" data-firm="${firm.id}" data-plan="${plan.id}">+ Add notice (easy to forget)</button>
+          </div>
+        </div>`).join('') || '<div class="hint" style="padding:8px 2px 2px;">No plans yet — tap "+ Plan" to add one (e.g. "Phase 1", "Funded").</div>'}
+    </div>`).join('');
+}
+document.getElementById('addFirmBtn').addEventListener('click', async ()=>{
+  const name = prompt('Prop firm name (e.g. "FTMO", "MyFundedFX"):');
+  if(!name || !name.trim()) return;
+  propFirmsList.push({ id: uid(), name: name.trim(), plans: [] });
+  await savePropFirms();
+  renderRulesView();
+});
+document.getElementById('firmsList').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('[data-act]');
+  if(!btn) return;
+  const act = btn.dataset.act;
+  const firmId = btn.dataset.firm;
+  const firm = propFirmsList.find(f=>f.id===firmId);
+  if(!firm) return;
+  if(act === 'addplan'){
+    const name = prompt('Plan / stage name (e.g. "Phase 1", "Funded"):');
+    if(!name || !name.trim()) return;
+    firm.plans = firm.plans || [];
+    firm.plans.push({ id: uid(), name: name.trim(), rulesText:'', notices:[] });
+    await savePropFirms(); renderRulesView();
+  } else if(act === 'delfirm'){
+    if(!confirm('Delete this prop firm and all its plans and rules?')) return;
+    propFirmsList = propFirmsList.filter(f=>f.id!==firmId);
+    await savePropFirms(); renderRulesView();
+  } else if(act === 'delplan'){
+    const planId = btn.dataset.plan;
+    if(!confirm('Delete this plan and its rules and notices?')) return;
+    firm.plans = (firm.plans||[]).filter(p=>p.id!==planId);
+    await savePropFirms(); renderRulesView();
+  } else if(act === 'addnotice'){
+    const planId = btn.dataset.plan;
+    const plan = (firm.plans||[]).find(p=>p.id===planId);
+    if(!plan) return;
+    const text = prompt('Notice text (an easy-to-forget rule to highlight boldly):');
+    if(!text || !text.trim()) return;
+    plan.notices = plan.notices || [];
+    plan.notices.push({ id: uid(), text: text.trim() });
+    await savePropFirms(); renderRulesView();
+  } else if(act === 'delnotice'){
+    const planId = btn.dataset.plan, noticeId = btn.dataset.notice;
+    const plan = (firm.plans||[]).find(p=>p.id===planId);
+    if(!plan) return;
+    plan.notices = (plan.notices||[]).filter(n=>n.id!==noticeId);
+    await savePropFirms(); renderRulesView();
+  }
+});
+document.getElementById('firmsList').addEventListener('input', (e)=>{
+  const ta = e.target.closest('textarea[data-act="rulestext"]');
+  if(!ta) return;
+  const firm = propFirmsList.find(f=>f.id===ta.dataset.firm);
+  if(!firm) return;
+  const plan = (firm.plans||[]).find(p=>p.id===ta.dataset.plan);
+  if(!plan) return;
+  plan.rulesText = ta.value;
+  sSetDebounced('propfirms-list', propFirmsList, 700);
+});
+
 // ---------- Tabs ----------
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -1054,6 +1566,9 @@ async function initApp(){
     ['renderMilestones', renderMilestones],
     ['loadRealBalanceMeta', loadRealBalanceMeta],
     ['renderWeekly', renderWeekly],
+    ['loadAccounts', loadAccounts],
+    ['loadPropFirms', loadPropFirms],
+    ['loadProfile', loadProfile],
   ];
   let hadFailure = false;
   for(const [label, fn] of steps){
@@ -1066,7 +1581,7 @@ async function initApp(){
   }
   if(hadFailure){
     const bar = document.createElement('div');
-    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#E8544D;color:#fff;font-family:monospace;font-size:11px;padding:8px 14px;text-align:center;z-index:2000;';
+    bar.style.cssText = 'position:fixed;bottom:64px;left:0;right:0;background:#E8544D;color:#fff;font-family:monospace;font-size:11px;padding:8px 14px;text-align:center;z-index:2000;';
     bar.textContent = 'Some data may not have loaded — pull to refresh or check your connection.';
     document.body.appendChild(bar);
     setTimeout(() => bar.remove(), 6000);
@@ -1126,7 +1641,7 @@ window.initApp = initApp;
   const loadingEl = document.getElementById('authLoading');
   const emailInput = document.getElementById('authEmail');
   const passInput = document.getElementById('authPassword');
-  const accountEmailEl = document.getElementById('accountEmail');
+  const accountEmailEl = document.getElementById('profileEmailText');
 
   function setLoading(on){
     loadingEl.style.display = on ? 'block' : 'none';
@@ -1260,7 +1775,7 @@ window.initApp = initApp;
       if(document.getElementById('swUpdateBanner')) return; // already showing
       const bar = document.createElement('div');
       bar.id = 'swUpdateBanner';
-      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#3ECF8E;color:#08130D;font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;padding:12px 16px;text-align:center;z-index:3000;cursor:pointer;';
+      bar.style.cssText = 'position:fixed;bottom:64px;left:0;right:0;background:#3ECF8E;color:#08130D;font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;padding:12px 16px;text-align:center;z-index:3000;cursor:pointer;';
       bar.textContent = 'New version ready — tap to update';
       bar.onclick = () => {
         bar.textContent = 'Updating…';

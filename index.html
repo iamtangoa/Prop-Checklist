@@ -1346,6 +1346,10 @@ window.initApp = initApp;
       overlay.style.display = 'none';
       accountEmailEl.textContent = user.email;
       if(typeof updateSyncPill === 'function') updateSyncPill();
+      // Retry any writes left stuck "pending" from a prior failed sync (e.g.
+      // bad keys, dropped connection) — the browser 'online' event won't fire
+      // here since we were already online when the page loaded.
+      if(typeof flushPendingWrites === 'function') flushPendingWrites();
       if(!appStarted && window.initApp){
         appStarted = true;
         window.initApp();

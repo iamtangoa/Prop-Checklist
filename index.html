@@ -199,7 +199,7 @@
   .tracker.urgent{background:rgba(232,84,77,.10);border-radius:8px;padding:10px 8px;margin:2px 0;animation:pulse 1.6s ease-in-out infinite;}
 
   /* RISK LADDER */
-  .risk-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+  .risk-tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
   .risk-tier{
     background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;
   }
@@ -296,26 +296,6 @@
     background:none;border:none;color:var(--muted);font-family:var(--mono);
     font-size:11px;cursor:pointer;text-decoration:underline;
   }
-  #syncStatus{font-family:var(--mono);font-size:11px;font-weight:600;}
-
-  /* ACCOUNT SWITCHER */
-  .acct-switch-bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
-  .acct-switch-bar select{
-    flex:1; background:var(--panel); border:1px solid var(--line); color:var(--text);
-    padding:9px 10px; border-radius:9px; font-family:var(--display); font-weight:600; font-size:13px;
-  }
-  .acct-switch-bar select:focus{outline:none;border-color:var(--green);}
-  .acct-add-btn{
-    flex:none; background:var(--panel2); border:1px solid var(--line); color:var(--green);
-    padding:9px 13px; border-radius:9px; font-family:var(--display); font-weight:700; font-size:15px;
-    cursor:pointer; line-height:1;
-  }
-  .acct-icon-btn{
-    flex:none; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
-    padding:9px 11px; border-radius:9px; font-family:var(--mono); font-size:12px;
-    cursor:pointer; line-height:1;
-  }
-  .acct-icon-btn.danger{color:var(--red); border-color:rgba(232,84,77,.35);}
 </style>
 </head>
 <body>
@@ -350,15 +330,7 @@
 
   <div class="account-bar">
     <span id="accountEmail"></span>
-    <span id="syncStatus">● —</span>
     <button id="signOutBtn">Sign out</button>
-  </div>
-
-  <div class="acct-switch-bar">
-    <select id="accountSwitcher"></select>
-    <button class="acct-add-btn" id="addAccountBtn" title="Add a new account">+</button>
-    <button class="acct-icon-btn" id="renameAccountBtn" title="Rename this account">✎</button>
-    <button class="acct-icon-btn danger" id="removeAccountBtn" title="Remove this account">🗑</button>
   </div>
 
   <div id="alarmSlot"></div>
@@ -390,8 +362,8 @@
     <div class="section-head"><span class="section-num">00</span><span class="section-title">Account</span></div>
     <div class="card">
       <div class="stage-select" id="stageSelect">
-        <div class="stage-btn" data-stage="challenge1">Challenge 1</div>
-        <div class="stage-btn" data-stage="challenge2">Challenge 2</div>
+        <div class="stage-btn" data-stage="challenge1">Challenge 1<br>Target $5,500</div>
+        <div class="stage-btn" data-stage="challenge2">Challenge 2<br>Target $5,250</div>
         <div class="stage-btn" data-stage="real">Real Account</div>
       </div>
       <div class="inputs-row">
@@ -400,19 +372,11 @@
           <input type="date" id="accountStart">
         </div>
         <div class="field">
-          <label>Last trade date <span style="color:var(--dim);">(auto)</span></label>
+          <label>Last trade date</label>
           <input type="date" id="lastTradeDate">
         </div>
       </div>
       <div class="inputs-row" style="margin-top:10px;">
-        <div class="field" id="target1Wrap" style="display:none;">
-          <label>Challenge 1 target ($)</label>
-          <input type="number" id="target1" placeholder="e.g. 5500">
-        </div>
-        <div class="field" id="target2Wrap" style="display:none;">
-          <label>Challenge 2 target ($)</label>
-          <input type="number" id="target2" placeholder="e.g. 5250">
-        </div>
         <div class="field" id="withdrawTargetWrap" style="display:none;">
           <label>My withdrawal target ($)</label>
           <input type="number" id="withdrawTarget" placeholder="5500">
@@ -437,10 +401,6 @@
         <div class="calc-pill">
           <div class="k">Daily drawdown limit (5%)</div>
           <div class="v" id="dailyDDVal">—</div>
-        </div>
-        <div class="calc-pill" style="border-color:rgba(232,84,77,.35);">
-          <div class="k" style="color:var(--red);">Account floor (can't drop below)</div>
-          <div class="v" id="dailyFloorVal" style="color:var(--red);">—</div>
         </div>
       </div>
       <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's.</div>
@@ -524,7 +484,7 @@
         <div class="risk-btn win" id="riskWinBtn">Won last trade — step up</div>
         <div class="risk-btn loss" id="riskLossBtn">Lost last trade — reset to 0.5%</div>
       </div>
-      <div class="hint">First trade risks 1% of Real Balance. Win → step up (0.5%→1%→2%→3%→4%→5%, capped at 5%). Lose → reset straight to 0.5% and build back up.</div>
+      <div class="hint">First trade risks 1% of Real Balance. Win → step up (1%→2%→3%, capped at 3%). Lose → reset straight to 0.5% and build back up.</div>
     </div>
   </div>
   </div><!-- /panel: realbalance -->
@@ -605,7 +565,7 @@ const MILESTONES = [
   {id:'m_withdraw', text:"The instant I hit my withdrawal target: <b>stop trading, close every open trade, submit the withdrawal request</b> — then place zero new trades until payment lands.", note:"One trade after the target, even by accident, fails the account. Keep the target modest ($5,500 → $500 profit) — smaller numbers draw less scrutiny on withdrawal review."},
 ];
 
-const RISK_TIERS = [0.5, 1, 2, 3, 4, 5];
+const RISK_TIERS = [0.5, 1, 2, 3];
 
 // ---------- Storage helpers ----------
 // ---------- Firebase-backed storage ----------
@@ -625,7 +585,7 @@ function withTimeout(promise, ms, label){
   ]);
 }
 
-async function sGetRaw(key){
+async function sGet(key){
   if(!window.currentUser) return null;
   try{
     const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
@@ -634,39 +594,15 @@ async function sGetRaw(key){
     return snap.exists() ? JSON.parse(snap.data().value) : null;
   }catch(e){ console.error('Firestore read failed:', key, e); return null; }
 }
-async function sSetRaw(key, val){
+async function sSet(key, val){
   if(!window.currentUser) return;
   try{
     const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
     await window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() });
     showToast();
-    markSynced(true);
-  }catch(e){ console.error('Firestore write failed:', e); showToast('Sync failed — will retry'); markSynced(false); }
+  }catch(e){ console.error('Firestore write failed:', e); showToast('Sync failed — will retry'); }
 }
 function showToast(msg){ const t=document.getElementById('toast'); if(msg) t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>{ t.classList.remove('show'); t.textContent = 'Saved'; }, 1400); }
-
-// ---------- Multi-account key namespacing ----------
-// Every account after the first gets its data prefixed under acct:{id}:...
-// so the original ("default") account's data stays exactly where it always
-// was — no migration needed for existing users.
-let currentAccountId = 'default';
-function acctKey(key){
-  return (currentAccountId && currentAccountId !== 'default') ? ('acct:'+currentAccountId+':'+key) : key;
-}
-async function sGet(key){ return sGetRaw(acctKey(key)); }
-async function sSet(key, val){ return sSetRaw(acctKey(key), val); }
-
-// ---------- Sync/offline status pill ----------
-function markSynced(ok){
-  const el = document.getElementById('syncStatus');
-  if(!el) return;
-  if(!navigator.onLine){ el.textContent='● Offline'; el.style.color='var(--red)'; return; }
-  if(ok === false){ el.textContent='● Sync failed'; el.style.color='var(--amber)'; return; }
-  el.textContent='● Synced'; el.style.color='var(--green)';
-}
-function updateOnlineStatus(){ markSynced(navigator.onLine ? true : undefined); }
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
 
 // Debounced writer — avoids hammering storage on every keystroke (rate limit protection)
 const _debounceTimers = {};
@@ -690,7 +626,7 @@ function addDays(iso, n){
 }
 
 let selectedDate = todayISO();
-let accountMeta = { stage:'challenge1', accountStart: todayISO(), lastTradeDate: todayISO(), withdrawTarget: '', realAccountDate: '', target1: 5500, target2: 5250 };
+let accountMeta = { stage:'challenge1', accountStart: todayISO(), lastTradeDate: todayISO(), withdrawTarget: '', realAccountDate: '' };
 let calViewDate = new Date();
 
 // ---------- Render: hero ----------
@@ -737,8 +673,6 @@ function renderCalc(dayData){
   const bal = parseFloat(dayData.balance || 0);
   const dd5 = document.getElementById('dailyDDVal');
   dd5.textContent = bal ? '$' + (bal*0.05).toFixed(2) : '—';
-  const floor = document.getElementById('dailyFloorVal');
-  floor.textContent = bal ? '$' + (bal - bal*0.05).toFixed(2) : '—';
 }
 function renderLiveCalc(dayData){
   const live = parseFloat(dayData.liveBalance || 0);
@@ -762,11 +696,10 @@ async function prefetchHistory(){
     const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
     const snap = await withTimeout(window._fb.getDocs(colRef), 8000, 'prefetchHistory');
     if(!snap) return; // timed out — fall back to per-day reads as needed
-    const prefix = acctKey('day:');
     snap.forEach((docSnap) => {
       const key = docSnap.id;
-      if(key.startsWith(prefix)){
-        const iso = key.slice(prefix.length);
+      if(key.startsWith('day:')){
+        const iso = key.slice(4);
         try{ dayCache[iso] = JSON.parse(docSnap.data().value); }catch(e){ dayCache[iso] = null; }
       }
     });
@@ -818,23 +751,11 @@ document.getElementById('liveBalance').addEventListener('input', async (e)=>{
   renderAlarmBanner(dayData);
 });
 
-// Whenever the person logs a trade count or P&L for a day, that day silently
-// becomes the new "last trade date" — no manual edit needed.
-async function maybeUpdateLastTradeDate(){
-  if(selectedDate <= todayISO() && accountMeta.lastTradeDate !== selectedDate){
-    accountMeta.lastTradeDate = selectedDate;
-    document.getElementById('lastTradeDate').value = selectedDate;
-    await sSet('account-meta', accountMeta);
-    renderTrackers();
-  }
-}
-
 document.getElementById('dayTradeCount').addEventListener('input', async (e)=>{
   let dayData = (await getDayCached(selectedDate)) || {items:{}, balance:'', liveBalance:'', tradeCount:'', pnl:''};
   dayData.tradeCount = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
-  if(e.target.value !== '') maybeUpdateLastTradeDate();
 });
 
 document.getElementById('dayPnl').addEventListener('input', async (e)=>{
@@ -842,17 +763,14 @@ document.getElementById('dayPnl').addEventListener('input', async (e)=>{
   dayData.pnl = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
-  if(e.target.value !== '') maybeUpdateLastTradeDate();
 });
 
 // ---------- Account meta ----------
 async function loadAccountMeta(){
   const saved = await sGet('account-meta');
-  accountMeta = saved || { stage:'challenge1', accountStart: todayISO(), lastTradeDate: todayISO(), withdrawTarget: '', realAccountDate: '', target1: 5500, target2: 5250 };
+  if(saved) accountMeta = saved;
   document.getElementById('accountStart').value = accountMeta.accountStart;
   document.getElementById('lastTradeDate').value = accountMeta.lastTradeDate;
-  document.getElementById('target1').value = (accountMeta.target1 !== undefined && accountMeta.target1 !== null) ? accountMeta.target1 : '';
-  document.getElementById('target2').value = (accountMeta.target2 !== undefined && accountMeta.target2 !== null) ? accountMeta.target2 : '';
   document.getElementById('withdrawTarget').value = accountMeta.withdrawTarget || '';
   document.getElementById('realAccountDate').value = accountMeta.realAccountDate || '';
   setStageUI(accountMeta.stage);
@@ -860,8 +778,6 @@ async function loadAccountMeta(){
 function setStageUI(stage){
   accountMeta.stage = stage;
   document.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active', b.dataset.stage===stage));
-  document.getElementById('target1Wrap').style.display = stage==='challenge1' ? '' : 'none';
-  document.getElementById('target2Wrap').style.display = stage==='challenge2' ? '' : 'none';
   document.getElementById('withdrawTargetWrap').style.display = stage==='real' ? '' : 'none';
   document.getElementById('realAccountDateWrap').style.display = stage==='real' ? '' : 'none';
   renderTrackers();
@@ -874,9 +790,10 @@ document.querySelectorAll('.stage-btn').forEach(btn=>{
     await sSet('account-meta', accountMeta);
   });
 });
-['accountStart','lastTradeDate','target1','target2','withdrawTarget','realAccountDate'].forEach(id=>{
+['accountStart','lastTradeDate','withdrawTarget','realAccountDate'].forEach(id=>{
   document.getElementById(id).addEventListener('change', async (e)=>{
-    accountMeta[id] = e.target.value;
+    const map = {accountStart:'accountStart', lastTradeDate:'lastTradeDate', withdrawTarget:'withdrawTarget', realAccountDate:'realAccountDate'};
+    accountMeta[map[id]] = e.target.value;
     await sSet('account-meta', accountMeta);
     renderTrackers();
     renderMilestones();
@@ -901,7 +818,7 @@ function renderTrackers(){
   });
 
   // stage target
-  const stageTarget = accountMeta.stage==='challenge1' ? (parseFloat(accountMeta.target1)||null) : accountMeta.stage==='challenge2' ? (parseFloat(accountMeta.target2)||null) : (accountMeta.withdrawTarget || null);
+  const stageTarget = accountMeta.stage==='challenge1' ? 5500 : accountMeta.stage==='challenge2' ? 5250 : (accountMeta.withdrawTarget || null);
   rows.push({
     label: accountMeta.stage==='real' ? 'My next withdrawal target' : 'Current stage target',
     val: stageTarget ? '$'+Number(stageTarget).toLocaleString() : 'set a target above',
@@ -1011,7 +928,7 @@ async function renderWeekly(){
 // ---------- Target-hit alarm banner ----------
 function renderAlarmBanner(dayData){
   const slot = document.getElementById('alarmSlot');
-  const stageTarget = accountMeta.stage==='challenge1' ? parseFloat(accountMeta.target1||0) : accountMeta.stage==='challenge2' ? parseFloat(accountMeta.target2||0) : parseFloat(accountMeta.withdrawTarget||0);
+  const stageTarget = accountMeta.stage==='challenge1' ? 5500 : accountMeta.stage==='challenge2' ? 5250 : parseFloat(accountMeta.withdrawTarget||0);
   const bal = Math.max(parseFloat(dayData.balance||0), parseFloat(dayData.liveBalance||0));
   if(stageTarget && bal >= stageTarget){
     const label = accountMeta.stage==='real' ? 'WITHDRAWAL TARGET HIT' : 'CHALLENGE TARGET HIT';
@@ -1127,90 +1044,8 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ---------- Multi-account switcher ----------
-let accountsList = [{id:'default', name:'Account 1'}];
-async function loadAccountsList(){
-  accountsList = (await sGetRaw('accounts-list')) || [{id:'default', name:'Account 1'}];
-  currentAccountId = (await sGetRaw('active-account')) || 'default';
-  if(!accountsList.some(a=>a.id===currentAccountId)) currentAccountId = accountsList[0].id;
-  renderAccountSwitcher();
-}
-function renderAccountSwitcher(){
-  const sel = document.getElementById('accountSwitcher');
-  sel.innerHTML = accountsList.map(a=>`<option value="${a.id}" ${a.id===currentAccountId?'selected':''}>${a.name}</option>`).join('');
-}
-async function switchAccount(id){
-  currentAccountId = id;
-  await sSetRaw('active-account', id);
-  Object.keys(dayCache).forEach(k=>delete dayCache[k]);
-  historyPrefetched = false;
-  calViewDate = new Date();
-  await runInitSteps();
-}
-document.getElementById('accountSwitcher').addEventListener('change', (e)=>{ switchAccount(e.target.value); });
-document.getElementById('addAccountBtn').addEventListener('click', async ()=>{
-  const name = prompt('Name this account, e.g. "$100,000 Challenge"');
-  if(!name || !name.trim()) return;
-  const id = 'a' + Date.now().toString(36);
-  accountsList.push({id, name: name.trim()});
-  await sSetRaw('accounts-list', accountsList);
-  renderAccountSwitcher();
-  await switchAccount(id);
-});
-document.getElementById('renameAccountBtn').addEventListener('click', async ()=>{
-  const acct = accountsList.find(a=>a.id===currentAccountId);
-  if(!acct) return;
-  const name = prompt('Rename this account', acct.name);
-  if(!name || !name.trim()) return;
-  acct.name = name.trim();
-  await sSetRaw('accounts-list', accountsList);
-  renderAccountSwitcher();
-});
-document.getElementById('removeAccountBtn').addEventListener('click', async ()=>{
-  const acct = accountsList.find(a=>a.id===currentAccountId);
-  if(!acct) return;
-  if(acct.id === 'default'){
-    alert('Your original account can\'t be removed here — it\'s the one your earliest data lives under, unprefixed, so there\'s no safe way to isolate just its data for deletion. Rename it instead, or just stop using it and keep the accounts you want.');
-    return;
-  }
-  if(accountsList.length <= 1){
-    alert('You need at least one account left — add another before removing this one.');
-    return;
-  }
-  if(!confirm(`Permanently delete "${acct.name}" and ALL its saved data — checklist history, calendar, P&L? This cannot be undone.`)) return;
-  const typed = prompt(`Type DELETE (in capitals) to confirm removing "${acct.name}" forever.`);
-  if(!typed || typed.trim().toUpperCase() !== 'DELETE'){ alert('Cancelled — nothing was deleted.'); return; }
-  await deleteAccountData(acct.id);
-  accountsList = accountsList.filter(a=>a.id!==acct.id);
-  await sSetRaw('accounts-list', accountsList);
-  const nextId = accountsList.some(a=>a.id==='default') ? 'default' : accountsList[0].id;
-  renderAccountSwitcher();
-  await switchAccount(nextId);
-  alert(`"${acct.name}" was removed.`);
-});
-// Deletes only the prefixed docs belonging to a non-default account —
-// the default account's data has no unique prefix (it IS the raw keys),
-// so it is structurally excluded from ever being touched by this.
-async function deleteAccountData(id){
-  if(id==='default' || !window.currentUser) return;
-  const prefix = 'acct:'+id+':';
-  try{
-    const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
-    const snap = await window._fb.getDocs(colRef);
-    const toDelete = [];
-    snap.forEach(docSnap=>{ if(docSnap.id.startsWith(prefix)) toDelete.push(docSnap.id); });
-    for(const key of toDelete){
-      const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
-      await window._fb.deleteDoc(ref);
-    }
-  }catch(e){
-    console.error('deleteAccountData failed', e);
-    alert('Something went wrong deleting that account\'s data — check your connection and try again.');
-  }
-}
-
 // ---------- Init (called by the Firebase auth listener once logged in) ----------
-async function runInitSteps(){
+async function initApp(){
   const steps = [
     ['prefetchHistory', prefetchHistory],
     ['loadAccountMeta', loadAccountMeta],
@@ -1243,11 +1078,6 @@ async function runInitSteps(){
     renderHero(dd.items || {});
   }catch(e){ console.error('Hero fallback render failed:', e); }
 }
-async function initApp(){
-  updateOnlineStatus();
-  await loadAccountsList();
-  await runInitSteps();
-}
 window.initApp = initApp;
 </script>
 
@@ -1273,7 +1103,7 @@ window.initApp = initApp;
     sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, enableIndexedDbPersistence,
+    getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence,
     collection, getDocs
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -1288,7 +1118,7 @@ window.initApp = initApp;
   });
 
   // Expose the pieces the main app script needs.
-  window._fb = { db, doc, getDoc, setDoc, deleteDoc, collection, getDocs };
+  window._fb = { db, doc, getDoc, setDoc, collection, getDocs };
 
   const overlay = document.getElementById('authOverlay');
   const errorEl = document.getElementById('authError');

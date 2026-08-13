@@ -310,6 +310,12 @@
     padding:9px 13px; border-radius:9px; font-family:var(--display); font-weight:700; font-size:15px;
     cursor:pointer; line-height:1;
   }
+  .acct-icon-btn{
+    flex:none; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
+    padding:9px 11px; border-radius:9px; font-family:var(--mono); font-size:12px;
+    cursor:pointer; line-height:1;
+  }
+  .acct-icon-btn.danger{color:var(--red); border-color:rgba(232,84,77,.35);}
 </style>
 </head>
 <body>
@@ -351,6 +357,8 @@
   <div class="acct-switch-bar">
     <select id="accountSwitcher"></select>
     <button class="acct-add-btn" id="addAccountBtn" title="Add a new account">+</button>
+    <button class="acct-icon-btn" id="renameAccountBtn" title="Rename this account">✎</button>
+    <button class="acct-icon-btn danger" id="removeAccountBtn" title="Remove this account">🗑</button>
   </div>
 
   <div id="alarmSlot"></div>
@@ -1149,6 +1157,57 @@ document.getElementById('addAccountBtn').addEventListener('click', async ()=>{
   renderAccountSwitcher();
   await switchAccount(id);
 });
+document.getElementById('renameAccountBtn').addEventListener('click', async ()=>{
+  const acct = accountsList.find(a=>a.id===currentAccountId);
+  if(!acct) return;
+  const name = prompt('Rename this account', acct.name);
+  if(!name || !name.trim()) return;
+  acct.name = name.trim();
+  await sSetRaw('accounts-list', accountsList);
+  renderAccountSwitcher();
+});
+document.getElementById('removeAccountBtn').addEventListener('click', async ()=>{
+  const acct = accountsList.find(a=>a.id===currentAccountId);
+  if(!acct) return;
+  if(acct.id === 'default'){
+    alert('Your original account can\'t be removed here — it\'s the one your earliest data lives under, unprefixed, so there\'s no safe way to isolate just its data for deletion. Rename it instead, or just stop using it and keep the accounts you want.');
+    return;
+  }
+  if(accountsList.length <= 1){
+    alert('You need at least one account left — add another before removing this one.');
+    return;
+  }
+  if(!confirm(`Permanently delete "${acct.name}" and ALL its saved data — checklist history, calendar, P&L? This cannot be undone.`)) return;
+  const typed = prompt(`Type DELETE (in capitals) to confirm removing "${acct.name}" forever.`);
+  if(!typed || typed.trim().toUpperCase() !== 'DELETE'){ alert('Cancelled — nothing was deleted.'); return; }
+  await deleteAccountData(acct.id);
+  accountsList = accountsList.filter(a=>a.id!==acct.id);
+  await sSetRaw('accounts-list', accountsList);
+  const nextId = accountsList.some(a=>a.id==='default') ? 'default' : accountsList[0].id;
+  renderAccountSwitcher();
+  await switchAccount(nextId);
+  alert(`"${acct.name}" was removed.`);
+});
+// Deletes only the prefixed docs belonging to a non-default account —
+// the default account's data has no unique prefix (it IS the raw keys),
+// so it is structurally excluded from ever being touched by this.
+async function deleteAccountData(id){
+  if(id==='default' || !window.currentUser) return;
+  const prefix = 'acct:'+id+':';
+  try{
+    const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
+    const snap = await window._fb.getDocs(colRef);
+    const toDelete = [];
+    snap.forEach(docSnap=>{ if(docSnap.id.startsWith(prefix)) toDelete.push(docSnap.id); });
+    for(const key of toDelete){
+      const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
+      await window._fb.deleteDoc(ref);
+    }
+  }catch(e){
+    console.error('deleteAccountData failed', e);
+    alert('Something went wrong deleting that account\'s data — check your connection and try again.');
+  }
+}
 
 // ---------- Init (called by the Firebase auth listener once logged in) ----------
 async function runInitSteps(){
@@ -1214,7 +1273,7 @@ window.initApp = initApp;
     sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence,
+    getFirestore, doc, getDoc, setDoc, deleteDoc, enableIndexedDbPersistence,
     collection, getDocs
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -1229,7 +1288,7 @@ window.initApp = initApp;
   });
 
   // Expose the pieces the main app script needs.
-  window._fb = { db, doc, getDoc, setDoc, collection, getDocs };
+  window._fb = { db, doc, getDoc, setDoc, deleteDoc, collection, getDocs };
 
   const overlay = document.getElementById('authOverlay');
   const errorEl = document.getElementById('authError');

@@ -13,7 +13,7 @@
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <!-- 
-  FIREBASE VERSION — private cloud sync via Firebase Auth + Firestore.
+  SUPABASE VERSION — private cloud sync via Supabase Auth + Postgres.
   Paired with manifest.json, sw.js, icon-192.png, icon-512.png for PWA/APK packaging.
 -->
 <style>
@@ -97,6 +97,8 @@
   }
   .calc-pill .k{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;}
   .calc-pill .v{font-family:var(--display);font-weight:700;font-size:17px;margin-top:2px;color:var(--amber);}
+  .calc-pill.danger{border-color:rgba(232,84,77,.35);background:rgba(232,84,77,.08);}
+  .calc-pill.danger .v{color:var(--red);}
 
   /* checklist items */
   .item{
@@ -199,7 +201,7 @@
   .tracker.urgent{background:rgba(232,84,77,.10);border-radius:8px;padding:10px 8px;margin:2px 0;animation:pulse 1.6s ease-in-out infinite;}
 
   /* RISK LADDER */
-  .risk-tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+  .risk-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
   .risk-tier{
     background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;
   }
@@ -296,6 +298,18 @@
     background:none;border:none;color:var(--muted);font-family:var(--mono);
     font-size:11px;cursor:pointer;text-decoration:underline;
   }
+  .sync-pill{
+    display:inline-flex;align-items:center;gap:5px;font-size:10.5px;
+    padding:3px 9px;border-radius:99px;border:1px solid var(--line);
+    font-family:var(--mono);white-space:nowrap;
+  }
+  .sync-pill .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--dim);flex:none;}
+  .sync-pill.online{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.10);}
+  .sync-pill.online .sync-dot{background:var(--green);}
+  .sync-pill.offline{color:var(--red);border-color:rgba(232,84,77,.35);background:rgba(232,84,77,.10);}
+  .sync-pill.offline .sync-dot{background:var(--red);}
+  .sync-pill.pending{color:var(--amber);border-color:rgba(232,163,61,.35);background:rgba(232,163,61,.10);}
+  .sync-pill.pending .sync-dot{background:var(--amber);}
 </style>
 </head>
 <body>
@@ -304,11 +318,18 @@
   <div class="auth-card">
     <div class="auth-title">Gate</div>
     <div class="auth-sub">Sign in to sync your track record privately across devices.</div>
+    <!--
+      GOOGLE SIGN-IN — disabled for now, not yet set up in Google Cloud +
+      Supabase. To bring it back: 1) finish the OAuth client + Supabase
+      Google provider setup, 2) uncomment this button and the .auth-divider
+      below, 3) uncomment the authGoogleBtn click handler further down in
+      the Supabase auth module script block.
     <button class="auth-btn google" id="authGoogleBtn">
       <svg width="16" height="16" viewBox="0 0 48 48" style="vertical-align:-3px;margin-right:8px;"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4 24 4c-7.6 0-14.1 4.3-17.4 10.6z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.6l-6.6-5.6c-2 1.5-4.6 2.4-7.6 2.4-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.8 39.6 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.6 5.6C41.4 36.6 44 30.9 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
       Continue with Google
     </button>
     <div class="auth-divider"><span>or</span></div>
+    -->
     <div class="auth-field">
       <label>Email</label>
       <input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com">
@@ -330,6 +351,7 @@
 
   <div class="account-bar">
     <span id="accountEmail"></span>
+    <span class="sync-pill" id="syncPill"><span class="sync-dot"></span><span id="syncText">—</span></span>
     <button id="signOutBtn">Sign out</button>
   </div>
 
@@ -402,8 +424,12 @@
           <div class="k">Daily drawdown limit (5%)</div>
           <div class="v" id="dailyDDVal">—</div>
         </div>
+        <div class="calc-pill danger">
+          <div class="k">Account floor</div>
+          <div class="v" id="dailyFloorVal">—</div>
+        </div>
       </div>
-      <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's.</div>
+      <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's. Account floor is the exact balance you cannot drop to or below today.</div>
     </div>
   </div>
 
@@ -484,7 +510,7 @@
         <div class="risk-btn win" id="riskWinBtn">Won last trade — step up</div>
         <div class="risk-btn loss" id="riskLossBtn">Lost last trade — reset to 0.5%</div>
       </div>
-      <div class="hint">First trade risks 1% of Real Balance. Win → step up (1%→2%→3%, capped at 3%). Lose → reset straight to 0.5% and build back up.</div>
+      <div class="hint">First trade risks 1% of Real Balance. Win → step up (1%→2%→3%→4%→5%, capped at 5%). Lose → reset straight to 0.5% and build back up.</div>
     </div>
   </div>
   </div><!-- /panel: realbalance -->
@@ -565,12 +591,13 @@ const MILESTONES = [
   {id:'m_withdraw', text:"The instant I hit my withdrawal target: <b>stop trading, close every open trade, submit the withdrawal request</b> — then place zero new trades until payment lands.", note:"One trade after the target, even by accident, fails the account. Keep the target modest ($5,500 → $500 profit) — smaller numbers draw less scrutiny on withdrawal review."},
 ];
 
-const RISK_TIERS = [0.5, 1, 2, 3];
+const RISK_TIERS = [0.5, 1, 2, 3, 4, 5];
 
 // ---------- Storage helpers ----------
-// ---------- Firebase-backed storage ----------
-// Reads/writes go to Firestore under users/{uid}/appdata/{key}, so data is
-// private to the logged-in user and syncs across every device they log into.
+// ---------- Supabase-backed storage, with a localStorage cache so the app
+// keeps working (read AND write) with no connection at all. ----------
+// Reads/writes go to the "app_data" table, scoped to the logged-in user via
+// Postgres row-level security, so data is private and syncs across devices.
 window.currentUser = null;
 
 // A promise that never resolves/rejects would freeze the whole init chain
@@ -585,24 +612,114 @@ function withTimeout(promise, ms, label){
   ]);
 }
 
+function lsKey(key){ return 'gate:' + (window.currentUser ? window.currentUser.id : 'anon') + ':' + key; }
+function pendingLsKey(){ return 'gate:pending:' + (window.currentUser ? window.currentUser.id : 'anon'); }
+function getPendingSet(){
+  try{ return new Set(JSON.parse(localStorage.getItem(pendingLsKey()) || '[]')); }catch(e){ return new Set(); }
+}
+function savePendingSet(set){
+  try{ localStorage.setItem(pendingLsKey(), JSON.stringify([...set])); }catch(e){}
+}
+function markPending(key){ const s = getPendingSet(); s.add(key); savePendingSet(s); updateSyncPill(); }
+function clearPending(key){ const s = getPendingSet(); s.delete(key); savePendingSet(s); }
+
 async function sGet(key){
-  if(!window.currentUser) return null;
+  let cached;
   try{
-    const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
-    const snap = await withTimeout(window._fb.getDoc(ref), 8000, 'sGet:'+key);
-    if(snap === undefined) return null; // timed out
-    return snap.exists() ? JSON.parse(snap.data().value) : null;
-  }catch(e){ console.error('Firestore read failed:', key, e); return null; }
+    const raw = localStorage.getItem(lsKey(key));
+    cached = raw !== null ? JSON.parse(raw) : undefined;
+  }catch(e){ cached = undefined; }
+  if(!window.currentUser || !navigator.onLine) return cached !== undefined ? cached : null;
+  try{
+    const res = await withTimeout(
+      window._sb.from('app_data').select('value').eq('user_id', window.currentUser.id).eq('key', key).maybeSingle(),
+      8000, 'sGet:'+key
+    );
+    if(res === undefined) return cached !== undefined ? cached : null; // timed out
+    if(res.error) throw res.error;
+    const val = res.data ? res.data.value : null;
+    if(res.data) { try{ localStorage.setItem(lsKey(key), JSON.stringify(val)); }catch(e){} }
+    lastSyncedAt = Date.now(); updateSyncPill();
+    return val;
+  }catch(e){
+    console.error('Supabase read failed:', key, e);
+    return cached !== undefined ? cached : null;
+  }
 }
 async function sSet(key, val){
-  if(!window.currentUser) return;
+  // Optimistic local write first — the UI and offline mode always see the
+  // latest value immediately, whether or not the network call succeeds.
+  try{ localStorage.setItem(lsKey(key), JSON.stringify(val)); }catch(e){}
+  if(!window.currentUser){ showToast(); return; }
+  if(!navigator.onLine){
+    markPending(key);
+    showToast('Saved offline — will sync');
+    return;
+  }
   try{
-    const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
-    await window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() });
+    const { error } = await window._sb.from('app_data').upsert({
+      user_id: window.currentUser.id, key, value: val, updated_at: new Date().toISOString()
+    });
+    if(error) throw error;
+    clearPending(key);
+    lastSyncedAt = Date.now(); updateSyncPill();
     showToast();
-  }catch(e){ console.error('Firestore write failed:', e); showToast('Sync failed — will retry'); }
+  }catch(e){
+    console.error('Supabase write failed:', key, e);
+    markPending(key);
+    showToast('Sync failed — will retry');
+  }
+}
+// Retries any writes that queued up while offline, once the connection is back.
+async function flushPendingWrites(){
+  if(!window.currentUser || !navigator.onLine) return;
+  const pending = getPendingSet();
+  for(const key of pending){
+    let raw;
+    try{ raw = localStorage.getItem(lsKey(key)); }catch(e){ raw = null; }
+    if(raw === null){ clearPending(key); continue; }
+    try{
+      const { error } = await window._sb.from('app_data').upsert({
+        user_id: window.currentUser.id, key, value: JSON.parse(raw), updated_at: new Date().toISOString()
+      });
+      if(error) throw error;
+      clearPending(key);
+    }catch(e){ console.error('Retry sync failed:', key, e); }
+  }
+  lastSyncedAt = Date.now(); updateSyncPill();
 }
 function showToast(msg){ const t=document.getElementById('toast'); if(msg) t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>{ t.classList.remove('show'); t.textContent = 'Saved'; }, 1400); }
+
+// ---------- Sync status pill ----------
+let lastSyncedAt = null;
+function timeAgo(ts){
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<10) return 'just now';
+  if(s<60) return s+'s ago';
+  const m = Math.floor(s/60);
+  if(m<60) return m+'m ago';
+  return Math.floor(m/60)+'h ago';
+}
+function updateSyncPill(){
+  const pill = document.getElementById('syncPill');
+  const text = document.getElementById('syncText');
+  if(!pill || !text) return;
+  const pendingCount = getPendingSet().size;
+  if(!navigator.onLine){
+    pill.className = 'sync-pill offline';
+    text.textContent = pendingCount ? 'Offline · ' + pendingCount + ' queued' : 'Offline';
+  } else if(pendingCount){
+    pill.className = 'sync-pill pending';
+    text.textContent = 'Syncing…';
+  } else {
+    pill.className = 'sync-pill online';
+    text.textContent = lastSyncedAt ? 'Synced ' + timeAgo(lastSyncedAt) : 'Online';
+  }
+}
+window.addEventListener('online', () => { updateSyncPill(); flushPendingWrites(); });
+window.addEventListener('offline', updateSyncPill);
+setInterval(updateSyncPill, 15000);
+updateSyncPill();
 
 // Debounced writer — avoids hammering storage on every keystroke (rate limit protection)
 const _debounceTimers = {};
@@ -672,7 +789,9 @@ function renderChecklist(dayData){
 function renderCalc(dayData){
   const bal = parseFloat(dayData.balance || 0);
   const dd5 = document.getElementById('dailyDDVal');
+  const floor = document.getElementById('dailyFloorVal');
   dd5.textContent = bal ? '$' + (bal*0.05).toFixed(2) : '—';
+  floor.textContent = bal ? '$' + (bal - bal*0.05).toFixed(2) : '—';
 }
 function renderLiveCalc(dayData){
   const live = parseFloat(dayData.liveBalance || 0);
@@ -686,26 +805,42 @@ const dayCache = {};
 let historyPrefetched = false;
 
 // Pulls the user's ENTIRE checklist history in ONE request instead of one
-// request per calendar day. Firestore also caches this locally afterward
-// (via enableIndexedDbPersistence), so once this has run at least once while
-// online, the calendar keeps working fully offline indefinitely — it doesn't
-// re-fetch from the network on every visit.
+// request per calendar day, and mirrors it into localStorage. Once this has
+// run at least once while online, the calendar keeps working fully offline
+// indefinitely — it reads from localStorage instead of the network.
 async function prefetchHistory(){
-  if(!window.currentUser || !window._fb.getDocs) return;
+  if(!window.currentUser) return;
+  // Always warm dayCache from whatever's in localStorage first, so the
+  // calendar renders instantly even with zero connection.
   try{
-    const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
-    const snap = await withTimeout(window._fb.getDocs(colRef), 8000, 'prefetchHistory');
-    if(!snap) return; // timed out — fall back to per-day reads as needed
-    snap.forEach((docSnap) => {
-      const key = docSnap.id;
-      if(key.startsWith('day:')){
-        const iso = key.slice(4);
-        try{ dayCache[iso] = JSON.parse(docSnap.data().value); }catch(e){ dayCache[iso] = null; }
+    for(let i=0;i<localStorage.length;i++){
+      const lk = localStorage.key(i);
+      const prefix = 'gate:' + window.currentUser.id + ':day:';
+      if(lk && lk.startsWith(prefix)){
+        const iso = lk.slice(prefix.length);
+        try{ dayCache[iso] = JSON.parse(localStorage.getItem(lk)); }catch(e){}
+      }
+    }
+  }catch(e){}
+  if(!navigator.onLine) return;
+  try{
+    const res = await withTimeout(
+      window._sb.from('app_data').select('key,value').eq('user_id', window.currentUser.id),
+      8000, 'prefetchHistory'
+    );
+    if(!res) return; // timed out — fall back to per-day/local reads as needed
+    if(res.error) throw res.error;
+    (res.data || []).forEach((row) => {
+      try{ localStorage.setItem(lsKey(row.key), JSON.stringify(row.value)); }catch(e){}
+      if(row.key.startsWith('day:')){
+        const iso = row.key.slice(4);
+        dayCache[iso] = row.value;
       }
     });
     historyPrefetched = true;
+    lastSyncedAt = Date.now(); updateSyncPill();
   }catch(e){
-    console.error('History prefetch failed (falling back to per-day reads):', e);
+    console.error('History prefetch failed (falling back to per-day/local reads):', e);
   }
 }
 
@@ -751,11 +886,23 @@ document.getElementById('liveBalance').addEventListener('input', async (e)=>{
   renderAlarmBanner(dayData);
 });
 
+// Silently syncs "Last trade date" to whichever day the user is logging
+// trades/P&L for — no manual edits needed.
+async function maybeUpdateLastTradeDate(){
+  if(accountMeta.lastTradeDate === selectedDate) return;
+  accountMeta.lastTradeDate = selectedDate;
+  const field = document.getElementById('lastTradeDate');
+  if(field) field.value = selectedDate;
+  await sSet('account-meta', accountMeta);
+  renderTrackers();
+}
+
 document.getElementById('dayTradeCount').addEventListener('input', async (e)=>{
   let dayData = (await getDayCached(selectedDate)) || {items:{}, balance:'', liveBalance:'', tradeCount:'', pnl:''};
   dayData.tradeCount = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
+  if(e.target.value !== '') maybeUpdateLastTradeDate();
 });
 
 document.getElementById('dayPnl').addEventListener('input', async (e)=>{
@@ -763,6 +910,7 @@ document.getElementById('dayPnl').addEventListener('input', async (e)=>{
   dayData.pnl = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
+  if(e.target.value !== '') maybeUpdateLastTradeDate();
 });
 
 // ---------- Account meta ----------
@@ -1044,7 +1192,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ---------- Init (called by the Firebase auth listener once logged in) ----------
+// ---------- Init (called by the Supabase auth listener once logged in) ----------
 async function initApp(){
   const steps = [
     ['prefetchHistory', prefetchHistory],
@@ -1083,42 +1231,20 @@ window.initApp = initApp;
 
 <script type="module">
   // ============================================================
-  // FIREBASE SETUP — paste your project's config here.
-  // Firebase Console → Project Settings → General → Your apps → SDK setup
+  // SUPABASE SETUP — paste your project's URL + anon (public) key here.
+  // Supabase Dashboard → Project Settings → API
   // ============================================================
-  const firebaseConfig = {
-    apiKey: "AIzaSyCm65FuaV80bZ6Z1YGCCMG4sFBNDkXGNBA",
-    authDomain: "prop-checklist.firebaseapp.com",
-    projectId: "prop-checklist",
-    storageBucket: "prop-checklist.firebasestorage.app",
-    messagingSenderId: "139046608918",
-    appId: "1:139046608918:web:ad3efb4c2ef6481c775537"
-  };
+  const SUPABASE_URL = "https://hirihghexvzuapuqbzvt.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpcmloZ2hleHZ6dWFwdXFienZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2Mjg3MDYsImV4cCI6MjEwMjIwNDcwNn0.bj0R7MZ2tH_YQsa9z4iDtQDpDzajXw6IQ1FelSk4YNk";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-    createUserWithEmailAndPassword, signOut,
-    GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup,
-    sendPasswordResetEmail
-  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence,
-    collection, getDocs
-  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // Offline caching so the app still opens (read-only for unsynced data)
-  // with no connection, and queues writes until back online.
-  enableIndexedDbPersistence(db).catch((err) => {
-    console.warn('Offline persistence unavailable:', err.code);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
 
-  // Expose the pieces the main app script needs.
-  window._fb = { db, doc, getDoc, setDoc, collection, getDocs };
+  // Expose the client for the main app script (sGet/sSet/prefetchHistory).
+  window._sb = supabase;
 
   const overlay = document.getElementById('authOverlay');
   const errorEl = document.getElementById('authError');
@@ -1134,65 +1260,45 @@ window.initApp = initApp;
     document.getElementById('authSignUpBtn').disabled = on;
     document.getElementById('authForgotBtn').disabled = on;
   }
-  function friendlyError(code){
-    const map = {
-      'auth/invalid-email': 'That email address looks invalid.',
-      'auth/user-not-found': 'No account with that email — try Create Account.',
-      'auth/wrong-password': 'Wrong password.',
-      'auth/invalid-credential': 'Wrong email or password.',
-      'auth/email-already-in-use': 'An account already exists with that email — try Sign In instead.',
-      'auth/weak-password': 'Password needs to be at least 6 characters.',
-      'auth/unauthorized-domain': 'This site isn\'t authorized yet — add it under Authentication → Settings → Authorized domains in Firebase.',
-      'auth/popup-blocked': 'Popup was blocked — trying a different sign-in method.',
-      'auth/popup-closed-by-user': 'The Google sign-in window was closed before finishing — try again.',
-      'auth/account-exists-with-different-credential': 'That email is already used with a different sign-in method (likely email/password) — use that instead.',
-      'auth/network-request-failed': 'Network error — check your connection and try again.',
-      'auth/missing-email': 'Type your email above first.',
-      'auth/too-many-requests': 'Too many attempts — wait a bit and try again.',
-    };
-    return map[code] || ('Something went wrong (' + (code || 'unknown') + ') — try again.');
+  function friendlyError(msg){
+    if(!msg) return 'Something went wrong — try again.';
+    const m = msg.toLowerCase();
+    if(m.includes('invalid login credentials')) return 'Wrong email or password.';
+    if(m.includes('user already registered')) return 'An account already exists with that email — try Sign In instead.';
+    if(m.includes('password should be at least')) return 'Password needs to be at least 6 characters.';
+    if(m.includes('unable to validate email') || m.includes('invalid email')) return 'That email address looks invalid.';
+    if(m.includes('email not confirmed')) return 'Check your inbox to confirm your email, then sign in.';
+    if(m.includes('email rate limit') || m.includes('too many requests')) return 'Too many attempts — wait a bit and try again.';
+    if(m.includes('failed to fetch') || m.includes('network')) return 'Network error — check your connection and try again.';
+    return msg;
   }
 
-  const googleProvider = new GoogleAuthProvider();
-  document.getElementById('authGoogleBtn').addEventListener('click', async () => {
-    errorEl.textContent = '';
-    statusEl.textContent = '';
-    setLoading(true);
-    try{
-      // Popup avoids the cross-domain redirect round-trip that some mobile
-      // browser privacy settings silently break.
-      await signInWithPopup(auth, googleProvider);
-    }catch(e){
-      console.error('Google popup sign-in failed:', e.code, e.message);
-      if(e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment' || e.code === 'auth/cancelled-popup-request'){
-        try{
-          await signInWithRedirect(auth, googleProvider);
-          return; // page will navigate away
-        }catch(e2){
-          console.error('Google redirect sign-in failed:', e2.code, e2.message);
-          errorEl.textContent = friendlyError(e2.code);
-        }
-      } else {
-        errorEl.textContent = friendlyError(e.code);
-      }
-    }
-    setLoading(false);
-  });
-
-  // In case a redirect-based attempt is in flight from a previous load.
-  getRedirectResult(auth).catch((e) => {
-    console.error('Redirect result error:', e.code, e.message);
-    if(e && e.code) errorEl.textContent = friendlyError(e.code);
-  });
+  // GOOGLE SIGN-IN — disabled for now (button removed above too). To bring
+  // back: uncomment this block and the button/divider in the HTML above.
+  // document.getElementById('authGoogleBtn').addEventListener('click', async () => {
+  //   errorEl.textContent = '';
+  //   statusEl.textContent = '';
+  //   setLoading(true);
+  //   try{
+  //     const { error } = await window._sb.auth.signInWithOAuth({ provider: 'google' });
+  //     if(error) throw error;
+  //     // Page redirects to Google and back — nothing else to do here.
+  //   }catch(e){
+  //     console.error('Google sign-in failed:', e.message);
+  //     errorEl.textContent = friendlyError(e.message);
+  //     setLoading(false);
+  //   }
+  // });
 
   document.getElementById('authSignInBtn').addEventListener('click', async () => {
     errorEl.textContent = '';
     statusEl.textContent = '';
     setLoading(true);
     try{
-      await signInWithEmailAndPassword(auth, emailInput.value.trim(), passInput.value);
+      const { error } = await window._sb.auth.signInWithPassword({ email: emailInput.value.trim(), password: passInput.value });
+      if(error) throw error;
     }catch(e){
-      errorEl.textContent = friendlyError(e.code);
+      errorEl.textContent = friendlyError(e.message);
     }
     setLoading(false);
   });
@@ -1206,9 +1312,13 @@ window.initApp = initApp;
     statusEl.textContent = '';
     setLoading(true);
     try{
-      await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passInput.value);
+      const { data, error } = await window._sb.auth.signUp({ email: emailInput.value.trim(), password: passInput.value });
+      if(error) throw error;
+      if(data && data.user && !data.session){
+        statusEl.textContent = 'Check your inbox to confirm your email, then sign in.';
+      }
     }catch(e){
-      errorEl.textContent = friendlyError(e.code);
+      errorEl.textContent = friendlyError(e.message);
     }
     setLoading(false);
   });
@@ -1223,25 +1333,28 @@ window.initApp = initApp;
     }
     setLoading(true);
     try{
-      await sendPasswordResetEmail(auth, email);
+      const { error } = await window._sb.auth.resetPasswordForEmail(email);
+      if(error) throw error;
       statusEl.textContent = 'Reset link sent to ' + email + ' — check your inbox (and spam folder).';
     }catch(e){
-      errorEl.textContent = friendlyError(e.code);
+      errorEl.textContent = friendlyError(e.message);
     }
     setLoading(false);
   });
 
   document.getElementById('signOutBtn').addEventListener('click', async () => {
-    await signOut(auth);
+    await window._sb.auth.signOut();
     location.reload(); // simplest way to fully reset in-memory state/caches
   });
 
   let appStarted = false;
-  onAuthStateChanged(auth, (user) => {
+  window._sb.auth.onAuthStateChange((_event, session) => {
+    const user = session ? session.user : null;
     if(user){
       window.currentUser = user;
       overlay.style.display = 'none';
       accountEmailEl.textContent = user.email;
+      if(typeof updateSyncPill === 'function') updateSyncPill();
       if(!appStarted && window.initApp){
         appStarted = true;
         window.initApp();

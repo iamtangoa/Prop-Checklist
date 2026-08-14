@@ -13,7 +13,7 @@
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <!-- 
-  SUPABASE VERSION — private cloud sync via Supabase Auth + Postgres (RLS).
+  FIREBASE VERSION — private cloud sync via Firebase Auth + Firestore.
   Paired with manifest.json, sw.js, icon-192.png, icon-512.png for PWA/APK packaging.
 -->
 <style>
@@ -97,6 +97,8 @@
   }
   .calc-pill .k{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;}
   .calc-pill .v{font-family:var(--display);font-weight:700;font-size:17px;margin-top:2px;color:var(--amber);}
+  .calc-pill.floor{border-color:rgba(232,84,77,.35);background:rgba(232,84,77,.08);}
+  .calc-pill.floor .v{color:var(--red);}
 
   /* checklist items */
   .item{
@@ -290,23 +292,148 @@
   /* ACCOUNT BAR */
   .account-bar{
     display:flex; justify-content:space-between; align-items:center;
-    font-size:11px; color:var(--dim); margin-bottom:10px; padding:0 2px;
+    font-size:11px; color:var(--dim); margin-bottom:10px; padding:0 2px; gap:10px;
   }
   .account-bar button{
     background:none;border:none;color:var(--muted);font-family:var(--mono);
     font-size:11px;cursor:pointer;text-decoration:underline;
   }
-  .sync-pill{
-    display:inline-flex;align-items:center;gap:5px;font-size:10.5px;
-    padding:3px 9px;border-radius:99px;border:1px solid var(--line);
+  .menu-btn{
+    text-decoration:none !important; font-size:16px !important; color:var(--text) !important;
+    line-height:1; padding:2px 4px !important;
   }
-  .sync-pill .dot{width:6px;height:6px;border-radius:50%;}
-  .sync-pill.synced{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.10);}
-  .sync-pill.synced .dot{background:var(--green);}
-  .sync-pill.syncing{color:var(--amber);border-color:rgba(232,163,61,.35);background:rgba(232,163,61,.10);}
-  .sync-pill.syncing .dot{background:var(--amber);animation:pulse 1s ease-in-out infinite;}
-  .sync-pill.offline{color:var(--red);border-color:rgba(232,84,77,.35);background:rgba(232,84,77,.10);}
-  .sync-pill.offline .dot{background:var(--red);}
+  .account-bar #accountEmail{flex:1;text-align:left;}
+  .sync-status{display:flex;align-items:center;gap:5px;font-size:10.5px;white-space:nowrap;}
+  .sync-status .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+  .sync-status.online{color:var(--green);}
+  .sync-status.online .dot{background:var(--green);}
+  .sync-status.offline{color:var(--red);}
+  .sync-status.offline .dot{background:var(--red);animation:pulse 1.6s ease-in-out infinite;}
+
+  /* MENU DRAWER */
+  .menu-overlay{
+    position:fixed; inset:0; background:var(--bg); z-index:1500;
+    display:none; flex-direction:column;
+  }
+  .menu-overlay.open{display:flex;}
+  .menu-panel{
+    display:flex; flex-direction:column; height:100%; max-width:720px;
+    margin:0 auto; width:100%;
+  }
+  .menu-header{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px; border-bottom:1px solid var(--line);
+  }
+  .menu-title{font-family:var(--display);font-weight:700;font-size:17px;}
+  .menu-close{
+    background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;
+  }
+  .menu-tabs{display:flex;gap:6px;padding:12px 16px 0;overflow-x:auto;}
+  .menu-tab{
+    flex:none;font-family:var(--display);font-weight:600;font-size:12px;
+    color:var(--muted);background:var(--panel);border:1px solid var(--line);
+    border-radius:9px;padding:8px 12px;cursor:pointer;white-space:nowrap;
+  }
+  .menu-tab.active{color:var(--bg);background:var(--text);border-color:var(--text);}
+  .menu-body{flex:1;overflow-y:auto;padding:16px;}
+
+  /* Profile */
+  .profile-row{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:16px;margin-bottom:14px;
+  }
+  .profile-email{font-family:var(--mono);font-size:13px;word-break:break-all;}
+  .profile-signout{
+    background:rgba(232,84,77,.12);color:var(--red);border:1px solid rgba(232,84,77,.35);
+    border-radius:8px;padding:9px 14px;font-family:var(--display);font-weight:600;
+    font-size:12px;cursor:pointer;flex:none;margin-left:12px;
+  }
+
+  /* Status filter pills */
+  .status-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .status-pill{
+    flex:none;background:var(--panel);border:1px solid var(--line);border-radius:9px;
+    padding:8px 12px;cursor:pointer;font-family:var(--display);font-size:12px;font-weight:600;
+    color:var(--muted);display:flex;align-items:center;gap:6px;
+  }
+  .status-pill .cnt{
+    background:var(--bg);border-radius:99px;padding:1px 7px;font-size:10.5px;color:var(--text);
+  }
+  .status-pill.active-filter{border-color:var(--green);color:var(--green);}
+  .status-pill.active-filter .cnt{color:var(--green);}
+
+  /* Entity cards (accounts, future accounts, firms) */
+  .entity-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px;margin-bottom:10px;
+  }
+  .entity-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .entity-name{font-family:var(--display);font-weight:600;font-size:14px;}
+  .entity-sub{font-size:11.5px;color:var(--muted);margin-top:3px;}
+  .entity-badge{
+    flex:none;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .badge-active{background:rgba(62,207,142,.14);color:var(--green);}
+  .badge-ongoing{background:rgba(232,163,61,.14);color:var(--amber);}
+  .badge-passed{background:rgba(62,207,142,.14);color:var(--green);}
+  .badge-failed{background:rgba(232,84,77,.14);color:var(--red);}
+  .entity-actions{display:flex;gap:14px;margin-top:10px;}
+  .entity-actions button{
+    background:none;border:none;color:var(--dim);font-family:var(--mono);
+    font-size:10.5px;cursor:pointer;text-decoration:underline;
+  }
+
+  .add-btn{
+    width:100%;padding:11px;border-radius:10px;border:1px dashed var(--line);
+    background:none;color:var(--muted);font-family:var(--display);font-weight:600;
+    font-size:12.5px;cursor:pointer;margin-bottom:14px;
+  }
+  .add-btn:hover{border-color:var(--green);color:var(--green);}
+
+  /* Inline forms */
+  .entity-form{
+    background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+    padding:14px;margin-bottom:14px;
+  }
+  .entity-form .field{margin-bottom:10px;}
+  .entity-form label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .entity-form input, .entity-form select, .entity-form textarea{
+    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);padding:9px 10px;font-family:var(--mono);font-size:12.5px;
+  }
+  .entity-form textarea{min-height:70px;resize:vertical;}
+  .form-actions{display:flex;gap:10px;margin-top:4px;}
+  .form-actions button{
+    flex:1;padding:10px;border-radius:9px;border:none;font-family:var(--display);
+    font-weight:600;font-size:12.5px;cursor:pointer;
+  }
+  .form-save{background:var(--green);color:#08130D;}
+  .form-cancel{background:var(--panel);color:var(--muted);border:1px solid var(--line) !important;}
+
+  /* Prop firm / plan / rule nesting */
+  .firm-plans{margin-top:10px;padding-left:10px;border-left:2px solid var(--line);}
+  .plan-block{margin-bottom:10px;}
+  .plan-name{font-family:var(--display);font-weight:600;font-size:12.5px;}
+  .plan-balance{font-size:10.5px;color:var(--dim);}
+  .rule-row{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:8px;
+    padding:8px 0;border-bottom:1px solid var(--line);font-size:12px;line-height:1.4;
+  }
+  .rule-row:last-child{border-bottom:none;}
+  .rule-row.important{
+    background:rgba(232,84,77,.08);border-left:3px solid var(--red);
+    padding-left:8px;border-radius:6px;margin:4px 0;
+  }
+  .rule-row.important .rule-text{font-weight:700;}
+  .rule-important-tag{
+    flex:none;font-size:9px;font-weight:700;color:var(--red);
+    background:rgba(232,84,77,.15);border-radius:99px;padding:2px 7px;
+  }
+  .rule-star{background:none;border:none;cursor:pointer;font-size:13px;flex:none;color:var(--dim);}
+  .rule-star.on{color:var(--red);}
+  .empty-state{text-align:center;color:var(--dim);font-size:12px;padding:30px 10px;}
 </style>
 </head>
 <body>
@@ -337,14 +464,29 @@
   </div>
 </div>
 
+<div id="menuOverlay" class="menu-overlay">
+  <div class="menu-panel">
+    <div class="menu-header">
+      <div class="menu-title" id="menuTitle">Profile</div>
+      <button class="menu-close" id="menuCloseBtn">✕</button>
+    </div>
+    <div class="menu-tabs">
+      <button class="menu-tab active" data-menu="profile">Profile</button>
+      <button class="menu-tab" data-menu="accounts">Accounts</button>
+      <button class="menu-tab" data-menu="future">Future Accounts</button>
+      <button class="menu-tab" data-menu="firms">Prop Firms & Rules</button>
+    </div>
+    <div class="menu-body" id="menuBody"></div>
+  </div>
+</div>
+
 <div class="wrap">
 
   <div class="account-bar">
+    <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
     <span id="accountEmail"></span>
-    <span style="display:flex;align-items:center;gap:10px;">
-      <span class="sync-pill offline" id="syncPill"><span class="dot"></span><span id="syncPillText">Offline</span></span>
-      <button id="signOutBtn">Sign out</button>
-    </span>
+    <span id="syncStatus" class="sync-status"></span>
+    <button id="signOutBtn">Sign out</button>
   </div>
 
   <div id="alarmSlot"></div>
@@ -386,7 +528,7 @@
           <input type="date" id="accountStart">
         </div>
         <div class="field">
-          <label>Last trade date</label>
+          <label>Last trade date (auto-updates when you log a trade)</label>
           <input type="date" id="lastTradeDate">
         </div>
       </div>
@@ -416,9 +558,9 @@
           <div class="k">Daily drawdown limit (5%)</div>
           <div class="v" id="dailyDDVal">—</div>
         </div>
-        <div class="calc-pill">
-          <div class="k">Account floor (do not drop below)</div>
-          <div class="v" id="dailyFloorVal" style="color:var(--red);">—</div>
+        <div class="calc-pill floor">
+          <div class="k">Account floor — do not go below</div>
+          <div class="v" id="dailyFloorVal">—</div>
         </div>
       </div>
       <div class="hint">Fixed for the whole day once the broker's clock ticks over — this is the reminder to check the real number in your dashboard each morning, not trust yesterday's.</div>
@@ -603,48 +745,22 @@ function withTimeout(promise, ms, label){
   ]);
 }
 
-// ---------- Live sync / offline status pill ----------
-function setSyncPill(state, text){
-  const pill = document.getElementById('syncPill');
-  const label = document.getElementById('syncPillText');
-  if(!pill) return;
-  pill.className = 'sync-pill ' + state;
-  label.textContent = text;
-}
-function refreshSyncPillBaseline(){
-  setSyncPill(navigator.onLine ? 'synced' : 'offline', navigator.onLine ? 'Synced' : 'Offline');
-}
-window.addEventListener('online', refreshSyncPillBaseline);
-window.addEventListener('offline', refreshSyncPillBaseline);
-refreshSyncPillBaseline();
-
 async function sGet(key){
   if(!window.currentUser) return null;
   try{
-    const { data, error } = await withTimeout(
-      window._sb.client.from('app_data').select('value')
-        .eq('user_id', window.currentUser.id).eq('key', key).maybeSingle(),
-      8000, 'sGet:'+key
-    );
-    if(data === undefined) return null; // timed out
-    if(error) throw error;
-    return data ? data.value : null;
-  }catch(e){ console.error('Supabase read failed:', key, e); return null; }
+    const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
+    const snap = await withTimeout(window._fb.getDoc(ref), 8000, 'sGet:'+key);
+    if(snap === undefined) return null; // timed out
+    return snap.exists() ? JSON.parse(snap.data().value) : null;
+  }catch(e){ console.error('Firestore read failed:', key, e); return null; }
 }
 async function sSet(key, val){
   if(!window.currentUser) return;
-  setSyncPill('syncing', 'Syncing…');
   try{
-    const { error } = await window._sb.client.from('app_data')
-      .upsert({ user_id: window.currentUser.id, key, value: val }, { onConflict: 'user_id,key' });
-    if(error) throw error;
+    const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
+    await window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() });
     showToast();
-    setSyncPill('synced', 'Synced');
-  }catch(e){
-    console.error('Supabase write failed:', e);
-    showToast('Sync failed — will retry');
-    setSyncPill('offline', navigator.onLine ? 'Sync failed' : 'Offline');
-  }
+  }catch(e){ console.error('Firestore write failed:', e); showToast('Sync failed — will retry'); }
 }
 function showToast(msg){ const t=document.getElementById('toast'); if(msg) t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>{ t.classList.remove('show'); t.textContent = 'Saved'; }, 1400); }
 
@@ -717,8 +833,10 @@ function renderCalc(dayData){
   const bal = parseFloat(dayData.balance || 0);
   const dd5 = document.getElementById('dailyDDVal');
   const floorEl = document.getElementById('dailyFloorVal');
-  dd5.textContent = bal ? '$' + (bal*0.05).toFixed(2) : '—';
-  floorEl.textContent = bal ? '$' + (bal - bal*0.05).toFixed(2) : '—';
+  if(!bal){ dd5.textContent='—'; floorEl.textContent='—'; return; }
+  const ddAmount = bal*0.05;
+  dd5.textContent = '$' + ddAmount.toFixed(2);
+  floorEl.textContent = '$' + (bal - ddAmount).toFixed(2);
 }
 function renderLiveCalc(dayData){
   const live = parseFloat(dayData.liveBalance || 0);
@@ -732,24 +850,21 @@ const dayCache = {};
 let historyPrefetched = false;
 
 // Pulls the user's ENTIRE checklist history in ONE request instead of one
-// request per calendar day. The Supabase JS client also has its own fetch
-// cache disabled by default, so this is a plain network round trip — but
-// since dayCache is populated from it, the calendar keeps working fully
-// offline for the rest of the session once this has run.
+// request per calendar day. Firestore also caches this locally afterward
+// (via enableIndexedDbPersistence), so once this has run at least once while
+// online, the calendar keeps working fully offline indefinitely — it doesn't
+// re-fetch from the network on every visit.
 async function prefetchHistory(){
-  if(!window.currentUser || !window._sb.client) return;
+  if(!window.currentUser || !window._fb.getDocs) return;
   try{
-    const res = await withTimeout(
-      window._sb.client.from('app_data').select('key,value').eq('user_id', window.currentUser.id),
-      8000, 'prefetchHistory'
-    );
-    if(!res) return; // timed out — fall back to per-day reads as needed
-    const { data, error } = res;
-    if(error) throw error;
-    (data || []).forEach((row) => {
-      if(row.key.startsWith('day:')){
-        const iso = row.key.slice(4);
-        dayCache[iso] = row.value;
+    const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
+    const snap = await withTimeout(window._fb.getDocs(colRef), 8000, 'prefetchHistory');
+    if(!snap) return; // timed out — fall back to per-day reads as needed
+    snap.forEach((docSnap) => {
+      const key = docSnap.id;
+      if(key.startsWith('day:')){
+        const iso = key.slice(4);
+        try{ dayCache[iso] = JSON.parse(docSnap.data().value); }catch(e){ dayCache[iso] = null; }
       }
     });
     historyPrefetched = true;
@@ -800,14 +915,23 @@ document.getElementById('liveBalance').addEventListener('input', async (e)=>{
   renderAlarmBanner(dayData);
 });
 
-// Silently bumps "Last trade date" to whichever day the user is logging
-// trades/P&L for, so it never goes stale from a forgotten manual edit.
-function maybeBumpLastTradeDate(){
-  if(accountMeta.lastTradeDate === selectedDate) return;
-  accountMeta.lastTradeDate = selectedDate;
-  document.getElementById('lastTradeDate').value = selectedDate;
-  sSetDebounced('account-meta', accountMeta);
-  renderTrackers();
+// If a trade count or P&L is logged for a date, that date counts as a trade
+// day — auto-advance "Last trade date" so the 30-day inactivity tracker
+// stays accurate without manual upkeep. Never moves it backward (so
+// backfilling an old day's numbers doesn't regress the countdown), and
+// ignores future dates.
+function maybeUpdateLastTradeDate(iso, dayData){
+  if(iso > todayISO()) return;
+  const hasTradeCount = dayData.tradeCount !== undefined && dayData.tradeCount !== '' && parseFloat(dayData.tradeCount) > 0;
+  const hasPnl = dayData.pnl !== undefined && dayData.pnl !== '' && !isNaN(parseFloat(dayData.pnl));
+  if(!hasTradeCount && !hasPnl) return;
+  if(!accountMeta.lastTradeDate || iso >= accountMeta.lastTradeDate){
+    accountMeta.lastTradeDate = iso;
+    const ltdInput = document.getElementById('lastTradeDate');
+    if(ltdInput) ltdInput.value = iso;
+    sSetDebounced('account-meta', accountMeta);
+    renderTrackers();
+  }
 }
 
 document.getElementById('dayTradeCount').addEventListener('input', async (e)=>{
@@ -815,7 +939,7 @@ document.getElementById('dayTradeCount').addEventListener('input', async (e)=>{
   dayData.tradeCount = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
-  if(e.target.value !== '') maybeBumpLastTradeDate();
+  maybeUpdateLastTradeDate(selectedDate, dayData);
 });
 
 document.getElementById('dayPnl').addEventListener('input', async (e)=>{
@@ -823,7 +947,7 @@ document.getElementById('dayPnl').addEventListener('input', async (e)=>{
   dayData.pnl = e.target.value;
   setDayCache(selectedDate, dayData);
   sSetDebounced('day:'+selectedDate, dayData);
-  if(e.target.value !== '') maybeBumpLastTradeDate();
+  maybeUpdateLastTradeDate(selectedDate, dayData);
 });
 
 // ---------- Account meta ----------
@@ -1105,7 +1229,422 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ---------- Init (called by the Supabase auth listener once logged in) ----------
+// ---------- Init (called by the Firebase auth listener once logged in) ----------
+// ============================================================
+// ACCOUNTS / PROP FIRMS MENU SYSTEM
+// Entirely additive — separate storage keys ('accounts', 'future-accounts',
+// 'prop-firms'), lazy-loaded only when the menu is opened, so none of this
+// slows down the daily checklist's normal load.
+// ============================================================
+let accountsData = null;
+let futureAccountsData = null;
+let propFirmsData = null;
+let currentStatusFilter = 'all';
+let currentMenuTab = 'profile';
+let openFirmId = null;
+
+function genId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+async function ensureAccountsLoaded(){ if(accountsData === null) accountsData = (await sGet('accounts')) || []; }
+async function ensureFutureLoaded(){ if(futureAccountsData === null) futureAccountsData = (await sGet('future-accounts')) || []; }
+async function ensureFirmsLoaded(){ if(propFirmsData === null) propFirmsData = (await sGet('prop-firms')) || []; }
+function saveAccounts(){ sSet('accounts', accountsData); }
+function saveFuture(){ sSet('future-accounts', futureAccountsData); }
+function saveFirms(){ sSet('prop-firms', propFirmsData); }
+
+document.getElementById('menuBtn').addEventListener('click', async () => {
+  document.getElementById('menuOverlay').classList.add('open');
+  await renderMenuTab(currentMenuTab);
+});
+document.getElementById('menuCloseBtn').addEventListener('click', () => {
+  document.getElementById('menuOverlay').classList.remove('open');
+});
+document.querySelectorAll('.menu-tab').forEach(btn=>{
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.menu-tab').forEach(b=>b.classList.toggle('active', b===btn));
+    currentMenuTab = btn.dataset.menu;
+    await renderMenuTab(currentMenuTab);
+  });
+});
+
+async function renderMenuTab(tab){
+  const titles = { profile:'Profile', accounts:'Accounts', future:'Future Accounts', firms:'Prop Firms & Rules' };
+  document.getElementById('menuTitle').textContent = titles[tab] || '';
+  const body = document.getElementById('menuBody');
+  body.innerHTML = '<div class="empty-state">Loading…</div>';
+  if(tab === 'profile') return renderProfileTab();
+  if(tab === 'accounts') return renderAccountsTab();
+  if(tab === 'future') return renderFutureTab();
+  if(tab === 'firms') return renderFirmsTab();
+}
+
+function renderProfileTab(){
+  const body = document.getElementById('menuBody');
+  const email = window.currentUser ? window.currentUser.email : '';
+  body.innerHTML = `
+    <div class="profile-row">
+      <div class="profile-email">${escapeHtml(email)}</div>
+      <button class="profile-signout" id="drawerSignOutBtn">Sign out</button>
+    </div>
+    <div class="hint">Signing out here does the same thing as the Sign out link up top — your data stays safely synced to your account either way.</div>
+  `;
+  document.getElementById('drawerSignOutBtn').addEventListener('click', () => {
+    document.getElementById('signOutBtn').click();
+  });
+}
+
+// ---------- ACCOUNTS TAB ----------
+async function renderAccountsTab(){
+  await ensureAccountsLoaded();
+  const body = document.getElementById('menuBody');
+  const counts = { all: accountsData.length, active:0, ongoing:0, passed:0, failed:0 };
+  accountsData.forEach(a => { if(counts[a.status] !== undefined) counts[a.status]++; });
+
+  const pills = ['all','active','ongoing','passed','failed'].map(s => `
+    <div class="status-pill ${currentStatusFilter===s?'active-filter':''}" data-filter="${s}">
+      ${s[0].toUpperCase()+s.slice(1)} <span class="cnt">${counts[s]}</span>
+    </div>`).join('');
+
+  const filtered = currentStatusFilter==='all' ? accountsData : accountsData.filter(a=>a.status===currentStatusFilter);
+  const list = filtered.length ? filtered.map(a => accountCardHtml(a)).join('') :
+    `<div class="empty-state">No accounts in this category yet.</div>`;
+
+  body.innerHTML = `
+    <div class="status-pills">${pills}</div>
+    <button class="add-btn" id="addAccountBtn">+ Add account</button>
+    <div id="accountFormSlot"></div>
+    <div id="accountsList">${list}</div>
+  `;
+
+  body.querySelectorAll('.status-pill').forEach(p=>{
+    p.addEventListener('click', () => { currentStatusFilter = p.dataset.filter; renderAccountsTab(); });
+  });
+  document.getElementById('addAccountBtn').addEventListener('click', () => showAccountForm());
+  body.querySelectorAll('[data-edit-account]').forEach(btn=>{
+    btn.addEventListener('click', () => showAccountForm(btn.dataset.editAccount));
+  });
+  body.querySelectorAll('[data-delete-account]').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      accountsData = accountsData.filter(a=>a.id !== btn.dataset.deleteAccount);
+      saveAccounts();
+      renderAccountsTab();
+    });
+  });
+}
+
+function accountCardHtml(a){
+  const badgeClass = { active:'badge-active', ongoing:'badge-ongoing', passed:'badge-passed', failed:'badge-failed' }[a.status] || 'badge-ongoing';
+  return `
+    <div class="entity-card">
+      <div class="entity-top">
+        <div>
+          <div class="entity-name">${escapeHtml(a.label) || 'Untitled account'}</div>
+          <div class="entity-sub">${escapeHtml(a.firmName) || 'No firm set'}${a.planName ? ' — '+escapeHtml(a.planName) : ''} ${a.balance ? '· $'+Number(a.balance).toLocaleString() : ''}</div>
+        </div>
+        <div class="entity-badge ${badgeClass}">${a.status}</div>
+      </div>
+      ${a.notes ? `<div class="entity-sub" style="margin-top:8px;">${escapeHtml(a.notes)}</div>` : ''}
+      <div class="entity-actions">
+        <button data-edit-account="${a.id}">Edit</button>
+        <button data-delete-account="${a.id}">Delete</button>
+      </div>
+    </div>`;
+}
+
+async function showAccountForm(editId){
+  await ensureFirmsLoaded();
+  const editing = editId ? accountsData.find(a=>a.id===editId) : null;
+  const firmOptions = propFirmsData.map(f => `<option value="${f.id}" ${editing && editing.firmId===f.id ? 'selected':''}>${escapeHtml(f.name)}</option>`).join('');
+  const slot = document.getElementById('accountFormSlot');
+  slot.innerHTML = `
+    <div class="entity-form">
+      <div class="field"><label>Label</label><input id="af_label" value="${editing ? escapeHtml(editing.label) : ''}" placeholder="e.g. FTMO $100k #1"></div>
+      <div class="field"><label>Prop firm</label>
+        <select id="af_firm"><option value="">— none / other —</option>${firmOptions}</select>
+      </div>
+      <div class="field"><label>Plan</label><input id="af_plan" value="${editing ? escapeHtml(editing.planName) : ''}" placeholder="e.g. 2-step $100k"></div>
+      <div class="field"><label>Balance ($)</label><input id="af_balance" type="number" value="${editing ? editing.balance||'' : ''}"></div>
+      <div class="field"><label>Status</label>
+        <select id="af_status">
+          ${['active','ongoing','passed','failed'].map(s=>`<option value="${s}" ${editing && editing.status===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="af_notes" placeholder="anything worth remembering about this account">${editing ? escapeHtml(editing.notes) : ''}</textarea></div>
+      <div class="form-actions">
+        <button class="form-save" id="af_save">Save</button>
+        <button class="form-cancel" id="af_cancel">Cancel</button>
+      </div>
+    </div>`;
+  if(editing && editing.firmId) document.getElementById('af_firm').value = editing.firmId;
+  document.getElementById('af_cancel').addEventListener('click', () => { slot.innerHTML=''; });
+  document.getElementById('af_save').addEventListener('click', () => {
+    const firmId = document.getElementById('af_firm').value;
+    const firm = propFirmsData.find(f=>f.id===firmId);
+    const obj = {
+      id: editing ? editing.id : genId(),
+      label: document.getElementById('af_label').value.trim(),
+      firmId: firmId || '',
+      firmName: firm ? firm.name : '',
+      planName: document.getElementById('af_plan').value.trim(),
+      balance: document.getElementById('af_balance').value,
+      status: document.getElementById('af_status').value,
+      notes: document.getElementById('af_notes').value.trim(),
+    };
+    if(editing){ accountsData = accountsData.map(a => a.id===editing.id ? obj : a); }
+    else { accountsData.push(obj); }
+    saveAccounts();
+    slot.innerHTML = '';
+    renderAccountsTab();
+  });
+}
+
+// ---------- FUTURE ACCOUNTS TAB ----------
+async function renderFutureTab(){
+  await ensureFutureLoaded();
+  const body = document.getElementById('menuBody');
+  const list = futureAccountsData.length ? futureAccountsData.map(f => `
+    <div class="entity-card">
+      <div class="entity-top">
+        <div>
+          <div class="entity-name">${escapeHtml(f.label) || 'Untitled'}</div>
+          <div class="entity-sub">${escapeHtml(f.firmName) || 'No firm set'} ${f.targetBalance ? '· $'+Number(f.targetBalance).toLocaleString() : ''}</div>
+        </div>
+      </div>
+      ${f.notes ? `<div class="entity-sub" style="margin-top:8px;">${escapeHtml(f.notes)}</div>` : ''}
+      <div class="entity-actions">
+        <button data-delete-future="${f.id}">Delete</button>
+      </div>
+    </div>`).join('') : `<div class="empty-state">Nothing planned yet — add an account you're thinking about buying.</div>`;
+
+  body.innerHTML = `
+    <button class="add-btn" id="addFutureBtn">+ Add planned account</button>
+    <div id="futureFormSlot"></div>
+    <div>${list}</div>
+  `;
+  document.getElementById('addFutureBtn').addEventListener('click', () => {
+    document.getElementById('futureFormSlot').innerHTML = `
+      <div class="entity-form">
+        <div class="field"><label>Label</label><input id="ff_label" placeholder="e.g. Next: FTMO $200k"></div>
+        <div class="field"><label>Prop firm (optional)</label><input id="ff_firm" placeholder="e.g. FTMO"></div>
+        <div class="field"><label>Target balance ($)</label><input id="ff_balance" type="number"></div>
+        <div class="field"><label>Notes</label><textarea id="ff_notes" placeholder="why, when, budget..."></textarea></div>
+        <div class="form-actions">
+          <button class="form-save" id="ff_save">Save</button>
+          <button class="form-cancel" id="ff_cancel">Cancel</button>
+        </div>
+      </div>`;
+    document.getElementById('ff_cancel').addEventListener('click', () => { document.getElementById('futureFormSlot').innerHTML=''; });
+    document.getElementById('ff_save').addEventListener('click', () => {
+      futureAccountsData.push({
+        id: genId(),
+        label: document.getElementById('ff_label').value.trim(),
+        firmName: document.getElementById('ff_firm').value.trim(),
+        targetBalance: document.getElementById('ff_balance').value,
+        notes: document.getElementById('ff_notes').value.trim(),
+      });
+      saveFuture();
+      document.getElementById('futureFormSlot').innerHTML = '';
+      renderFutureTab();
+    });
+  });
+  body.querySelectorAll('[data-delete-future]').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      futureAccountsData = futureAccountsData.filter(f=>f.id!==btn.dataset.deleteFuture);
+      saveFuture();
+      renderFutureTab();
+    });
+  });
+}
+
+// ---------- PROP FIRMS & RULES TAB ----------
+async function renderFirmsTab(){
+  await ensureFirmsLoaded();
+  const body = document.getElementById('menuBody');
+  const list = propFirmsData.length ? propFirmsData.map(f => firmBlockHtml(f)).join('') :
+    `<div class="empty-state">No prop firms added yet.</div>`;
+  body.innerHTML = `
+    <button class="add-btn" id="addFirmBtn">+ Add prop firm</button>
+    <div id="firmFormSlot"></div>
+    <div>${list}</div>
+  `;
+  document.getElementById('addFirmBtn').addEventListener('click', () => {
+    document.getElementById('firmFormSlot').innerHTML = `
+      <div class="entity-form">
+        <div class="field"><label>Prop firm name</label><input id="nf_name" placeholder="e.g. FTMO"></div>
+        <div class="form-actions">
+          <button class="form-save" id="nf_save">Save</button>
+          <button class="form-cancel" id="nf_cancel">Cancel</button>
+        </div>
+      </div>`;
+    document.getElementById('nf_cancel').addEventListener('click', () => { document.getElementById('firmFormSlot').innerHTML=''; });
+    document.getElementById('nf_save').addEventListener('click', () => {
+      const name = document.getElementById('nf_name').value.trim();
+      if(!name) return;
+      propFirmsData.push({ id: genId(), name, plans: [] });
+      saveFirms();
+      document.getElementById('firmFormSlot').innerHTML = '';
+      renderFirmsTab();
+    });
+  });
+  wireFirmsTabEvents();
+}
+
+function firmBlockHtml(firm){
+  const isOpen = openFirmId === firm.id;
+  const plansHtml = isOpen ? `
+    <div class="firm-plans">
+      ${firm.plans.map(p => planBlockHtml(firm.id, p)).join('')}
+      <button class="add-btn" data-add-plan="${firm.id}" style="margin-top:6px;">+ Add plan</button>
+      <div id="planFormSlot_${firm.id}"></div>
+    </div>` : '';
+  return `
+    <div class="entity-card">
+      <div class="entity-top" style="cursor:pointer;" data-toggle-firm="${firm.id}">
+        <div>
+          <div class="entity-name">${escapeHtml(firm.name)}</div>
+          <div class="entity-sub">${firm.plans.length} plan${firm.plans.length===1?'':'s'}</div>
+        </div>
+        <div style="color:var(--dim);font-size:14px;">${isOpen ? '−' : '+'}</div>
+      </div>
+      <div class="entity-actions">
+        <button data-delete-firm="${firm.id}">Delete firm</button>
+      </div>
+      ${plansHtml}
+    </div>`;
+}
+
+function planBlockHtml(firmId, plan){
+  const important = plan.rules.filter(r=>r.important);
+  const normal = plan.rules.filter(r=>!r.important);
+  const ruleHtml = (r) => `
+    <div class="rule-row ${r.important?'important':''}">
+      <div class="rule-text">${r.important ? '<span class="rule-important-tag">MUST NOT FORGET</span> ' : ''}${escapeHtml(r.text)}</div>
+      <button class="rule-star ${r.important?'on':''}" data-toggle-rule="${firmId}|${plan.id}|${r.id}">★</button>
+    </div>`;
+  const rulesHtml = [...important, ...normal].map(ruleHtml).join('') ||
+    `<div class="empty-state" style="padding:14px;">No rules added yet.</div>`;
+  return `
+    <div class="plan-block">
+      <div class="entity-top">
+        <div>
+          <div class="plan-name">${escapeHtml(plan.name)}</div>
+          <div class="plan-balance">${plan.balance ? '$'+Number(plan.balance).toLocaleString() : ''}</div>
+        </div>
+        <button data-delete-plan="${firmId}|${plan.id}" style="background:none;border:none;color:var(--dim);font-size:10.5px;text-decoration:underline;cursor:pointer;">Delete plan</button>
+      </div>
+      <div style="margin-top:8px;">${rulesHtml}</div>
+      <button class="add-btn" data-add-rule="${firmId}|${plan.id}" style="margin-top:8px;">+ Add rule(s)</button>
+      <div id="ruleFormSlot_${firmId}_${plan.id}"></div>
+    </div>`;
+}
+
+function wireFirmsTabEvents(){
+  const body = document.getElementById('menuBody');
+  body.querySelectorAll('[data-toggle-firm]').forEach(el=>{
+    el.addEventListener('click', () => {
+      const id = el.dataset.toggleFirm;
+      openFirmId = (openFirmId === id) ? null : id;
+      renderFirmsTab();
+    });
+  });
+  body.querySelectorAll('[data-delete-firm]').forEach(btn=>{
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      propFirmsData = propFirmsData.filter(f=>f.id!==btn.dataset.deleteFirm);
+      saveFirms();
+      renderFirmsTab();
+    });
+  });
+  body.querySelectorAll('[data-add-plan]').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      const firmId = btn.dataset.addPlan;
+      const slot = document.getElementById('planFormSlot_'+firmId);
+      slot.innerHTML = `
+        <div class="entity-form">
+          <div class="field"><label>Plan name</label><input id="np_name" placeholder="e.g. 2-step $100k"></div>
+          <div class="field"><label>Balance ($)</label><input id="np_balance" type="number"></div>
+          <div class="form-actions">
+            <button class="form-save" id="np_save">Save</button>
+            <button class="form-cancel" id="np_cancel">Cancel</button>
+          </div>
+        </div>`;
+      document.getElementById('np_cancel').addEventListener('click', () => { slot.innerHTML=''; });
+      document.getElementById('np_save').addEventListener('click', () => {
+        const name = document.getElementById('np_name').value.trim();
+        if(!name) return;
+        const firm = propFirmsData.find(f=>f.id===firmId);
+        firm.plans.push({ id: genId(), name, balance: document.getElementById('np_balance').value, rules: [] });
+        saveFirms();
+        renderFirmsTab();
+      });
+    });
+  });
+  body.querySelectorAll('[data-delete-plan]').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      const [firmId, planId] = btn.dataset.deletePlan.split('|');
+      const firm = propFirmsData.find(f=>f.id===firmId);
+      firm.plans = firm.plans.filter(p=>p.id!==planId);
+      saveFirms();
+      renderFirmsTab();
+    });
+  });
+  body.querySelectorAll('[data-add-rule]').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      const [firmId, planId] = btn.dataset.addRule.split('|');
+      const slot = document.getElementById('ruleFormSlot_'+firmId+'_'+planId);
+      slot.innerHTML = `
+        <div class="entity-form">
+          <div class="field"><label>Paste or type rules — one per line, as many as you like</label>
+            <textarea id="nr_text" placeholder="e.g.&#10;Daily drawdown 5%&#10;No weekend holding&#10;Max 2 accounts"></textarea>
+          </div>
+          <div class="form-actions">
+            <button class="form-save" id="nr_save">Add</button>
+            <button class="form-cancel" id="nr_cancel">Cancel</button>
+          </div>
+        </div>`;
+      document.getElementById('nr_cancel').addEventListener('click', () => { slot.innerHTML=''; });
+      document.getElementById('nr_save').addEventListener('click', () => {
+        const raw = document.getElementById('nr_text').value;
+        const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
+        if(!lines.length) return;
+        const firm = propFirmsData.find(f=>f.id===firmId);
+        const plan = firm.plans.find(p=>p.id===planId);
+        lines.forEach(text => plan.rules.push({ id: genId(), text, important:false }));
+        saveFirms();
+        renderFirmsTab();
+      });
+    });
+  });
+  body.querySelectorAll('[data-toggle-rule]').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      const [firmId, planId, ruleId] = btn.dataset.toggleRule.split('|');
+      const firm = propFirmsData.find(f=>f.id===firmId);
+      const plan = firm.plans.find(p=>p.id===planId);
+      const rule = plan.rules.find(r=>r.id===ruleId);
+      rule.important = !rule.important;
+      saveFirms();
+      renderFirmsTab();
+    });
+  });
+}
+
+// ---------- Online/offline sync status ----------
+function updateSyncStatus(){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  if(navigator.onLine){
+    el.className = 'sync-status online';
+    el.innerHTML = '<span class="dot"></span>Synced';
+  } else {
+    el.className = 'sync-status offline';
+    el.innerHTML = '<span class="dot"></span>Offline — will sync later';
+  }
+}
+window.addEventListener('online', updateSyncStatus);
+window.addEventListener('offline', updateSyncStatus);
+updateSyncStatus();
+
 async function initApp(){
   const steps = [
     ['prefetchHistory', prefetchHistory],
@@ -1144,22 +1683,42 @@ window.initApp = initApp;
 
 <script type="module">
   // ============================================================
-  // SUPABASE SETUP — Project: hirihghexvzuapuqbzvt
-  // The anon/publishable key below is safe to ship client-side —
-  // it's gated entirely by the Row Level Security policies applied
-  // via schema.sql. No RLS = no access, not "no security."
+  // FIREBASE SETUP — paste your project's config here.
+  // Firebase Console → Project Settings → General → Your apps → SDK setup
   // ============================================================
-  const SUPABASE_URL = "https://hirihghexvzuapuqbzvt.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpcmloZ2hleHZ6dWFwdXFienZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2Mjg3MDYsImV4cCI6MjEwMjIwNDcwNn0.bj0R7MZ2tH_YQsa9z4iDtQDpDzajXw6IQ1FelSk4YNk";
+  const firebaseConfig = {
+    apiKey: "AIzaSyCm65FuaV80bZ6Z1YGCCMG4sFBNDkXGNBA",
+    authDomain: "prop-checklist.firebaseapp.com",
+    projectId: "prop-checklist",
+    storageBucket: "prop-checklist.firebasestorage.app",
+    messagingSenderId: "139046608918",
+    appId: "1:139046608918:web:ad3efb4c2ef6481c775537"
+  };
 
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+    createUserWithEmailAndPassword, signOut,
+    GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup,
+    sendPasswordResetEmail
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence,
+    collection, getDocs
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true }
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Offline caching so the app still opens (read-only for unsynced data)
+  // with no connection, and queues writes until back online.
+  enableIndexedDbPersistence(db).catch((err) => {
+    console.warn('Offline persistence unavailable:', err.code);
   });
 
   // Expose the pieces the main app script needs.
-  window._sb = { client };
+  window._fb = { db, doc, getDoc, setDoc, collection, getDocs };
 
   const overlay = document.getElementById('authOverlay');
   const errorEl = document.getElementById('authError');
@@ -1175,46 +1734,66 @@ window.initApp = initApp;
     document.getElementById('authSignUpBtn').disabled = on;
     document.getElementById('authForgotBtn').disabled = on;
   }
-  // Supabase returns free-text error messages (no stable error codes like
-  // Firebase), so this matches on substrings instead of a code lookup table.
-  function friendlyError(message){
-    const msg = (message || '').toLowerCase();
-    if(msg.includes('invalid login credentials')) return 'Wrong email or password.';
-    if(msg.includes('user already registered')) return 'An account already exists with that email — try Sign In instead.';
-    if(msg.includes('password should be at least') || msg.includes('password') && msg.includes('character')) return 'Password needs to be at least 6 characters.';
-    if(msg.includes('unable to validate email') || msg.includes('invalid email')) return 'That email address looks invalid.';
-    if(msg.includes('email not confirmed')) return 'Check your inbox to confirm your email before signing in.';
-    if(msg.includes('email rate limit') || msg.includes('too many')) return 'Too many attempts — wait a bit and try again.';
-    if(msg.includes('network') || msg.includes('fetch')) return 'Network error — check your connection and try again.';
-    if(msg.includes('missing email')) return 'Type your email above first.';
-    return message ? ('Something went wrong — ' + message) : 'Something went wrong — try again.';
+  function friendlyError(code){
+    const map = {
+      'auth/invalid-email': 'That email address looks invalid.',
+      'auth/user-not-found': 'No account with that email — try Create Account.',
+      'auth/wrong-password': 'Wrong password.',
+      'auth/invalid-credential': 'Wrong email or password.',
+      'auth/email-already-in-use': 'An account already exists with that email — try Sign In instead.',
+      'auth/weak-password': 'Password needs to be at least 6 characters.',
+      'auth/unauthorized-domain': 'This site isn\'t authorized yet — add it under Authentication → Settings → Authorized domains in Firebase.',
+      'auth/popup-blocked': 'Popup was blocked — trying a different sign-in method.',
+      'auth/popup-closed-by-user': 'The Google sign-in window was closed before finishing — try again.',
+      'auth/account-exists-with-different-credential': 'That email is already used with a different sign-in method (likely email/password) — use that instead.',
+      'auth/network-request-failed': 'Network error — check your connection and try again.',
+      'auth/missing-email': 'Type your email above first.',
+      'auth/too-many-requests': 'Too many attempts — wait a bit and try again.',
+    };
+    return map[code] || ('Something went wrong (' + (code || 'unknown') + ') — try again.');
   }
 
+  const googleProvider = new GoogleAuthProvider();
   document.getElementById('authGoogleBtn').addEventListener('click', async () => {
     errorEl.textContent = '';
     statusEl.textContent = '';
     setLoading(true);
-    // Supabase's Google sign-in is redirect-based (no popup option), so the
-    // page navigates away here and comes back with a session already set.
-    const { error } = await client.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.href }
-    });
-    if(error){
-      console.error('Google sign-in failed:', error.message);
-      errorEl.textContent = friendlyError(error.message);
-      setLoading(false);
+    try{
+      // Popup avoids the cross-domain redirect round-trip that some mobile
+      // browser privacy settings silently break.
+      await signInWithPopup(auth, googleProvider);
+    }catch(e){
+      console.error('Google popup sign-in failed:', e.code, e.message);
+      if(e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment' || e.code === 'auth/cancelled-popup-request'){
+        try{
+          await signInWithRedirect(auth, googleProvider);
+          return; // page will navigate away
+        }catch(e2){
+          console.error('Google redirect sign-in failed:', e2.code, e2.message);
+          errorEl.textContent = friendlyError(e2.code);
+        }
+      } else {
+        errorEl.textContent = friendlyError(e.code);
+      }
     }
+    setLoading(false);
+  });
+
+  // In case a redirect-based attempt is in flight from a previous load.
+  getRedirectResult(auth).catch((e) => {
+    console.error('Redirect result error:', e.code, e.message);
+    if(e && e.code) errorEl.textContent = friendlyError(e.code);
   });
 
   document.getElementById('authSignInBtn').addEventListener('click', async () => {
     errorEl.textContent = '';
     statusEl.textContent = '';
     setLoading(true);
-    const { error } = await client.auth.signInWithPassword({
-      email: emailInput.value.trim(), password: passInput.value
-    });
-    if(error) errorEl.textContent = friendlyError(error.message);
+    try{
+      await signInWithEmailAndPassword(auth, emailInput.value.trim(), passInput.value);
+    }catch(e){
+      errorEl.textContent = friendlyError(e.code);
+    }
     setLoading(false);
   });
 
@@ -1226,13 +1805,10 @@ window.initApp = initApp;
     errorEl.textContent = '';
     statusEl.textContent = '';
     setLoading(true);
-    const { error } = await client.auth.signUp({
-      email: emailInput.value.trim(), password: passInput.value
-    });
-    if(error){
-      errorEl.textContent = friendlyError(error.message);
-    } else {
-      statusEl.textContent = 'Account created — check your inbox to confirm your email, then sign in.';
+    try{
+      await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passInput.value);
+    }catch(e){
+      errorEl.textContent = friendlyError(e.code);
     }
     setLoading(false);
   });
@@ -1246,20 +1822,22 @@ window.initApp = initApp;
       return;
     }
     setLoading(true);
-    const { error } = await client.auth.resetPasswordForEmail(email);
-    if(error) errorEl.textContent = friendlyError(error.message);
-    else statusEl.textContent = 'Reset link sent to ' + email + ' — check your inbox (and spam folder).';
+    try{
+      await sendPasswordResetEmail(auth, email);
+      statusEl.textContent = 'Reset link sent to ' + email + ' — check your inbox (and spam folder).';
+    }catch(e){
+      errorEl.textContent = friendlyError(e.code);
+    }
     setLoading(false);
   });
 
   document.getElementById('signOutBtn').addEventListener('click', async () => {
-    await client.auth.signOut();
+    await signOut(auth);
     location.reload(); // simplest way to fully reset in-memory state/caches
   });
 
   let appStarted = false;
-  client.auth.onAuthStateChange((_event, session) => {
-    const user = session ? session.user : null;
+  onAuthStateChanged(auth, (user) => {
     if(user){
       window.currentUser = user;
       overlay.style.display = 'none';

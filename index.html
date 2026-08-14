@@ -13,7 +13,7 @@
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <!-- 
-  FIREBASE VERSION — private cloud sync via Firebase Auth + Firestore.
+  SUPABASE VERSION — private cloud sync via Supabase Auth + Postgres (RLS).
   Paired with manifest.json, sw.js, icon-192.png, icon-512.png for PWA/APK packaging.
 -->
 <style>
@@ -621,24 +621,29 @@ refreshSyncPillBaseline();
 async function sGet(key){
   if(!window.currentUser) return null;
   try{
-    const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
-    const snap = await withTimeout(window._fb.getDoc(ref), 8000, 'sGet:'+key);
-    if(snap === undefined) return null; // timed out
-    return snap.exists() ? JSON.parse(snap.data().value) : null;
-  }catch(e){ console.error('Firestore read failed:', key, e); return null; }
+    const { data, error } = await withTimeout(
+      window._sb.client.from('app_data').select('value')
+        .eq('user_id', window.currentUser.id).eq('key', key).maybeSingle(),
+      8000, 'sGet:'+key
+    );
+    if(data === undefined) return null; // timed out
+    if(error) throw error;
+    return data ? data.value : null;
+  }catch(e){ console.error('Supabase read failed:', key, e); return null; }
 }
 async function sSet(key, val){
   if(!window.currentUser) return;
   setSyncPill('syncing', 'Syncing…');
   try{
-    const ref = window._fb.doc(window._fb.db, 'users', window.currentUser.uid, 'appdata', key);
-    await window._fb.setDoc(ref, { value: JSON.stringify(val), updatedAt: Date.now() });
+    const { error } = await window._sb.client.from('app_data')
+      .upsert({ user_id: window.currentUser.id, key, value: val }, { onConflict: 'user_id,key' });
+    if(error) throw error;
     showToast();
     setSyncPill('synced', 'Synced');
   }catch(e){
-    console.error('Firestore write failed:', e);
+    console.error('Supabase write failed:', e);
     showToast('Sync failed — will retry');
-    setSyncPill(navigator.onLine ? 'offline' : 'offline', navigator.onLine ? 'Sync failed' : 'Offline');
+    setSyncPill('offline', navigator.onLine ? 'Sync failed' : 'Offline');
   }
 }
 function showToast(msg){ const t=document.getElementById('toast'); if(msg) t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>{ t.classList.remove('show'); t.textContent = 'Saved'; }, 1400); }
@@ -727,21 +732,24 @@ const dayCache = {};
 let historyPrefetched = false;
 
 // Pulls the user's ENTIRE checklist history in ONE request instead of one
-// request per calendar day. Firestore also caches this locally afterward
-// (via enableIndexedDbPersistence), so once this has run at least once while
-// online, the calendar keeps working fully offline indefinitely — it doesn't
-// re-fetch from the network on every visit.
+// request per calendar day. The Supabase JS client also has its own fetch
+// cache disabled by default, so this is a plain network round trip — but
+// since dayCache is populated from it, the calendar keeps working fully
+// offline for the rest of the session once this has run.
 async function prefetchHistory(){
-  if(!window.currentUser || !window._fb.getDocs) return;
+  if(!window.currentUser || !window._sb.client) return;
   try{
-    const colRef = window._fb.collection(window._fb.db, 'users', window.currentUser.uid, 'appdata');
-    const snap = await withTimeout(window._fb.getDocs(colRef), 8000, 'prefetchHistory');
-    if(!snap) return; // timed out — fall back to per-day reads as needed
-    snap.forEach((docSnap) => {
-      const key = docSnap.id;
-      if(key.startsWith('day:')){
-        const iso = key.slice(4);
-        try{ dayCache[iso] = JSON.parse(docSnap.data().value); }catch(e){ dayCache[iso] = null; }
+    const res = await withTimeout(
+      window._sb.client.from('app_data').select('key,value').eq('user_id', window.currentUser.id),
+      8000, 'prefetchHistory'
+    );
+    if(!res) return; // timed out — fall back to per-day reads as needed
+    const { data, error } = res;
+    if(error) throw error;
+    (data || []).forEach((row) => {
+      if(row.key.startsWith('day:')){
+        const iso = row.key.slice(4);
+        dayCache[iso] = row.value;
       }
     });
     historyPrefetched = true;
@@ -1097,7 +1105,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ---------- Init (called by the Firebase auth listener once logged in) ----------
+// ---------- Init (called by the Supabase auth listener once logged in) ----------
 async function initApp(){
   const steps = [
     ['prefetchHistory', prefetchHistory],
@@ -1136,42 +1144,22 @@ window.initApp = initApp;
 
 <script type="module">
   // ============================================================
-  // FIREBASE SETUP — paste your project's config here.
-  // Firebase Console → Project Settings → General → Your apps → SDK setup
+  // SUPABASE SETUP — Project: hirihghexvzuapuqbzvt
+  // The anon/publishable key below is safe to ship client-side —
+  // it's gated entirely by the Row Level Security policies applied
+  // via schema.sql. No RLS = no access, not "no security."
   // ============================================================
-  const firebaseConfig = {
-    apiKey: "AIzaSyCm65FuaV80bZ6Z1YGCCMG4sFBNDkXGNBA",
-    authDomain: "prop-checklist.firebaseapp.com",
-    projectId: "prop-checklist",
-    storageBucket: "prop-checklist.firebasestorage.app",
-    messagingSenderId: "139046608918",
-    appId: "1:139046608918:web:ad3efb4c2ef6481c775537"
-  };
+  const SUPABASE_URL = "https://hirihghexvzuapuqbzvt.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpcmloZ2hleHZ6dWFwdXFienZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2Mjg3MDYsImV4cCI6MjEwMjIwNDcwNn0.bj0R7MZ2tH_YQsa9z4iDtQDpDzajXw6IQ1FelSk4YNk";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-    createUserWithEmailAndPassword, signOut,
-    GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup,
-    sendPasswordResetEmail
-  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence,
-    collection, getDocs
-  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // Offline caching so the app still opens (read-only for unsynced data)
-  // with no connection, and queues writes until back online.
-  enableIndexedDbPersistence(db).catch((err) => {
-    console.warn('Offline persistence unavailable:', err.code);
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
   });
 
   // Expose the pieces the main app script needs.
-  window._fb = { db, doc, getDoc, setDoc, collection, getDocs };
+  window._sb = { client };
 
   const overlay = document.getElementById('authOverlay');
   const errorEl = document.getElementById('authError');
@@ -1187,66 +1175,46 @@ window.initApp = initApp;
     document.getElementById('authSignUpBtn').disabled = on;
     document.getElementById('authForgotBtn').disabled = on;
   }
-  function friendlyError(code){
-    const map = {
-      'auth/invalid-email': 'That email address looks invalid.',
-      'auth/user-not-found': 'No account with that email — try Create Account.',
-      'auth/wrong-password': 'Wrong password.',
-      'auth/invalid-credential': 'Wrong email or password.',
-      'auth/email-already-in-use': 'An account already exists with that email — try Sign In instead.',
-      'auth/weak-password': 'Password needs to be at least 6 characters.',
-      'auth/unauthorized-domain': 'This site isn\'t authorized yet — add it under Authentication → Settings → Authorized domains in Firebase.',
-      'auth/popup-blocked': 'Popup was blocked — trying a different sign-in method.',
-      'auth/popup-closed-by-user': 'The Google sign-in window was closed before finishing — try again.',
-      'auth/account-exists-with-different-credential': 'That email is already used with a different sign-in method (likely email/password) — use that instead.',
-      'auth/network-request-failed': 'Network error — check your connection and try again.',
-      'auth/missing-email': 'Type your email above first.',
-      'auth/too-many-requests': 'Too many attempts — wait a bit and try again.',
-    };
-    return map[code] || ('Something went wrong (' + (code || 'unknown') + ') — try again.');
+  // Supabase returns free-text error messages (no stable error codes like
+  // Firebase), so this matches on substrings instead of a code lookup table.
+  function friendlyError(message){
+    const msg = (message || '').toLowerCase();
+    if(msg.includes('invalid login credentials')) return 'Wrong email or password.';
+    if(msg.includes('user already registered')) return 'An account already exists with that email — try Sign In instead.';
+    if(msg.includes('password should be at least') || msg.includes('password') && msg.includes('character')) return 'Password needs to be at least 6 characters.';
+    if(msg.includes('unable to validate email') || msg.includes('invalid email')) return 'That email address looks invalid.';
+    if(msg.includes('email not confirmed')) return 'Check your inbox to confirm your email before signing in.';
+    if(msg.includes('email rate limit') || msg.includes('too many')) return 'Too many attempts — wait a bit and try again.';
+    if(msg.includes('network') || msg.includes('fetch')) return 'Network error — check your connection and try again.';
+    if(msg.includes('missing email')) return 'Type your email above first.';
+    return message ? ('Something went wrong — ' + message) : 'Something went wrong — try again.';
   }
 
-  const googleProvider = new GoogleAuthProvider();
   document.getElementById('authGoogleBtn').addEventListener('click', async () => {
     errorEl.textContent = '';
     statusEl.textContent = '';
     setLoading(true);
-    try{
-      // Popup avoids the cross-domain redirect round-trip that some mobile
-      // browser privacy settings silently break.
-      await signInWithPopup(auth, googleProvider);
-    }catch(e){
-      console.error('Google popup sign-in failed:', e.code, e.message);
-      if(e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment' || e.code === 'auth/cancelled-popup-request'){
-        try{
-          await signInWithRedirect(auth, googleProvider);
-          return; // page will navigate away
-        }catch(e2){
-          console.error('Google redirect sign-in failed:', e2.code, e2.message);
-          errorEl.textContent = friendlyError(e2.code);
-        }
-      } else {
-        errorEl.textContent = friendlyError(e.code);
-      }
+    // Supabase's Google sign-in is redirect-based (no popup option), so the
+    // page navigates away here and comes back with a session already set.
+    const { error } = await client.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.href }
+    });
+    if(error){
+      console.error('Google sign-in failed:', error.message);
+      errorEl.textContent = friendlyError(error.message);
+      setLoading(false);
     }
-    setLoading(false);
-  });
-
-  // In case a redirect-based attempt is in flight from a previous load.
-  getRedirectResult(auth).catch((e) => {
-    console.error('Redirect result error:', e.code, e.message);
-    if(e && e.code) errorEl.textContent = friendlyError(e.code);
   });
 
   document.getElementById('authSignInBtn').addEventListener('click', async () => {
     errorEl.textContent = '';
     statusEl.textContent = '';
     setLoading(true);
-    try{
-      await signInWithEmailAndPassword(auth, emailInput.value.trim(), passInput.value);
-    }catch(e){
-      errorEl.textContent = friendlyError(e.code);
-    }
+    const { error } = await client.auth.signInWithPassword({
+      email: emailInput.value.trim(), password: passInput.value
+    });
+    if(error) errorEl.textContent = friendlyError(error.message);
     setLoading(false);
   });
 
@@ -1258,10 +1226,13 @@ window.initApp = initApp;
     errorEl.textContent = '';
     statusEl.textContent = '';
     setLoading(true);
-    try{
-      await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passInput.value);
-    }catch(e){
-      errorEl.textContent = friendlyError(e.code);
+    const { error } = await client.auth.signUp({
+      email: emailInput.value.trim(), password: passInput.value
+    });
+    if(error){
+      errorEl.textContent = friendlyError(error.message);
+    } else {
+      statusEl.textContent = 'Account created — check your inbox to confirm your email, then sign in.';
     }
     setLoading(false);
   });
@@ -1275,22 +1246,20 @@ window.initApp = initApp;
       return;
     }
     setLoading(true);
-    try{
-      await sendPasswordResetEmail(auth, email);
-      statusEl.textContent = 'Reset link sent to ' + email + ' — check your inbox (and spam folder).';
-    }catch(e){
-      errorEl.textContent = friendlyError(e.code);
-    }
+    const { error } = await client.auth.resetPasswordForEmail(email);
+    if(error) errorEl.textContent = friendlyError(error.message);
+    else statusEl.textContent = 'Reset link sent to ' + email + ' — check your inbox (and spam folder).';
     setLoading(false);
   });
 
   document.getElementById('signOutBtn').addEventListener('click', async () => {
-    await signOut(auth);
+    await client.auth.signOut();
     location.reload(); // simplest way to fully reset in-memory state/caches
   });
 
   let appStarted = false;
-  onAuthStateChanged(auth, (user) => {
+  client.auth.onAuthStateChange((_event, session) => {
+    const user = session ? session.user : null;
     if(user){
       window.currentUser = user;
       overlay.style.display = 'none';
